@@ -1,0 +1,16 @@
+{
+  "name": "tamad",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter tamad-frontend dev\" \"pnpm --filter tamad-backend dev\"",
+    "build": "pnpm --filter tamad-frontend build",
+    "dev:backend": "pnpm --filter tamad-backend dev",
+    "build:backend": "pnpm --filter tamad-backend build"
+  },
+  "dependencies": {
+    "mongodb": "^7.5.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
