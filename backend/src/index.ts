@@ -56,7 +56,7 @@ app.get('/api/health', (req, res) => {
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error(err.message, { stack: err.stack });
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(500).json({ error: err.message, stack: err.stack });
 });
 
 const PORT = process.env.PORT || 5000;

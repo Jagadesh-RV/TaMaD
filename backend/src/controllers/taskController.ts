@@ -1,6 +1,9 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Task from '../models/Task';
+import '../models/Category';
+import '../models/Tag';
+import '../models/User';
 
 // @desc    Get all tasks for a workspace
 // @route   GET /api/tasks?workspaceId=...

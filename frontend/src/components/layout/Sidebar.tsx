@@ -81,13 +81,16 @@ const links = [
 export default function Sidebar() {
   return (
     <aside className="sidebar">
-      <div className="logo">TaMaD</div>
+      <div className="mb-8 flex justify-center">
+        <img src="/logo.png" alt="TaMaD Logo" className="h-32 w-auto object-contain drop-shadow-md" />
+      </div>
 
-      <nav className="sidebar-nav">
+      <nav className="sidebar-nav flex-1 overflow-y-auto w-full">
         {links.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
+            end={link.path === "/"}
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
             }

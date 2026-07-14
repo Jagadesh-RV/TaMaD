@@ -3,30 +3,20 @@ import { motion } from "framer-motion";
 export default function GlassCard({
   children,
   className = "",
+  delay = 0,
 }) {
   return (
     <motion.div
-      whileHover={{
-        y: -6,
-        scale: 1.01,
-      }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.25,
+        duration: 0.4,
+        delay,
+        ease: [0.16, 1, 0.3, 1],
       }}
-      className={`
-        bg-surface
-        border border-border
-        shadow-soft hover:shadow-float
-        rounded-2xl
-        p-6
-        relative
-        overflow-hidden
-        transition-shadow
-        ${className}
-      `}
+      className={`glass ${className}`}
     >
-
-      <div className="relative z-10">
+      <div className="relative z-10 h-full w-full">
         {children}
       </div>
     </motion.div>
