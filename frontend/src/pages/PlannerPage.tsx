@@ -1,20 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Target, Activity, Plus, Check, MoreVertical } from 'lucide-react';
 import clsx from 'clsx';
 import { format, subDays } from 'date-fns';
-
-const MOCK_HABITS = [
-  { id: 'h1', name: 'Morning Workout', streak: 12, longestStreak: 15, color: 'text-blue-500 bg-blue-100', history: [true, true, true, false, true, true, true] },
-  { id: 'h2', name: 'Read 20 pages', streak: 5, longestStreak: 30, color: 'text-purple-500 bg-purple-100', history: [false, true, true, true, true, true, false] },
-];
-
-const MOCK_GOALS = [
-  { id: 'g1', title: 'Launch TaMaD MVP', progress: 75, type: 'professional', milestones: 4, completed: 3 },
-  { id: 'g2', title: 'Run a Half Marathon', progress: 30, type: 'health', milestones: 5, completed: 1 },
-];
+import { useGoalStore } from '../store/goalStore';
+import { useHabitStore } from '../store/habitStore';
+import GoalModal from '../components/planner/GoalModal';
+import HabitModal from '../components/planner/HabitModal';
 
 export default function PlannerPage() {
   const [activeTab, setActiveTab] = useState<'habits' | 'goals'>('habits');
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
+  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
+
+  const { goals, fetchGoals, createGoal } = useGoalStore() as any;
+  const { habits, fetchHabits, createHabit } = useHabitStore() as any;
+
+  useEffect(() => {
+    fetchGoals();
+    fetchHabits();
+  }, [fetchGoals, fetchHabits]);
+
+  const handleSaveGoal = async (data: any) => {
+    await createGoal({ ...data, workspaceId: '000000000000000000000000' });
+  };
+
+  const handleSaveHabit = async (data: any) => {
+    await createHabit({ ...data, workspaceId: '000000000000000000000000' });
+  };
 
   return (
     <div className="page flex flex-col h-[calc(100vh-80px)] overflow-y-auto">
@@ -29,7 +41,10 @@ export default function PlannerPage() {
           <p className="text-secondary mt-2 text-sm">Track your daily habits and long-term goals.</p>
         </div>
 
-        <button className="btn-primary flex items-center justify-center gap-2 px-4 py-2 w-auto">
+        <button 
+          onClick={() => activeTab === 'habits' ? setIsHabitModalOpen(true) : setIsGoalModalOpen(true)}
+          className="btn-primary flex items-center justify-center gap-2 px-4 py-2 w-auto"
+        >
           <Plus size={20} />
           New {activeTab === 'habits' ? 'Habit' : 'Goal'}
         </button>
@@ -58,22 +73,27 @@ export default function PlannerPage() {
 
       {activeTab === 'habits' ? (
         <div className="grid gap-4">
-          {MOCK_HABITS.map((habit) => (
-            <div key={habit.id} className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
+          {habits.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-gray-400 text-sm font-medium border-2 border-dashed border-gray-200 rounded-2xl">
+              No habits yet. Create one to start building consistency!
+            </div>
+          ) : habits.map((habit: any) => (
+            <div key={habit._id} className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4">
                 <div className={clsx('w-12 h-12 rounded-2xl flex items-center justify-center', habit.color)}>
                   <Activity size={24} />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800 text-lg">{habit.name}</h3>
-                  <p className="text-sm text-gray-500 font-medium">🔥 {habit.streak} Day Streak (Best: {habit.longestStreak})</p>
+                  <p className="text-sm text-gray-500 font-medium">🔥 {habit.streak || 0} Day Streak (Best: {habit.longestStreak || 0})</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
                 {[6, 5, 4, 3, 2, 1, 0].map((daysAgo, i) => {
                   const date = subDays(new Date(), daysAgo);
-                  const isCompleted = habit.history[i];
+                  // Quick mock logic for UI since real backend history needs custom endpoint handling
+                  const isCompleted = false; 
                   return (
                     <div key={i} className="flex flex-col items-center gap-2">
                       <span className="text-xs text-gray-400 font-medium">{format(date, 'eee')}</span>
@@ -99,12 +119,16 @@ export default function PlannerPage() {
         </div>
       ) : (
         <div className="grid lg:grid-cols-2 gap-6">
-          {MOCK_GOALS.map((goal) => (
-            <div key={goal.id} className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all group">
+          {goals.length === 0 ? (
+            <div className="col-span-2 flex items-center justify-center h-32 text-gray-400 text-sm font-medium border-2 border-dashed border-gray-200 rounded-2xl">
+              No goals yet. Set a long-term goal to track!
+            </div>
+          ) : goals.map((goal: any) => (
+            <div key={goal._id} className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold capitalize mb-3 inline-block">
-                    {goal.type}
+                    {goal.type || 'Professional'}
                   </span>
                   <h3 className="font-bold text-xl text-gray-800">{goal.title}</h3>
                 </div>
@@ -115,20 +139,32 @@ export default function PlannerPage() {
 
               <div className="mb-2 flex justify-between text-sm font-semibold text-gray-700">
                 <span>Progress</span>
-                <span>{goal.progress}%</span>
+                <span>{goal.progress || 0}%</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-6">
-                <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${goal.progress}%` }} />
+                <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${goal.progress || 0}%` }} />
               </div>
 
               <div className="flex items-center justify-between text-sm text-gray-500 font-medium bg-gray-50 p-4 rounded-2xl">
                 <span>Milestones</span>
-                <span className="text-gray-800">{goal.completed} / {goal.milestones} Completed</span>
+                <span className="text-gray-800">{goal.milestones?.filter((m:any)=>m.completed).length || 0} / {goal.milestones?.length || 0} Completed</span>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      <GoalModal 
+        isOpen={isGoalModalOpen}
+        onClose={() => setIsGoalModalOpen(false)}
+        onSave={handleSaveGoal}
+      />
+      
+      <HabitModal
+        isOpen={isHabitModalOpen}
+        onClose={() => setIsHabitModalOpen(false)}
+        onSave={handleSaveHabit}
+      />
     </div>
   );
 }

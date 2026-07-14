@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Project from '../models/Project';
+import '../models/User';
 
 // @desc    Get all projects for a workspace
 // @route   GET /api/projects?workspaceId=...

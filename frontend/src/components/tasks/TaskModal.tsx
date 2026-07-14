@@ -5,17 +5,19 @@ export default function TaskModal({
   isOpen = true,
   onClose,
   onSave,
-  initialData = {},
-}) {
-  const [title, setTitle] = useState(initialData.title || '');
-  const [description, setDescription] = useState(initialData.description || '');
-  const [dueDate, setDueDate] = useState(initialData.dueDate || initialData.initialDate || '');
+  initialData,
+}: any) {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
 
   useEffect(() => {
-    setTitle(initialData.title || '');
-    setDescription(initialData.description || '');
-    setDueDate(initialData.dueDate || initialData.initialDate || '');
-  }, [initialData]);
+    if (isOpen) {
+      setTitle(initialData?.title || '');
+      setDescription(initialData?.description || '');
+      setDueDate(initialData?.dueDate || initialData?.initialDate || '');
+    }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 

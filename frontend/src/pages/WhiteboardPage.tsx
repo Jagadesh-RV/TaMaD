@@ -1,19 +1,36 @@
-import { useState, useRef } from 'react';
-import { Pen, Square, Circle, Eraser, MousePointer2, Plus, Users, Share2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Pen, Square, Circle, Eraser, MousePointer2, Plus, Users, Share2, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
+import { useWhiteboardStore } from '../store/whiteboardStore';
+import WhiteboardModal from '../components/whiteboards/WhiteboardModal';
 
 export default function WhiteboardPage() {
   const [activeTool, setActiveTool] = useState<'select' | 'pen' | 'square' | 'circle' | 'eraser'>('pen');
-  const [elements, setElements] = useState<any[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  
-  const canvasRef = useRef<HTMLDivElement>(null);
-  
-  // A simple implementation of drawing paths in SVG
   const [currentPath, setCurrentPath] = useState<string>('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeBoard, setActiveBoard] = useState<any>(null);
+
+  const { whiteboards, fetchWhiteboards, createWhiteboard, updateWhiteboard } = useWhiteboardStore() as any;
+  const canvasRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchWhiteboards().then(() => {
+      if (!activeBoard && whiteboards?.length > 0) {
+        setActiveBoard(whiteboards[0]);
+      }
+    });
+  }, [fetchWhiteboards]);
+
+  useEffect(() => {
+    if (!activeBoard && whiteboards?.length > 0) {
+      setActiveBoard(whiteboards[0]);
+    }
+  }, [whiteboards, activeBoard]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (activeTool !== 'pen') return;
+    if (activeTool !== 'pen' || !activeBoard) return;
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
     const x = e.clientX - rect.left;
@@ -24,7 +41,7 @@ export default function WhiteboardPage() {
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDrawing || activeTool !== 'pen') return;
+    if (!isDrawing || activeTool !== 'pen' || !activeBoard) return;
     const rect = canvasRef.current?.getBoundingClientRect();
     if (!rect) return;
     const x = e.clientX - rect.left;
@@ -34,11 +51,21 @@ export default function WhiteboardPage() {
   };
 
   const handlePointerUp = () => {
-    if (!isDrawing) return;
+    if (!isDrawing || !activeBoard) return;
     setIsDrawing(false);
     if (currentPath) {
-      setElements([...elements, { type: 'path', data: currentPath }]);
+      const newElements = [...(activeBoard.elements || []), { type: 'path', data: currentPath }];
+      const updatedBoard = { ...activeBoard, elements: newElements };
+      setActiveBoard(updatedBoard);
       setCurrentPath('');
+      updateWhiteboard(activeBoard._id, { elements: newElements });
+    }
+  };
+
+  const handleSaveBoard = async (data: any) => {
+    const newBoard = await createWhiteboard({ ...data, workspaceId: '000000000000000000000000' });
+    if (newBoard) {
+      setActiveBoard(newBoard);
     }
   };
 
@@ -56,14 +83,28 @@ export default function WhiteboardPage() {
       {/* Header Toolbar */}
       <div className="absolute top-6 left-6 right-6 z-20 flex items-center justify-between pointer-events-none">
         
-        {/* Board Title */}
+        {/* Board Title & Selector */}
         <div className="bg-white/90 backdrop-blur-md px-4 py-2.5 rounded-xl flex items-center gap-3 pointer-events-auto shadow-sm border border-border">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
             <Pen size={18} />
           </div>
-          <div>
-            <h2 className="text-sm font-bold text-gray-900 tracking-wide">Q3 Brainstorming</h2>
-            <p className="text-[11px] text-gray-500 font-medium">Last edited 2 mins ago</p>
+          <div className="relative flex flex-col">
+            <div className="flex items-center">
+              <select 
+                 className="bg-transparent outline-none appearance-none cursor-pointer text-sm font-bold text-gray-900 tracking-wide pr-6 z-10"
+                 value={activeBoard?._id || ''}
+                 onChange={(e) => {
+                   if (e.target.value === 'new') setIsModalOpen(true);
+                   else setActiveBoard(whiteboards.find((w: any) => w._id === e.target.value));
+                 }}
+               >
+                 {whiteboards.length === 0 && <option value="" disabled>No boards</option>}
+                 {whiteboards.map((w: any) => <option key={w._id} value={w._id}>{w.title}</option>)}
+                 <option value="new">+ Create New Board</option>
+               </select>
+               <ChevronDown size={14} className="absolute right-0 text-gray-400 pointer-events-none" />
+            </div>
+            <p className="text-[11px] text-gray-500 font-medium mt-0.5">Auto-saved</p>
           </div>
         </div>
 
@@ -107,30 +148,47 @@ export default function WhiteboardPage() {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        <svg className="w-full h-full pointer-events-none">
-          {elements.map((el, i) => (
-            <path
-              key={i}
-              d={el.data}
-              fill="none"
-              stroke="#0071e3"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          ))}
-          {isDrawing && currentPath && (
-            <path
-              d={currentPath}
-              fill="none"
-              stroke="#0071e3"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-        </svg>
+        {!activeBoard ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="btn-primary px-6 py-3 shadow-lg"
+            >
+              + Create Whiteboard
+            </button>
+          </div>
+        ) : (
+          <svg className="w-full h-full pointer-events-none">
+            {activeBoard?.elements?.map((el: any, i: number) => (
+              <path
+                key={i}
+                d={el.data}
+                fill="none"
+                stroke="#0071e3"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ))}
+            {isDrawing && currentPath && (
+              <path
+                d={currentPath}
+                fill="none"
+                stroke="#0071e3"
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            )}
+          </svg>
+        )}
       </div>
+
+      <WhiteboardModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveBoard}
+      />
     </div>
   );
 }
