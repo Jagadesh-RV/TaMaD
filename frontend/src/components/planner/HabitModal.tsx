@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
-import { X, Calendar, AlignLeft } from 'lucide-react';
+import { X, Activity } from 'lucide-react';
 
-export default function ProjectModal({
+const COLORS = [
+  { value: 'text-blue-500 bg-blue-100', label: 'Blue' },
+  { value: 'text-purple-500 bg-purple-100', label: 'Purple' },
+  { value: 'text-indigo-500 bg-indigo-100', label: 'Indigo' },
+  { value: 'text-teal-500 bg-teal-100', label: 'Teal' },
+  { value: 'text-rose-500 bg-rose-100', label: 'Rose' },
+];
+
+export default function HabitModal({
   isOpen,
   onClose,
   onSave,
@@ -9,15 +17,15 @@ export default function ProjectModal({
 }: any) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [frequency, setFrequency] = useState('daily');
+  const [color, setColor] = useState(COLORS[0].value);
 
   useEffect(() => {
     if (isOpen) {
       setName(initialData?.name || '');
       setDescription(initialData?.description || '');
-      setStartDate(initialData?.startDate || '');
-      setEndDate(initialData?.endDate || '');
+      setFrequency(initialData?.frequency || 'daily');
+      setColor(initialData?.color || COLORS[0].value);
     }
   }, [isOpen, initialData]);
 
@@ -25,7 +33,7 @@ export default function ProjectModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ name, description, startDate, endDate });
+    onSave({ name, description, frequency, color });
     onClose();
   };
 
@@ -35,30 +43,29 @@ export default function ProjectModal({
         <button
           onClick={onClose}
           className="absolute right-5 top-5 text-gray-400 hover:text-gray-700 transition-colors bg-gray-50 hover:bg-gray-100 p-2 rounded-full"
-          aria-label="Close modal"
         >
           <X size={20} />
         </button>
 
         <div className="mb-8 flex items-center gap-4 text-[#111111]">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
-            <AlignLeft size={24} />
+            <Activity size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Create project</h2>
-            <p className="text-sm font-medium text-gray-500">Add a new project to your roadmap.</p>
+            <h2 className="text-2xl font-bold tracking-tight">New Habit</h2>
+            <p className="text-sm font-medium text-gray-500">Create a habit to build consistency.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Project Name</label>
+            <label className="text-sm font-semibold text-gray-700">Habit Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#111111] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-              placeholder="e.g., Q3 Marketing Site Redesign"
+              placeholder="e.g., Drink 2L water"
               required
               autoFocus
             />
@@ -66,30 +73,27 @@ export default function ProjectModal({
 
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">Start Date</label>
-              <div className="relative">
-                <Calendar size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-[#111111] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-                  required
-                />
-              </div>
+              <label className="text-sm font-semibold text-gray-700">Frequency</label>
+              <select
+                value={frequency}
+                onChange={(e) => setFrequency(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#111111] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+              >
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700">End Date</label>
-              <div className="relative">
-                <Calendar size={18} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-3 text-[#111111] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-                  required
-                />
-              </div>
+              <label className="text-sm font-semibold text-gray-700">Color Tag</label>
+              <select
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#111111] focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
+              >
+                {COLORS.map((c) => (
+                  <option key={c.value} value={c.value}>{c.label}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -99,7 +103,7 @@ export default function ProjectModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#111111] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium min-h-[100px] resize-none"
-              placeholder="Add details about this project..."
+              placeholder="Optional notes..."
             />
           </div>
 
@@ -112,7 +116,7 @@ export default function ProjectModal({
               Cancel
             </button>
             <button type="submit" className="btn-primary px-8 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
-              Save Project
+              Save Habit
             </button>
           </div>
         </form>
