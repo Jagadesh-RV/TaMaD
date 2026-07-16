@@ -1,15 +1,8 @@
 import { useEffect } from 'react';
-import {
-  CheckCircle2,
-  Clock3,
-  Zap,
-  TrendingUp,
-  Loader2,
-  Sparkles
-} from 'lucide-react';
+import { CheckCircle2, Clock3, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useTaskStore } from '../store/taskStore';
-import GlassCard from '../components/ui/GlassCard';
+import { Card } from '../components/ui/Card';
 
 export default function DashboardPage() {
   const { tasks, loading, fetchTasks } = useTaskStore() as any;
@@ -26,103 +19,51 @@ export default function DashboardPage() {
   const productivity = totalTasks === 0 ? 0 : Math.min(100, Math.round((completedTasks * 1.5 / (totalTasks || 1)) * 100));
 
   const stats = [
-    {
-      title: 'Tasks Completed',
-      value: completedTasks,
-      icon: CheckCircle2,
-      color: 'text-emerald-500',
-      bg: 'bg-emerald-500/10 border-emerald-500/20',
-    },
-    {
-      title: 'Pending Tasks',
-      value: pendingTasks,
-      icon: Clock3,
-      color: 'text-amber-500',
-      bg: 'bg-amber-500/10 border-amber-500/20',
-    },
-    {
-      title: 'Efficiency',
-      value: `${efficiency}%`,
-      icon: TrendingUp,
-      color: 'text-blue-500',
-      bg: 'bg-blue-500/10 border-blue-500/20',
-    },
-    {
-      title: 'Productivity',
-      value: `${productivity}%`,
-      icon: Zap,
-      color: 'text-purple-500',
-      bg: 'bg-purple-500/10 border-purple-500/20',
-    },
+    { title: 'Today', value: pendingTasks, icon: Clock3, accent: 'text-amber-500' },
+    { title: 'Completed', value: completedTasks, icon: CheckCircle2, accent: 'text-emerald-500' },
+    { title: 'Focus score', value: `${productivity}%`, icon: Zap, accent: 'text-indigo-500' },
+    { title: 'Momentum', value: `${efficiency}%`, icon: TrendingUp, accent: 'text-sky-500' },
   ];
 
   return (
-    <div className="page relative z-10">
-      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="page">
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <motion.div 
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3 mb-2"
-          >
-            <h1 className="page-title mb-0">
-              Overview
-            </h1>
-          </motion.div>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="text-secondary text-lg font-medium"
-          >
-            Your AI-powered productivity intelligence
-          </motion.p>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.24em] text-[color:var(--color-muted)]">Executive overview</p>
+          <h1 className="page-title">A calmer way to run your week.</h1>
+          <p className="text-sm text-[color:var(--color-muted)]">Track your commitments, protect focus time, and keep momentum without the noise.</p>
         </div>
-        
-        {loading && (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-3 text-[#111111] bg-white px-5 py-2.5 rounded-xl border border-border shadow-sm"
-          >
-            <Loader2 size={18} className="animate-spin text-primary" />
-            <span className="text-sm font-medium tracking-wide">Syncing Intelligence...</span>
-          </motion.div>
-        )}
+        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-2 text-sm text-[color:var(--color-muted)]">
+          <Sparkles size={16} className="text-[color:var(--color-accent)]" />
+          {loading ? 'Syncing…' : 'Updated just now'}
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <GlassCard key={stat.title} delay={i * 0.1} className="p-6 group">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-secondary font-medium mb-2 text-xs uppercase tracking-wider">
-                  {stat.title}
-                </p>
-                <h2 className="text-3xl font-semibold text-[#111111] mt-1 tracking-tight flex items-baseline gap-1">
-                  {loading ? (
-                    <span className="animate-pulse bg-gray-200 text-transparent rounded w-16 h-8 inline-block">00</span>
-                  ) : (
-                    stat.value
-                  )}
-                </h2>
+      <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat, index) => (
+          <motion.div key={stat.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}>
+            <Card variant="elevated" className="p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-muted)]">{stat.title}</p>
+                <div className={`rounded-xl bg-[color:var(--color-surface-hover)] p-2 ${stat.accent}`}>
+                  <stat.icon size={18} />
+                </div>
               </div>
-              <div className={`p-3.5 rounded-xl border ${stat.bg} ${stat.color} transition-transform duration-300 group-hover:scale-105`}>
-                <stat.icon size={24} strokeWidth={2} />
-              </div>
-            </div>
-            
-            <div className="mt-6 w-full h-1 bg-black/5 rounded-full overflow-hidden">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: loading ? '0%' : '70%' }}
-                transition={{ duration: 1, delay: 0.2 + (i * 0.1) }}
-                className={`h-full ${stat.color.replace('text', 'bg')} rounded-full opacity-80`}
-              />
-            </div>
-          </GlassCard>
+              <div className="text-3xl font-semibold text-[color:var(--color-foreground)]">{loading ? '—' : stat.value}</div>
+            </Card>
+          </motion.div>
         ))}
       </div>
+
+      <Card variant="elevated" className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">This week at a glance</h2>
+            <p className="mt-1 text-sm text-[color:var(--color-muted)]">A simple view of what’s moving and what deserves attention.</p>
+          </div>
+          <div className="rounded-full bg-[color:var(--color-surface-hover)] px-3 py-1 text-sm text-[color:var(--color-muted)]">{totalTasks} items</div>
+        </div>
+      </Card>
     </div>
   );
 }
