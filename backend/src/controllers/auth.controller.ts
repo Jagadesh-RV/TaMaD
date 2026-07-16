@@ -2,13 +2,9 @@ import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/jwt";
 import User from "../models/User";
 
-// NOTE:
-// This repo's backend currently runs from `backend/index.js` / `backend/app.js` (plain JS).
-// These TS controller files are for the upgraded TS backend structure.
-
 export const register = async (req: any, res: any) => {
   try {
-    const { name, email, mobile, password } = req.body;
+    const { name, email, password } = req.body;
 
     const emailExists = await User.findOne({ email });
     if (emailExists) {
@@ -17,21 +13,17 @@ export const register = async (req: any, res: any) => {
       });
     }
 
-    const mobileExists = await User.findOne({ mobile });
-    if (mobileExists) {
-      return res.status(400).json({
-        message: "Mobile already registered",
-      });
-    }
-
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await User.create({
       name,
       email,
-      mobile,
       password: hashedPassword,
-      isMobileVerified: true,
+      preferences: {
+        theme: "system",
+        language: "en",
+        timezone: "UTC",
+      },
     });
 
     const token = generateToken(user._id.toString());
@@ -39,10 +31,9 @@ export const register = async (req: any, res: any) => {
     return res.status(201).json({
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
-        mobile: user.mobile,
       },
     });
   } catch (error) {
@@ -57,8 +48,8 @@ export const login = async (req: any, res: any) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
+    const user = await User.findOne({ email }).select("+password");
+    if (!user || !user.password) {
       return res.status(400).json({
         message: "Invalid credentials",
       });
@@ -76,10 +67,9 @@ export const login = async (req: any, res: any) => {
     return res.json({
       token,
       user: {
-        id: user._id,
+        id: user._id.toString(),
         name: user.name,
         email: user.email,
-        mobile: user.mobile,
       },
     });
   } catch (error) {
@@ -90,3 +80,4 @@ export const login = async (req: any, res: any) => {
   }
 };
 
+  

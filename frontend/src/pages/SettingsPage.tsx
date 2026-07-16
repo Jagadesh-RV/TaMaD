@@ -1,13 +1,29 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Moon, Bell, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/authStore';
 
 function SettingsPage() {
+  const { user, init, updateProfile } = useAuthStore((state) => ({
+    user: state.user,
+    init: state.init,
+    updateProfile: state.updateProfile,
+  }));
   const [settings, setSettings] = useState({
     darkMode: false,
     notifications: true,
     autoSave: true,
   });
+
+  useEffect(() => {
+    if (user?.preferences?.theme === 'dark') {
+      setSettings((prev) => ({ ...prev, darkMode: true }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    void init();
+  }, [init]);
 
   const toggleSetting = (key: keyof typeof settings) => {
     setSettings((prev) => ({
@@ -16,6 +32,20 @@ function SettingsPage() {
     }));
   };
 
+  const savePreferences = async () => {
+    try {
+      await updateProfile({
+        preferences: {
+          theme: settings.darkMode ? 'dark' : 'light',
+          language: 'en',
+          timezone: user?.preferences?.timezone || 'UTC',
+        },
+      });
+      toast.success('Preferences saved successfully!');
+    } catch {
+      toast.error('Unable to save preferences right now.');
+    }
+  };
   return (
     <div className="p-6 max-w-7xl mx-auto relative z-10">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -25,7 +55,7 @@ function SettingsPage() {
           <p className="text-gray-500 mt-2 max-w-2xl font-medium">Customize how TaMaD looks, notifies, and saves your progress automatically with premium controls.</p>
         </div>
         <button 
-          onClick={() => toast.success('Settings saved successfully!')}
+          onClick={() => void savePreferences()}
           className="btn-primary inline-flex items-center justify-center gap-2 px-6 w-auto"
         >
           <Save size={18} /> Save preferences

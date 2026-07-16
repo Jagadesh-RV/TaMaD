@@ -15,10 +15,10 @@ interface TaskCardProps {
 }
 
 const priorityColors = {
-  low: 'bg-gray-100 text-gray-700',
-  medium: 'bg-blue-100 text-blue-700',
-  high: 'bg-orange-100 text-orange-700',
-  urgent: 'bg-red-100 text-red-700',
+  low: 'bg-slate-100 text-slate-700',
+  medium: 'bg-sky-100 text-sky-700',
+  high: 'bg-amber-100 text-amber-700',
+  urgent: 'bg-rose-100 text-rose-700',
 };
 
 export default function TaskCard({ task }: TaskCardProps) {
@@ -41,31 +41,24 @@ export default function TaskCard({ task }: TaskCardProps) {
       ref={setNodeRef}
       style={style}
       className={clsx(
-        'group relative bg-white rounded-xl border p-4 shadow-sm transition-all hover:shadow-md cursor-grab active:cursor-grabbing',
-        isDragging ? 'opacity-50 border-blue-500 shadow-lg scale-105 z-50' : 'border-gray-200'
+        'group relative cursor-grab rounded-xl border border-border bg-[color:var(--color-surface)] p-3 shadow-sm transition-all active:cursor-grabbing',
+        isDragging ? 'z-50 scale-[1.01] border-[color:var(--color-accent)]/30 shadow-float' : 'hover:shadow-soft'
       )}
       {...attributes}
       {...listeners}
     >
-      <div className="absolute top-4 right-2 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
-        <GripVertical size={16} />
+      <div className="absolute right-2 top-2 text-[color:var(--color-muted)] opacity-0 transition-opacity group-hover:opacity-100">
+        <GripVertical size={14} />
       </div>
 
-      <h3 className="font-medium text-gray-900 pr-6 mb-2 line-clamp-2">
-        {task.title}
-      </h3>
+      <h3 className="pr-5 text-sm font-medium text-[color:var(--color-foreground)]">{task.title}</h3>
 
-      <div className="flex items-center justify-between mt-4">
-        <span
-          className={clsx(
-            'text-xs font-semibold px-2.5 py-1 rounded-full',
-            priorityColors[task.priority]
-          )}
-        >
+      <div className="mt-3 flex items-center justify-between">
+        <span className={clsx('rounded-full px-2 py-1 text-[11px] font-semibold', priorityColors[task.priority])}>
           {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
         </span>
 
-        <div className="flex items-center text-gray-400 text-xs gap-1">
+        <div className="flex items-center gap-1 text-[11px] text-[color:var(--color-muted)]">
           <Clock size={12} />
           <span>Today</span>
         </div>

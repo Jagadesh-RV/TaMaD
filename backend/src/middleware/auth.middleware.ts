@@ -1,49 +1,29 @@
-import {
-Request,
-Response,
-NextFunction,
-} from "express";
+import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
+import User from '../models/User';
 
-import jwt from "jsonwebtoken";
-
-export interface AuthRequest
-extends Request {
-user?: any;
+export interface AuthRequest extends Request {
+  user?: any;
 }
 
-export const protect = (
-req: AuthRequest,
-res: Response,
-next: NextFunction
-) => {
-try {
-const token =
-req.headers.authorization?.split(
-" "
-)[1];
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
 
-```
-if (!token) {
-  return res.status(401).json({
-    message:
-      "Unauthorized",
-  });
-}
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-const decoded = jwt.verify(
-  token,
-  process.env.JWT_SECRET as string
-);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    const user = await User.findById(decoded.id).select('-password');
 
-req.user = decoded;
+    if (!user || !user.isActive) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-next();
-```
-
-} catch {
-return res.status(401).json({
-message:
-"Invalid Token",
-});
-}
+    req.user = user;
+    next();
+  } catch {
+    return res.status(401).json({ message: 'Invalid Token' });
+  }
 };

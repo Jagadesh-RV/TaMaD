@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import api from '../../utils/api';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -28,12 +29,11 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: ForgotPasswordFormValues) => {
     setIsLoading(true);
     try {
-      // Fake API call for now
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await api.post('/auth/forgot-password', { email: data.email });
       setIsSent(true);
-      toast.success('Password reset link sent to your email.');
-    } catch (error) {
-      toast.error('Failed to send reset link. Please try again.');
+      toast.success('If an account exists, reset instructions have been sent.');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to send reset link. Please try again.');
     } finally {
       setIsLoading(false);
     }

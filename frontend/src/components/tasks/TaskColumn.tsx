@@ -23,11 +23,11 @@ export default function TaskColumn({ id, title, tasks }: TaskColumnProps) {
   });
 
   return (
-    <div className="flex flex-col flex-1 min-w-[300px] max-w-[350px]">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <h2 className="font-semibold text-gray-700 capitalize flex items-center gap-2">
+    <div className="flex min-w-[280px] max-w-[320px] flex-1 flex-col">
+      <div className="mb-3 flex items-center justify-between px-1">
+        <h2 className="flex items-center gap-2 text-sm font-semibold capitalize text-[color:var(--color-foreground)]">
           {title.replace('-', ' ')}
-          <span className="bg-gray-100 text-gray-500 text-xs py-0.5 px-2 rounded-full font-medium">
+          <span className="rounded-full bg-[color:var(--color-surface-hover)] px-2 py-0.5 text-[11px] text-[color:var(--color-muted)]">
             {tasks.length}
           </span>
         </h2>
@@ -36,12 +36,12 @@ export default function TaskColumn({ id, title, tasks }: TaskColumnProps) {
       <div
         ref={setNodeRef}
         className={clsx(
-          'flex-1 p-2 rounded-2xl bg-gray-50 border-2 transition-colors min-h-[500px]',
-          isOver ? 'border-blue-200 bg-blue-50/50' : 'border-transparent'
+          'flex min-h-[480px] flex-1 flex-col rounded-2xl border p-2 transition-all',
+          isOver ? 'border-[color:var(--color-accent)]/30 bg-[color:var(--color-surface-hover)]' : 'border-border bg-[color:var(--color-surface)]'
         )}
       >
         <SortableContext items={tasks.map((t) => t._id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2">
             {tasks.map((task) => (
               <TaskCard key={task._id} task={task} />
             ))}
