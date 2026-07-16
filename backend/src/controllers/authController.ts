@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import { sendMail } from '../utils/mailer';
 
 const getAccessToken = (id: string) => {
   return jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '15m' });
@@ -165,7 +166,10 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.passwordResetExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
     await user.save();
 
-    res.json({ message: 'If an account exists, password reset instructions have been prepared.', resetToken });
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    await sendMail(user.email, 'Reset your TaMaD password', `<p>Hello ${user.name},</p><p>Use the link below to reset your password:</p><p><a href="${resetLink}">Reset password</a></p>`);
+
+    res.json({ message: 'If an account exists, password reset instructions have been prepared.' });
   } catch (error: any) {
     res.status(500).json({ error: error.message || 'Unable to process password reset' });
   }
