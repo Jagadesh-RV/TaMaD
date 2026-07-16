@@ -1,107 +1,45 @@
+import { useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
+
 export default function ProfilePage() {
+  const { user, init, loading } = useAuthStore((state) => ({
+    user: state.user,
+    init: state.init,
+    loading: state.loading,
+  }));
+
+  useEffect(() => {
+    void init();
+  }, [init]);
+
+  if (loading || !user) {
+    return <div className="p-8 text-gray-600">Loading profile…</div>;
+  }
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top, #1e3a8a 0%, #0f172a 45%, #020617 100%)",
-        padding: "40px",
-        color: "white",
-        fontFamily: "Inter, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          backdropFilter: "blur(20px)",
-          borderRadius: "28px",
-          padding: "40px",
-          boxShadow: "0 10px 40px rgba(0,0,0,0.4)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "24px",
-            marginBottom: "32px",
-          }}
-        >
-          <img
-            src="https://i.pravatar.cc/150"
-            alt="avatar"
-            style={{
-              width: "120px",
-              height: "120px",
-              borderRadius: "50%",
-              border: "4px solid rgba(255,255,255,0.15)",
-            }}
-          />
-
+    <div className="p-8 max-w-6xl mx-auto">
+      <div className="rounded-[28px] border border-border bg-white p-8 shadow-soft">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center">
+          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 text-2xl font-semibold text-primary">
+            {user.name?.charAt(0).toUpperCase()}
+          </div>
           <div>
-            <h1
-              style={{
-                fontSize: "42px",
-                fontWeight: "800",
-                marginBottom: "8px",
-              }}
-            >
-              Jagadesh
-            </h1>
-
-            <p
-              style={{
-                color: "#94a3b8",
-                fontSize: "18px",
-              }}
-            >
-              Full Stack Developer • Productivity Enthusiast
-            </p>
+            <h1 className="text-3xl font-bold text-[#1d1d1f]">{user.name}</h1>
+            <p className="mt-2 text-gray-500">{user.email}</p>
+            <p className="mt-2 text-sm font-medium text-primary">{user.role?.toUpperCase()}</p>
           </div>
         </div>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-            gap: "20px",
-          }}
-        >
+        <div className="mt-8 grid gap-4 md:grid-cols-4">
           {[
-            ["Tasks Completed", "128"],
-            ["Productivity", "94%"],
-            ["Current Streak", "16 Days"],
-            ["Projects", "12"],
+            ['Account status', 'Active'],
+            ['Timezone', user.preferences?.timezone || 'UTC'],
+            ['Language', user.preferences?.language || 'en'],
+            ['Theme', user.preferences?.theme || 'system'],
           ].map(([title, value]) => (
-            <div
-              key={title}
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "20px",
-                padding: "24px",
-                border: "1px solid rgba(255,255,255,0.08)",
-              }}
-            >
-              <p
-                style={{
-                  color: "#94a3b8",
-                  marginBottom: "12px",
-                }}
-              >
-                {title}
-              </p>
-
-              <h2
-                style={{
-                  fontSize: "32px",
-                  fontWeight: "700",
-                }}
-              >
-                {value}
-              </h2>
+            <div key={title} className="rounded-2xl border border-border bg-gray-50 p-5">
+              <p className="text-sm text-gray-500">{title}</p>
+              <p className="mt-2 text-lg font-semibold text-[#1d1d1f]">{value}</p>
             </div>
           ))}
         </div>

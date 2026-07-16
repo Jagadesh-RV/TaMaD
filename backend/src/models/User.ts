@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 export interface IUser extends Document {
   name: string;
@@ -15,12 +16,36 @@ export interface IUser extends Document {
     language: string;
     timezone: string;
   };
+  sessions: Array<{
+    tokenHash: string;
+    deviceName: string;
+    ipAddress: string;
+    createdAt: Date;
+    lastUsedAt: Date;
+    expiresAt: Date;
+    revokedAt?: Date;
+  }>;
+  passwordResetTokenHash?: string;
+  passwordResetExpiresAt?: Date;
   comparePassword: (password: string) => Promise<boolean>;
 }
 
+const SessionSchema = new Schema(
+  {
+    tokenHash: { type: String, required: true },
+    deviceName: { type: String, default: 'Unknown device' },
+    ipAddress: { type: String, default: 'Unknown' },
+    createdAt: { type: Date, default: Date.now },
+    lastUsedAt: { type: Date, default: Date.now },
+    expiresAt: { type: Date, required: true },
+    revokedAt: { type: Date },
+  },
+  { _id: false }
+);
+
 const UserSchema: Schema = new Schema(
   {
-    name: { type: String, required: true },
+    name: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, select: false },
     avatarUrl: { type: String },
@@ -33,6 +58,9 @@ const UserSchema: Schema = new Schema(
       language: { type: String, default: 'en' },
       timezone: { type: String, default: 'UTC' },
     },
+    sessions: [SessionSchema],
+    passwordResetTokenHash: { type: String, select: false },
+    passwordResetExpiresAt: { type: Date, select: false },
   },
   { timestamps: true }
 );
@@ -51,6 +79,10 @@ UserSchema.pre<IUser>('save', async function (next) {
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+UserSchema.methods.hashToken = function (token: string) {
+  return crypto.createHash('sha256').update(token).digest('hex');
 };
 
 export default mongoose.model<IUser>('User', UserSchema);

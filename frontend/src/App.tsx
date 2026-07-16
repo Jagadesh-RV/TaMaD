@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 
@@ -21,7 +22,12 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 
 export default function App() {
   const token = useAuthStore((state) => state.token);
+  const init = useAuthStore((state) => state.init);
   const isAuthenticated = Boolean(token);
+
+  useEffect(() => {
+    void init();
+  }, [init]);
 
   return (
     <Routes>
