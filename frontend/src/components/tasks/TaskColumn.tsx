@@ -14,9 +14,11 @@ interface TaskColumnProps {
   id: string;
   title: string;
   tasks: Task[];
+  selectedTaskIds?: string[];
+  onToggleSelect?: (id: string) => void;
 }
 
-export default function TaskColumn({ id, title, tasks }: TaskColumnProps) {
+export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onToggleSelect }: TaskColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: { type: 'Column', columnId: id },
@@ -43,7 +45,12 @@ export default function TaskColumn({ id, title, tasks }: TaskColumnProps) {
         <SortableContext items={tasks.map((t) => t._id)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-2">
             {tasks.map((task) => (
-              <TaskCard key={task._id} task={task} />
+              <TaskCard 
+                key={task._id} 
+                task={task} 
+                isSelected={selectedTaskIds.includes(task._id)}
+                onToggleSelect={onToggleSelect}
+              />
             ))}
           </div>
         </SortableContext>
