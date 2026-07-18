@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
-import { Server } from 'socket.io';
+import { initSocket } from './sockets/socketManager';
 import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db';
 import { redis } from './config/redis';
@@ -18,12 +18,7 @@ const app = express();
 const httpServer = createServer(app);
 
 // Socket.io setup
-export const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  },
-});
+export const io = initSocket(httpServer);
 
 import authRoutes from './routes/authRoutes';
 import taskRoutes from './routes/taskRoutes';

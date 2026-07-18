@@ -4,6 +4,7 @@ import Task from '../models/Task';
 import '../models/Category';
 import '../models/Tag';
 import '../models/User';
+import { getIO } from '../sockets/socketManager';
 
 // @desc    Get all tasks for a workspace
 // @route   GET /api/tasks?workspaceId=...
@@ -87,6 +88,8 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     .populate('dependencies', 'title status')
     .populate('parentTaskId', 'title');
 
+  getIO().to(`workspace_${workspaceId}`).emit('task_created', populatedTask);
+
   res.status(201).json(populatedTask);
 };
 
@@ -111,6 +114,8 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     .populate('dependencies', 'title status')
     .populate('parentTaskId', 'title');
 
+  getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updatedTask);
+
   res.json(updatedTask);
 };
 
@@ -129,6 +134,8 @@ export const reorderTask = async (req: AuthRequest, res: Response) => {
   task.order = newOrder;
   await task.save();
 
+  getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', task);
+
   res.json(task);
 };
 
@@ -143,6 +150,9 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
   }
 
   await task.deleteOne();
+  
+  getIO().to(`workspace_${task.workspaceId}`).emit('task_deleted', { taskId: req.params.id });
+  
   res.json({ message: 'Task removed' });
 };
 
@@ -160,6 +170,8 @@ export const bulkUpdateTasks = async (req: AuthRequest, res: Response) => {
     { $set: updates }
   );
 
+  getIO().to(`workspace_${req.body.workspaceId}`).emit('tasks_bulk_updated', { taskIds, updates });
+
   res.json({ message: 'Tasks updated successfully' });
 };
 
@@ -173,5 +185,8 @@ export const bulkDeleteTasks = async (req: AuthRequest, res: Response) => {
   }
 
   await Task.deleteMany({ _id: { $in: taskIds }, workspaceId });
+  
+  getIO().to(`workspace_${workspaceId}`).emit('tasks_bulk_deleted', { taskIds });
+
   res.json({ message: 'Tasks deleted successfully' });
 };
