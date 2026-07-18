@@ -20,6 +20,7 @@ export interface ITask extends Document {
   estimatedTime?: number; // in minutes
   actualTime?: number; // in minutes
   isArchived: boolean;
+  embedding?: number[];
 }
 
 const TaskSchema: Schema = new Schema(
