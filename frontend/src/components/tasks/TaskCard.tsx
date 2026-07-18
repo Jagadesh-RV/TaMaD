@@ -16,6 +16,7 @@ interface TaskCardProps {
   task: Task;
   isSelected?: boolean;
   onToggleSelect?: (id: string) => void;
+  onClick?: () => void;
 }
 
 const priorityColors = {
@@ -25,7 +26,7 @@ const priorityColors = {
   urgent: 'bg-rose-100 text-rose-700',
 };
 
-export default function TaskCard({ task, isSelected, onToggleSelect }: TaskCardProps) {
+export default function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -49,6 +50,7 @@ export default function TaskCard({ task, isSelected, onToggleSelect }: TaskCardP
         isDragging ? 'z-50 scale-[1.01] border-[color:var(--color-accent)]/30 shadow-float' : 'border-border hover:shadow-soft',
         isSelected ? 'ring-2 ring-[color:var(--color-accent)]' : ''
       )}
+      onClick={onClick}
       {...attributes}
       {...listeners}
     >

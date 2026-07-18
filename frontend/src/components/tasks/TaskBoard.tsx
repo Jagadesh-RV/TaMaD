@@ -20,7 +20,7 @@ import { Trash2, CheckCircle2 } from 'lucide-react';
 
 const COLUMNS = ['todo', 'in-progress', 'review', 'done'];
 
-export default function TaskBoard() {
+export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) => void }) {
   const { tasks, fetchTasks, loading, reorderTask, bulkUpdate, bulkDelete } = useTaskStore();
   
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
@@ -152,6 +152,7 @@ export default function TaskBoard() {
             tasks={localTasks.filter((t) => t.status === colId)}
             selectedTaskIds={selectedTaskIds}
             onToggleSelect={handleToggleSelect}
+            onTaskClick={onTaskClick}
           />
         ))}
 

@@ -7,19 +7,38 @@ import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 
 export default function TasksPage() {
-  const { createTask } = useTaskStore() as any;
+  const { createTask, updateTask } = useTaskStore() as any;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quickTitle, setQuickTitle] = useState('');
+  const [editingTask, setEditingTask] = useState<any>(null);
+
+  const handleOpenNewTask = () => {
+    setEditingTask(null);
+    setIsModalOpen(true);
+  };
+
+  const handleTaskClick = (task: any) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
 
   const handleSaveTask = async (taskData: any) => {
-    await createTask({
-      title: taskData.title,
-      description: taskData.description,
-      dueDate: taskData.dueDate,
-      status: 'todo',
-      priority: 'medium',
-      workspaceId: '000000000000000000000000'
-    });
+    if (editingTask) {
+      await updateTask(editingTask._id, {
+        title: taskData.title,
+        description: taskData.description,
+        dueDate: taskData.dueDate,
+      });
+    } else {
+      await createTask({
+        title: taskData.title,
+        description: taskData.description,
+        dueDate: taskData.dueDate,
+        status: 'todo',
+        priority: 'medium',
+        workspaceId: '000000000000000000000000'
+      });
+    }
   };
 
   const handleQuickAdd = async () => {
@@ -46,7 +65,7 @@ export default function TasksPage() {
         </div>
 
         <button 
-          onClick={() => setIsModalOpen(true)}
+          onClick={handleOpenNewTask}
           className="btn-primary flex max-w-[160px] items-center justify-center gap-2"
         >
           <Plus size={20} />
@@ -60,13 +79,14 @@ export default function TasksPage() {
       </div>
 
       <div className="flex-1 min-h-0 overflow-hidden">
-        <TaskBoard />
+        <TaskBoard onTaskClick={handleTaskClick} />
       </div>
 
       <TaskModal 
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setEditingTask(null); }}
         onSave={handleSaveTask}
+        initialData={editingTask}
       />
     </div>
   );

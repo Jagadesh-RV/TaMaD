@@ -16,9 +16,10 @@ interface TaskColumnProps {
   tasks: Task[];
   selectedTaskIds?: string[];
   onToggleSelect?: (id: string) => void;
+  onTaskClick?: (task: Task) => void;
 }
 
-export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onToggleSelect }: TaskColumnProps) {
+export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onToggleSelect, onTaskClick }: TaskColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: { type: 'Column', columnId: id },
@@ -50,6 +51,7 @@ export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onT
                 task={task} 
                 isSelected={selectedTaskIds.includes(task._id)}
                 onToggleSelect={onToggleSelect}
+                onClick={() => onTaskClick && onTaskClick(task)}
               />
             ))}
           </div>
