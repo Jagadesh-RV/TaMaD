@@ -41,4 +41,7 @@ const ProjectSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+ProjectSchema.index({ workspaceId: 1, status: 1 });
+ProjectSchema.index({ 'members.userId': 1 });
+
 export default mongoose.model<IProject>('Project', ProjectSchema);

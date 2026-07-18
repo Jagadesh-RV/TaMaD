@@ -14,7 +14,7 @@ export default function GlassCard({
         delay,
         ease: [0.16, 1, 0.3, 1],
       }}
-      className={`glass ${className}`}
+      className={`card ${className}`}
     >
       <div className="relative z-10 h-full w-full">
         {children}

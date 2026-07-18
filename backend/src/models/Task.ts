@@ -55,5 +55,9 @@ const TaskSchema: Schema = new Schema(
 
 // Index for drag and drop ordering by status
 TaskSchema.index({ workspaceId: 1, status: 1, order: 1 });
+// Indexes for efficient querying
+TaskSchema.index({ workspaceId: 1, projectId: 1 });
+TaskSchema.index({ assignees: 1, status: 1 });
+TaskSchema.index({ dueDate: 1 });
 
 export default mongoose.model<ITask>('Task', TaskSchema);

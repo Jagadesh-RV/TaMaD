@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db';
 import { redis } from './config/redis';
 import logger from './utils/logger';
@@ -19,7 +20,7 @@ const httpServer = createServer(app);
 // Socket.io setup
 export const io = new Server(httpServer, {
   cors: {
-    origin: '*', // TODO: restrict in production
+    origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   },
 });
@@ -34,11 +35,24 @@ import noteRoutes from './routes/noteRoutes';
 import whiteboardRoutes from './routes/whiteboardRoutes';
 import healthRoutes from './routes/healthRoutes';
 
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  message: { error: 'Too many requests, please try again later.' }
+});
+
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
+  credentials: true
+}));
 app.use(helmet());
 app.use(morgan('dev'));
+app.use('/api', apiLimiter); // Apply rate limiter to all /api routes
 
 // Routes
 app.use('/api/health', healthRoutes);
@@ -68,7 +82,12 @@ app.get('/api/ready', async (req, res) => {
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error(err.message, { stack: err.stack });
-  res.status(500).json({ error: err.message, stack: err.stack });
+  
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode).json({ 
+    error: err.message, 
+    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack 
+  });
 });
 
 const PORT = process.env.PORT || 5000;
