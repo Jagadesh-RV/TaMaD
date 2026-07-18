@@ -15,6 +15,7 @@ export interface ITask extends Document {
   tags: mongoose.Types.ObjectId[];
   createdBy: mongoose.Types.ObjectId;
   parentTaskId?: mongoose.Types.ObjectId;
+  dependencies: mongoose.Types.ObjectId[];
   order: number;
   estimatedTime?: number; // in minutes
   actualTime?: number; // in minutes
@@ -45,6 +46,7 @@ const TaskSchema: Schema = new Schema(
     tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     parentTaskId: { type: Schema.Types.ObjectId, ref: 'Task' },
+    dependencies: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
     order: { type: Number, default: 0 },
     estimatedTime: { type: Number },
     actualTime: { type: Number, default: 0 },
