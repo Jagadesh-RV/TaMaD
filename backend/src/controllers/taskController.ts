@@ -5,6 +5,7 @@ import '../models/Category';
 import '../models/Tag';
 import '../models/User';
 import { getIO } from '../sockets/socketManager';
+import { createAuditLog } from '../utils/auditLogger';
 
 // @desc    Get all tasks for a workspace
 // @route   GET /api/tasks?workspaceId=...
@@ -89,6 +90,15 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     .populate('parentTaskId', 'title');
 
   getIO().to(`workspace_${workspaceId}`).emit('task_created', populatedTask);
+  
+  await createAuditLog(
+    workspaceId as string,
+    req.user._id,
+    'created task',
+    'Task',
+    task._id.toString(),
+    { title: task.title }
+  );
 
   res.status(201).json(populatedTask);
 };
@@ -115,6 +125,15 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     .populate('parentTaskId', 'title');
 
   getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updatedTask);
+
+  await createAuditLog(
+    task.workspaceId.toString(),
+    req.user._id,
+    'updated task',
+    'Task',
+    task._id.toString(),
+    { title: task.title }
+  );
 
   res.json(updatedTask);
 };
@@ -152,6 +171,15 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
   await task.deleteOne();
   
   getIO().to(`workspace_${task.workspaceId}`).emit('task_deleted', { taskId: req.params.id });
+  
+  await createAuditLog(
+    task.workspaceId.toString(),
+    req.user._id,
+    'deleted task',
+    'Task',
+    task._id.toString(),
+    { title: task.title }
+  );
   
   res.json({ message: 'Task removed' });
 };

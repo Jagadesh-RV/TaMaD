@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { getTasks, createTask, updateTask, deleteTask, reorderTask, bulkUpdateTasks, bulkDeleteTasks } from '../controllers/taskController';
+import { getComments, addComment } from '../controllers/commentController';
 import { protect } from '../middleware/auth';
 
 const router = Router();
@@ -19,5 +20,9 @@ router.route('/:id')
   .delete(deleteTask);
 
 router.put('/:id/reorder', reorderTask);
+
+router.route('/:taskId/comments')
+  .get(getComments)
+  .post(addComment);
 
 export default router;

@@ -29,6 +29,7 @@ import documentRoutes from './routes/documentRoutes';
 import noteRoutes from './routes/noteRoutes';
 import whiteboardRoutes from './routes/whiteboardRoutes';
 import healthRoutes from './routes/healthRoutes';
+import commentRoutes from './routes/commentRoutes';
 
 // Rate Limiting
 const apiLimiter = rateLimit({
@@ -59,6 +60,7 @@ app.use('/api/goals', goalRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/whiteboards', whiteboardRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Health and readiness routes
 app.get('/api/health', (req, res) => {
