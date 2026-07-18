@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "./store/authStore";
 
 import AppLayout from "./components/layout/AppLayout";
+import { RealtimeProvider } from "./providers/RealtimeProvider";
 
 import DashboardPage from "./pages/DashboardPage";
 import TasksPage from "./pages/TasksPage";
@@ -35,7 +36,15 @@ export default function App() {
       <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
       <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/" /> : <ForgotPasswordPage />} />
 
-      <Route element={<AppLayout />}>
+      <Route element={
+        isAuthenticated ? (
+          <RealtimeProvider>
+            <AppLayout />
+          </RealtimeProvider>
+        ) : (
+          <Navigate to="/login" />
+        )
+      }>
         <Route
           path="/"
           element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />}

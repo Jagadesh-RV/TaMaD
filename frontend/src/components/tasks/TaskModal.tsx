@@ -3,6 +3,7 @@ import { X, Calendar, Check } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, DialogDescription } from '../ui/Dialog';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import TaskComments from './TaskComments';
 
 export default function TaskModal({
   isOpen = true,
@@ -46,12 +47,13 @@ export default function TaskModal({
             <Check size={20} />
           </div>
           <div>
-            <DialogTitle>Create task</DialogTitle>
+            <DialogTitle>{initialData?._id ? 'Edit task' : 'Create task'}</DialogTitle>
             <DialogDescription>Capture the next thing worth doing.</DialogDescription>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className={initialData?._id ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-[color:var(--color-foreground)]">Title</label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Finalize presentation slides" required autoFocus />
@@ -75,11 +77,21 @@ export default function TaskModal({
             />
           </div>
 
-          <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
-            <Button type="button" variant="secondary" onClick={onClose} className="sm:w-auto">Cancel</Button>
-            <Button type="submit" className="sm:w-auto">Save task</Button>
-          </div>
-        </form>
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={onClose} className="sm:w-auto">Cancel</Button>
+              <Button type="submit" className="sm:w-auto">Save task</Button>
+            </div>
+          </form>
+
+          {initialData?._id && (
+            <div className="flex flex-col rounded-xl border border-border bg-surface-hover h-full max-h-[400px]">
+              <div className="p-3 border-b border-border bg-[color:var(--color-surface)] rounded-t-xl">
+                <h4 className="text-xs font-semibold text-[color:var(--color-foreground)]">Activity & Comments</h4>
+              </div>
+              <TaskComments taskId={initialData._id} />
+            </div>
+          )}
+        </div>
       </DialogPanel>
     </Dialog>
   );

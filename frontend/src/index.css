@@ -55,14 +55,13 @@
 }
 
 @layer components {
-  .glass {
-    @apply rounded-[20px] border border-border bg-surface transition-all duration-200;
+  .card {
+    @apply rounded-2xl border border-border bg-surface transition-all duration-200;
     box-shadow: var(--shadow-soft);
   }
 
-  .glass-panel {
-    @apply rounded-[20px] border border-border bg-surface;
-    box-shadow: var(--shadow-soft);
+  .card-hover {
+    @apply hover:-translate-y-1 hover:shadow-float;
   }
 
   .layout {

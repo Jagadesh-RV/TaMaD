@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 
 export const useTaskStore = create((set, get) => ({
   tasks: [],
+  pagination: null,
   loading: false,
   filters: { status: '', priority: '', tag: '', search: '', date: '' },
 
@@ -20,7 +21,11 @@ export const useTaskStore = create((set, get) => ({
       Object.keys(params).forEach(k => !params[k] && delete params[k]);
       
       const { data } = await api.get('/tasks', { params });
-      set({ tasks: data, loading: false });
+      set({ 
+        tasks: data.tasks || data, 
+        pagination: data.pagination || null,
+        loading: false 
+      });
     } catch (err) {
       set({ loading: false });
       toast.error('Failed to load tasks');
@@ -74,5 +79,29 @@ export const useTaskStore = create((set, get) => ({
   toggleStatus: async (id, currentStatus) => {
     const next = currentStatus === 'done' ? 'todo' : 'done';
     return get().updateTask(id, { status: next });
+  },
+
+  bulkUpdate: async (taskIds, updates, workspaceId) => {
+    try {
+      await api.put('/tasks/bulk', { taskIds, updates, workspaceId });
+      set(s => ({
+        tasks: s.tasks.map(t => taskIds.includes(t._id) ? { ...t, ...updates } : t)
+      }));
+      toast.success('Tasks updated');
+    } catch (err) {
+      toast.error('Failed to update tasks');
+    }
+  },
+
+  bulkDelete: async (taskIds, workspaceId) => {
+    try {
+      await api.delete('/tasks/bulk', { data: { taskIds, workspaceId } });
+      set(s => ({
+        tasks: s.tasks.filter(t => !taskIds.includes(t._id))
+      }));
+      toast.success('Tasks deleted');
+    } catch (err) {
+      toast.error('Failed to delete tasks');
+    }
   },
 }));
