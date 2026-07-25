@@ -152,6 +152,14 @@
     @apply flex justify-center;
   }
 
+  .auth-phone-input-group {
+    @apply flex gap-2;
+  }
+
+  .auth-country-code {
+    @apply w-32 shrink-0 px-2 text-sm;
+  }
+
   .auth-otp-input {
     @apply text-center text-xl tracking-[0.5em];
   }
