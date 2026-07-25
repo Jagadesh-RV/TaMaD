@@ -3,6 +3,7 @@ packages:
   - backend
 allowBuilds:
   '@firebase/util': true
+  '@google/genai': true
   core-js-pure: true
   esbuild: true
   protobufjs: true

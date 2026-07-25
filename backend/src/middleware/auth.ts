@@ -10,6 +10,8 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
+  } else {
+    token = req.cookies?.tamad_access_token;
   }
 
   if (!token) {
@@ -18,7 +20,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
-    const user = await User.findById(decoded.id).select('-password');
+    const user = await User.findById(decoded.id);
     if (!user || !user.isActive) {
       return res.status(401).json({ error: 'Not authorized, user not found' });
     }

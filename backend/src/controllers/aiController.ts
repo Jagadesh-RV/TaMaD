@@ -62,7 +62,7 @@ export const chatWithWorkspace = async (req: AuthRequest, res: Response) => {
 
     // Note: We bypass executing the pipeline if the index is not set up yet to avoid crashing.
     // const relevantTasks = await Task.aggregate(pipeline);
-    const relevantTasks = []; // Placeholder
+    const relevantTasks: unknown[] = []; // Placeholder
 
     res.json({ 
       message: 'Vector search endpoint prepared. Atlas Search Index configuration required.',

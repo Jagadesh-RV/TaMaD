@@ -35,6 +35,8 @@
   --color-secondary: var(--color-muted);
   --animate-fade-in: fadeIn 0.25s ease-out forwards;
   --animate-slide-up: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --shadow-soft: var(--shadow-soft);
+  --shadow-float: var(--shadow-float);
 }
 
 @layer base {
@@ -116,5 +118,47 @@
 
   .btn-secondary {
     @apply w-full rounded-xl border border-border bg-surface px-4 py-2.5 font-medium text-[color:var(--color-foreground)] transition-all hover:bg-[color:var(--color-surface-hover)];
+  }
+
+  .auth-provider-button {
+    @apply flex items-center justify-center gap-3;
+  }
+
+  .auth-google-mark {
+    @apply text-lg font-bold text-red-500;
+  }
+
+  .auth-phone-link,
+  .auth-text-button,
+  .auth-back-link {
+    @apply mt-4 block text-center text-sm font-semibold text-primary transition-colors hover:brightness-90;
+  }
+
+  .auth-divider {
+    @apply my-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-[color:var(--color-muted)];
+  }
+
+  .auth-divider::before,
+  .auth-divider::after {
+    @apply h-px flex-1 bg-[color:var(--color-border)];
+    content: '';
+  }
+
+  .auth-confirmation {
+    @apply space-y-5 text-center text-[color:var(--color-muted)];
+  }
+
+  .auth-captcha {
+    @apply flex justify-center;
+  }
+
+  .auth-otp-input {
+    @apply text-center text-xl tracking-[0.5em];
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-otp-input {
+    @apply tracking-[0.35em];
   }
 }
