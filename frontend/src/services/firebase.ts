@@ -12,6 +12,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
   signInWithPopup,
+  updateProfile,
   confirmPasswordReset,
   signOut,
 } from 'firebase/auth';
@@ -54,7 +55,7 @@ export const registerWithEmail = async (name: string, email: string, password: s
   requireFirebaseConfig();
   await setSessionPersistence(false);
   const credential = await createUserWithEmailAndPassword(auth, email, password);
-  await credential.user.updateProfile({ displayName: name });
+  await updateProfile(credential.user, { displayName: name });
   await sendEmailVerification(credential.user);
   return credential;
 };
@@ -80,4 +81,9 @@ export const createPhoneRecaptcha = (container: HTMLElement) => {
   return new RecaptchaVerifier(auth, container, { size: 'normal' });
 };
 
-export { signInWithPhoneNumber, signOut };
+export const startPhoneSignIn = (phoneNumber: string, verifier: RecaptchaVerifier) => {
+  requireFirebaseConfig();
+  return signInWithPhoneNumber(auth, phoneNumber, verifier);
+};
+
+export { signOut };

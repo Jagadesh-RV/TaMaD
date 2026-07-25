@@ -20,21 +20,30 @@ import NotificationsPage from "./pages/NotificationsPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 
 export default function App() {
-  const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
+  const loading = useAuthStore((state) => state.loading);
   const init = useAuthStore((state) => state.init);
-  const isAuthenticated = Boolean(token);
+  const isAuthenticated = Boolean(user);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  if (loading) return null;
 
   return (
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to="/" /> : <RegisterPage />} />
       <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/" /> : <ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={isAuthenticated ? <VerifyEmailPage /> : <Navigate to="/login" />} />
+      <Route path="/phone-login" element={isAuthenticated ? <Navigate to="/" /> : <PhoneLoginPage />} />
 
       <Route element={
         isAuthenticated ? (
