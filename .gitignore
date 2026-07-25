@@ -69,6 +69,9 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# Firebase service-account credentials
+*tamad-*-firebase-adminsdk-*.json
+
 # dotenv environment variables file
 .env
 .env.test
