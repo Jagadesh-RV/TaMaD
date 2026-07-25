@@ -9,6 +9,7 @@
     "build:all": "pnpm --filter tamad-frontend build && pnpm --filter tamad-backend build"
   },
   "dependencies": {
+    "firebase": "^12.16.0",
     "mongodb": "^7.5.0"
   },
   "devDependencies": {
