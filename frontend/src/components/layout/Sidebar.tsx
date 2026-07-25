@@ -12,6 +12,7 @@ import {
   FileText,
   PenTool,
   Sparkles,
+  Mail,
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
@@ -29,6 +30,7 @@ const links = [
   { label: "Notifications", path: "/notifications", icon: <Bell size={18} /> },
   { label: "Profile", path: "/profile", icon: <User size={18} /> },
   { label: "Settings", path: "/settings", icon: <Settings size={18} /> },
+  { label: "Contact Us", path: "/contact", icon: <Mail size={18} /> },
 ];
 
 export default function Sidebar() {

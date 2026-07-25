@@ -163,10 +163,104 @@
   .auth-otp-input {
     @apply text-center text-xl tracking-[0.5em];
   }
+
+  .contact-header {
+    @apply mb-8 max-w-2xl;
+  }
+
+  .contact-eyebrow {
+    @apply mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-primary;
+  }
+
+  .contact-muted,
+  .contact-help {
+    @apply text-sm leading-6 text-[color:var(--color-muted)];
+  }
+
+  .contact-layout {
+    @apply grid gap-6 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)];
+  }
+
+  .contact-details,
+  .contact-form,
+  .contact-success {
+    @apply p-6 sm:p-8;
+  }
+
+  .contact-section-title {
+    @apply mb-3 text-xl font-semibold text-[color:var(--color-foreground)];
+  }
+
+  .contact-detail-item {
+    @apply mt-6 flex items-start gap-3 text-primary;
+  }
+
+  .contact-detail-item div {
+    @apply flex flex-col gap-1;
+  }
+
+  .contact-detail-item strong {
+    @apply text-sm text-[color:var(--color-foreground)];
+  }
+
+  .contact-detail-item span {
+    @apply text-sm text-[color:var(--color-muted)];
+  }
+
+  .contact-form-grid {
+    @apply grid gap-5 sm:grid-cols-2;
+  }
+
+  .contact-field {
+    @apply flex flex-col gap-2;
+  }
+
+  .contact-field + .contact-field,
+  .contact-form-grid + .contact-field {
+    @apply mt-5;
+  }
+
+  .contact-field label {
+    @apply text-sm font-semibold text-[color:var(--color-foreground)];
+  }
+
+  .contact-country-select {
+    @apply cursor-pointer;
+  }
+
+  .contact-message {
+    @apply min-h-36 resize-y;
+  }
+
+  .contact-error {
+    @apply text-sm font-medium text-red-500;
+  }
+
+  .contact-submit {
+    @apply mt-6 flex min-h-11 items-center justify-center;
+  }
+
+  .contact-success {
+    @apply mx-auto max-w-xl text-center;
+  }
+
+  .contact-success-icon {
+    @apply mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--color-accent)]/10 text-primary;
+  }
+
+  .contact-success-button {
+    @apply mx-auto mt-6 max-w-xs;
+  }
 }
 
 @media (max-width: 640px) {
   .auth-otp-input {
     @apply tracking-[0.35em];
+  }
+
+  .contact-details,
+  .contact-form,
+  .contact-success {
+    @apply p-5;
   }
 }

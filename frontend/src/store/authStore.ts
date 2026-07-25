@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '../utils/api';
-import { auth, signOut } from '../services/firebase';
+import { getClientAuth, signOutFromFirebase } from '../services/firebase';
 
 interface UserShape {
   id: string;
@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   completeFirebaseSignIn: async (rememberMe = false) => {
-    const firebaseUser = auth.currentUser;
+    const firebaseUser = getClientAuth().currentUser;
     if (!firebaseUser) throw new Error('Firebase sign-in did not complete');
     const idToken = await firebaseUser.getIdToken(true);
     const response = await api.post('/auth/firebase/session', { idToken, rememberMe });
@@ -59,7 +59,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await api.post('/auth/logout');
     } finally {
-      await signOut(auth);
+      await signOutFromFirebase();
       set({ user: null });
     }
   },

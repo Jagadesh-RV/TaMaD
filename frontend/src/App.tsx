@@ -23,6 +23,7 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
+import ContactPage from "./pages/ContactPage";
 
 export default function App() {
   const user = useAuthStore((state) => state.user);
@@ -44,6 +45,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={isAuthenticated ? <VerifyEmailPage /> : <Navigate to="/login" />} />
       <Route path="/phone-login" element={isAuthenticated ? <Navigate to="/" /> : <PhoneLoginPage />} />
+      <Route path="/contact" element={<ContactPage />} />
 
       <Route element={
         isAuthenticated ? (
