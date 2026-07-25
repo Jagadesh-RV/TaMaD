@@ -35,6 +35,8 @@
   --color-secondary: var(--color-muted);
   --animate-fade-in: fadeIn 0.25s ease-out forwards;
   --animate-slide-up: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --shadow-soft: var(--shadow-soft);
+  --shadow-float: var(--shadow-float);
 }
 
 @layer base {

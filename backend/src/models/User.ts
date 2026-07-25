@@ -1,16 +1,17 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
+import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IUser extends Document {
   name: string;
-  email: string;
-  password?: string;
+  email?: string;
+  firebaseUid: string;
+  phoneNumber?: string;
   avatarUrl?: string;
-  googleId?: string;
-  githubId?: string;
+  authProvider: 'google' | 'email' | 'phone';
+  emailVerified: boolean;
+  phoneVerified: boolean;
   role: 'user' | 'admin' | 'superadmin';
   isActive: boolean;
+  lastLogin: Date;
   preferences: {
     theme: 'light' | 'dark' | 'system';
     language: string;
@@ -23,11 +24,7 @@ export interface IUser extends Document {
     createdAt: Date;
     lastUsedAt: Date;
     expiresAt: Date;
-    revokedAt?: Date;
   }>;
-  passwordResetTokenHash?: string;
-  passwordResetExpiresAt?: Date;
-  comparePassword: (password: string) => Promise<boolean>;
 }
 
 const SessionSchema = new Schema(
@@ -38,7 +35,6 @@ const SessionSchema = new Schema(
     createdAt: { type: Date, default: Date.now },
     lastUsedAt: { type: Date, default: Date.now },
     expiresAt: { type: Date, required: true },
-    revokedAt: { type: Date },
   },
   { _id: false }
 );
@@ -46,43 +42,24 @@ const SessionSchema = new Schema(
 const UserSchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-    password: { type: String, select: false },
+    email: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
+    firebaseUid: { type: String, required: true, unique: true, index: true },
+    phoneNumber: { type: String, unique: true, sparse: true },
     avatarUrl: { type: String },
-    googleId: { type: String, sparse: true },
-    githubId: { type: String, sparse: true },
+    authProvider: { type: String, enum: ['google', 'email', 'phone'], required: true },
+    emailVerified: { type: Boolean, default: false },
+    phoneVerified: { type: Boolean, default: false },
     role: { type: String, enum: ['user', 'admin', 'superadmin'], default: 'user' },
     isActive: { type: Boolean, default: true },
+    lastLogin: { type: Date, default: Date.now },
     preferences: {
       theme: { type: String, enum: ['light', 'dark', 'system'], default: 'light' },
       language: { type: String, default: 'en' },
       timezone: { type: String, default: 'UTC' },
     },
     sessions: [SessionSchema],
-    passwordResetTokenHash: { type: String, select: false },
-    passwordResetExpiresAt: { type: Date, select: false },
   },
   { timestamps: true }
 );
-
-UserSchema.pre<IUser>('save', async function (next) {
-  if (!this.isModified('password') || !this.password) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    return next();
-  } catch (err: any) {
-    return next(err);
-  }
-});
-
-UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
-  if (!this.password) return false;
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-UserSchema.methods.hashToken = function (token: string) {
-  return crypto.createHash('sha256').update(token).digest('hex');
-};
 
 export default mongoose.model<IUser>('User', UserSchema);

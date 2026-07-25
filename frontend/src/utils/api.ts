@@ -2,30 +2,30 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('tamad_access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+let refreshRequest: Promise<void> | null = null;
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('tamad_access_token');
-      localStorage.removeItem('tamad_refresh_token');
-      window.location.href = '/login';
+  async (error) => {
+    const request = error.config;
+    if (error.response?.status !== 401 || request?._retried || request?.url === '/auth/refresh') {
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
+
+    request._retried = true;
+    refreshRequest ||= api.post('/auth/refresh').then(() => undefined).finally(() => { refreshRequest = null; });
+
+    try {
+      await refreshRequest;
+      return api(request);
+    } catch {
+      return Promise.reject(error);
+    }
+  },
 );
 
 export default api;
