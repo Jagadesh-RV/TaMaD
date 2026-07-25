@@ -13,19 +13,18 @@ const RealtimeContext = createContext<RealtimeContextType>({ socket: null, isCon
 export const useRealtime = () => useContext(RealtimeContext);
 
 export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { token } = useAuthStore();
+  const { user } = useAuthStore();
   const { fetchTasks } = useTaskStore();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    if (!token) return;
+    if (!user) return;
 
     // Use environment variable or fallback to same origin if not set
     const SOCKET_URL = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:5000';
 
     const newSocket = io(SOCKET_URL, {
-      auth: { token },
       withCredentials: true,
     });
 
@@ -65,7 +64,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       newSocket.close();
     };
-  }, [token, fetchTasks]);
+  }, [user, fetchTasks]);
 
   return (
     <RealtimeContext.Provider value={{ socket, isConnected }}>

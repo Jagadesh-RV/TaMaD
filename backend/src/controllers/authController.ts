@@ -1,16 +1,34 @@
-import { Request, Response } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
+import type { CookieOptions, Request, Response } from 'express';
 import User from '../models/User';
-import { sendMail } from '../utils/mailer';
+import { getFirebaseAuth } from '../config/firebase';
 
-const getAccessToken = (id: string) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '15m' });
+const accessCookieName = 'tamad_access_token';
+const refreshCookieName = 'tamad_refresh_token';
+const refreshLifetime = 90 * 24 * 60 * 60 * 1000;
+
+const accessCookieOptions: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: 15 * 60 * 1000,
+  path: '/',
 };
 
+const refreshCookieOptions: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  maxAge: refreshLifetime,
+  path: '/api/auth',
+};
+
+const getAccessToken = (id: string) => jwt.sign({ id }, process.env.JWT_SECRET as string, { expiresIn: '15m' });
+
 const getRefreshToken = (id: string) => {
-  const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'tamad-refresh-secret';
-  return jwt.sign({ id }, secret, { expiresIn: '90d' });
+  const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+  return jwt.sign({ id }, secret as string, { expiresIn: '90d' });
 };
 
 const hashToken = (token: string) => crypto.createHash('sha256').update(token).digest('hex');
@@ -19,205 +37,142 @@ const buildUserPayload = (user: any) => ({
   id: user._id,
   name: user.name,
   email: user.email,
-  role: user.role,
+  phoneNumber: user.phoneNumber,
   avatarUrl: user.avatarUrl,
+  authProvider: user.authProvider,
+  emailVerified: user.emailVerified,
+  phoneVerified: user.phoneVerified,
+  role: user.role,
   preferences: user.preferences,
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
+  lastLogin: user.lastLogin,
 });
 
 const appendSession = async (user: any, refreshToken: string, req: Request) => {
-  const expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
-  user.sessions = user.sessions || [];
+  user.sessions = (user.sessions || []).filter((session: any) => session.expiresAt > new Date());
   user.sessions.push({
     tokenHash: hashToken(refreshToken),
     deviceName: req.headers['user-agent']?.slice(0, 80) || 'Unknown device',
     ipAddress: req.ip || req.socket.remoteAddress || 'Unknown',
     createdAt: new Date(),
     lastUsedAt: new Date(),
-    expiresAt,
+    expiresAt: new Date(Date.now() + refreshLifetime),
   });
   await user.save();
 };
 
-export const register = async (req: Request, res: Response) => {
-  try {
-    const { name, email, password, rememberMe = false } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password are required' });
-    }
-
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      preferences: { theme: 'system', language: 'en', timezone: 'UTC' },
-    });
-
-    const refreshToken = getRefreshToken(user._id.toString());
-    await appendSession(user, refreshToken, req);
-
-    res.status(201).json({
-      accessToken: getAccessToken(user._id.toString()),
-      refreshToken,
-      user: buildUserPayload(user),
-      rememberMe,
-    });
-  } catch (error: any) {
-    res.status(400).json({ error: error.message || 'Invalid user data' });
-  }
+const setSessionCookies = (res: Response, userId: string, rememberMe: boolean) => {
+  const accessToken = getAccessToken(userId);
+  const refreshToken = getRefreshToken(userId);
+  const accessOptions = rememberMe ? accessCookieOptions : { ...accessCookieOptions, maxAge: undefined };
+  const refreshOptions = rememberMe ? refreshCookieOptions : { ...refreshCookieOptions, maxAge: undefined };
+  res.cookie(accessCookieName, accessToken, accessOptions);
+  res.cookie(refreshCookieName, refreshToken, refreshOptions);
+  return refreshToken;
 };
 
-export const login = async (req: Request, res: Response) => {
-  try {
-    const { email, password, rememberMe = false } = req.body;
-    const user = await User.findOne({ email }).select('+password');
+const providerFor = (provider: string) => {
+  if (provider === 'google.com') return 'google';
+  if (provider === 'phone') return 'phone';
+  return 'email';
+};
 
-    if (!user || !user.isActive || !(await user.comparePassword(password))) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+export const createFirebaseSession = async (req: Request, res: Response) => {
+  try {
+    const { idToken, rememberMe = false } = req.body;
+    if (!idToken || typeof idToken !== 'string') {
+      return res.status(400).json({ error: 'Firebase ID token is required' });
     }
 
-    const refreshToken = getRefreshToken(user._id.toString());
-    await appendSession(user, refreshToken, req);
+    const decoded = await getFirebaseAuth().verifyIdToken(idToken, true);
+    const provider = providerFor(decoded.firebase?.sign_in_provider || 'password');
+    const email = decoded.email?.toLowerCase();
+    let user = await User.findOne({ firebaseUid: decoded.uid });
 
-    res.json({
-      accessToken: getAccessToken(user._id.toString()),
-      refreshToken,
-      user: buildUserPayload(user),
-      rememberMe,
-    });
+    if (!user && email) user = await User.findOne({ email });
+    if (!user && decoded.phone_number) user = await User.findOne({ phoneNumber: decoded.phone_number });
+
+    if (user && !user.isActive) return res.status(403).json({ error: 'This account is disabled' });
+
+    if (!user) {
+      user = await User.create({
+        firebaseUid: decoded.uid,
+        name: decoded.name || email?.split('@')[0] || 'TaMaD user',
+        email,
+        phoneNumber: decoded.phone_number,
+        avatarUrl: decoded.picture,
+        authProvider: provider,
+        emailVerified: Boolean(decoded.email_verified),
+        phoneVerified: Boolean(decoded.phone_number),
+        preferences: { theme: 'system', language: 'en', timezone: 'UTC' },
+      });
+    } else {
+      user.firebaseUid = decoded.uid;
+      user.name = decoded.name || user.name;
+      user.email = email || user.email;
+      user.phoneNumber = decoded.phone_number || user.phoneNumber;
+      user.avatarUrl = decoded.picture || user.avatarUrl;
+      user.authProvider = provider;
+      user.emailVerified = Boolean(decoded.email_verified);
+      user.phoneVerified = Boolean(decoded.phone_number);
+      user.lastLogin = new Date();
+    }
+
+    const refreshToken = setSessionCookies(res, user._id.toString(), Boolean(rememberMe));
+    await appendSession(user, refreshToken, req);
+    res.json({ user: buildUserPayload(user) });
   } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Login failed' });
+    res.status(401).json({ error: error.message || 'Unable to verify Firebase session' });
   }
 };
 
 export const refresh = async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(400).json({ error: 'Refresh token is required' });
-    }
+    const refreshToken = req.cookies?.[refreshCookieName] || req.body.refreshToken;
+    if (!refreshToken) return res.status(401).json({ error: 'Session is invalid' });
 
-    const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || 'tamad-refresh-secret';
-    const decoded = jwt.verify(refreshToken, secret) as { id: string };
+    const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
+    const decoded = jwt.verify(refreshToken, secret as string) as { id: string };
     const user = await User.findById(decoded.id);
-    if (!user || !user.isActive) {
-      return res.status(401).json({ error: 'Session is invalid' });
-    }
+    const session = user?.sessions.find((entry: any) => entry.tokenHash === hashToken(refreshToken) && entry.expiresAt > new Date());
+    if (!user || !user.isActive || !session) return res.status(401).json({ error: 'Session is invalid' });
 
-    const tokenHash = hashToken(refreshToken);
-    const session = user.sessions?.find((entry: any) => entry.tokenHash === tokenHash && (!entry.revokedAt || entry.revokedAt > new Date()) && entry.expiresAt > new Date());
-
-    if (!session) {
-      return res.status(401).json({ error: 'Session is invalid' });
-    }
-
-    session.lastUsedAt = new Date();
-    await user.save();
-
-    res.json({ accessToken: getAccessToken(user._id.toString()), refreshToken, user: buildUserPayload(user) });
-  } catch (error) {
+    user.sessions = user.sessions.filter((entry: any) => entry.tokenHash !== hashToken(refreshToken));
+    const nextRefreshToken = setSessionCookies(res, user._id.toString(), true);
+    await appendSession(user, nextRefreshToken, req);
+    res.json({ user: buildUserPayload(user) });
+  } catch {
     res.status(401).json({ error: 'Session is invalid' });
   }
 };
 
 export const logout = async (req: any, res: Response) => {
-  try {
-    const { refreshToken, allDevices = false } = req.body;
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    if (allDevices) {
-      user.sessions = [];
-    } else if (refreshToken) {
-      const tokenHash = hashToken(refreshToken);
-      user.sessions = (user.sessions || []).filter((entry: any) => entry.tokenHash !== tokenHash);
-    } else {
-      user.sessions = [];
-    }
-
+  const refreshToken = req.cookies?.[refreshCookieName] || req.body.refreshToken;
+  const user = await User.findById(req.user._id);
+  if (user && refreshToken) {
+    user.sessions = user.sessions.filter((entry: any) => entry.tokenHash !== hashToken(refreshToken));
     await user.save();
-    res.json({ message: 'Logged out successfully' });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Logout failed' });
   }
-};
-
-export const forgotPassword = async (req: Request, res: Response) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email is required' });
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({ message: 'If an account exists, password reset instructions have been prepared.' });
-    }
-
-    const resetToken = crypto.randomBytes(24).toString('hex');
-    user.passwordResetTokenHash = hashToken(resetToken);
-    user.passwordResetExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
-    await user.save();
-
-    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
-    await sendMail(user.email, 'Reset your TaMaD password', `<p>Hello ${user.name},</p><p>Use the link below to reset your password:</p><p><a href="${resetLink}">Reset password</a></p>`);
-
-    res.json({ message: 'If an account exists, password reset instructions have been prepared.' });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Unable to process password reset' });
-  }
-};
-
-export const resetPassword = async (req: Request, res: Response) => {
-  try {
-    const { token, password } = req.body;
-    if (!token || !password) {
-      return res.status(400).json({ error: 'Reset token and password are required' });
-    }
-
-    const user = await User.findOne({ passwordResetTokenHash: hashToken(token) }).select('+passwordResetTokenHash +passwordResetExpiresAt');
-    if (!user || !user.passwordResetExpiresAt || user.passwordResetExpiresAt < new Date()) {
-      return res.status(400).json({ error: 'Reset token is invalid or expired' });
-    }
-
-    user.password = password;
-    user.passwordResetTokenHash = undefined;
-    user.passwordResetExpiresAt = undefined;
-    await user.save();
-
-    res.json({ message: 'Password updated successfully' });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Unable to reset password' });
-  }
+  res.clearCookie(accessCookieName, accessCookieOptions);
+  res.clearCookie(refreshCookieName, refreshCookieOptions);
+  res.json({ message: 'Logged out successfully' });
 };
 
 export const getMe = async (req: any, res: Response) => {
-  const user = await User.findById(req.user._id);
-  res.json({ user: buildUserPayload(user) });
+  res.json({ user: buildUserPayload(req.user) });
 };
 
 export const updateProfile = async (req: any, res: Response) => {
-  try {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
+  const user = await User.findById(req.user._id);
+  if (!user) return res.status(404).json({ error: 'User not found' });
 
-    const { name, avatarUrl, preferences } = req.body;
-    if (name) user.name = name;
-    if (avatarUrl) user.avatarUrl = avatarUrl;
-    if (preferences) user.preferences = { ...user.preferences, ...preferences };
-
-    await user.save();
-    res.json({ user: buildUserPayload(user) });
-  } catch (error: any) {
-    res.status(500).json({ error: error.message || 'Unable to update profile' });
-  }
+  const { name, avatarUrl, preferences } = req.body;
+  if (name) user.name = name;
+  if (avatarUrl) user.avatarUrl = avatarUrl;
+  if (preferences) user.preferences = { ...user.preferences, ...preferences };
+  await user.save();
+  res.json({ user: buildUserPayload(user) });
 };
 
 export const getSessions = async (req: any, res: Response) => {
