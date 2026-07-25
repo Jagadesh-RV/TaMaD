@@ -62,11 +62,13 @@ const appendSession = async (user: any, refreshToken: string, req: Request) => {
   await user.save();
 };
 
-const setSessionCookies = (res: Response, userId: string) => {
+const setSessionCookies = (res: Response, userId: string, rememberMe: boolean) => {
   const accessToken = getAccessToken(userId);
   const refreshToken = getRefreshToken(userId);
-  res.cookie(accessCookieName, accessToken, accessCookieOptions);
-  res.cookie(refreshCookieName, refreshToken, refreshCookieOptions);
+  const accessOptions = rememberMe ? accessCookieOptions : { ...accessCookieOptions, maxAge: undefined };
+  const refreshOptions = rememberMe ? refreshCookieOptions : { ...refreshCookieOptions, maxAge: undefined };
+  res.cookie(accessCookieName, accessToken, accessOptions);
+  res.cookie(refreshCookieName, refreshToken, refreshOptions);
   return refreshToken;
 };
 
@@ -78,7 +80,7 @@ const providerFor = (provider: string) => {
 
 export const createFirebaseSession = async (req: Request, res: Response) => {
   try {
-    const { idToken } = req.body;
+    const { idToken, rememberMe = false } = req.body;
     if (!idToken || typeof idToken !== 'string') {
       return res.status(400).json({ error: 'Firebase ID token is required' });
     }
@@ -117,7 +119,7 @@ export const createFirebaseSession = async (req: Request, res: Response) => {
       user.lastLogin = new Date();
     }
 
-    const refreshToken = setSessionCookies(res, user._id.toString());
+    const refreshToken = setSessionCookies(res, user._id.toString(), Boolean(rememberMe));
     await appendSession(user, refreshToken, req);
     res.json({ user: buildUserPayload(user) });
   } catch (error: any) {
@@ -137,7 +139,7 @@ export const refresh = async (req: Request, res: Response) => {
     if (!user || !user.isActive || !session) return res.status(401).json({ error: 'Session is invalid' });
 
     user.sessions = user.sessions.filter((entry: any) => entry.tokenHash !== hashToken(refreshToken));
-    const nextRefreshToken = setSessionCookies(res, user._id.toString());
+    const nextRefreshToken = setSessionCookies(res, user._id.toString(), true);
     await appendSession(user, nextRefreshToken, req);
     res.json({ user: buildUserPayload(user) });
   } catch {
