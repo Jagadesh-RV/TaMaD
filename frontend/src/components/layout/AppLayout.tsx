@@ -1,48 +1,62 @@
-import { Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Command } from "lucide-react";
-import Sidebar from "./Sidebar";
-import { CommandPalette } from "../ui/CommandPalette";
+import { Outlet } from 'react-router-dom';
+import { useEffect, useState, useCallback } from 'react';
+import { Menu } from 'lucide-react';
+import Sidebar from './Sidebar';
+import TopBar from './TopBar';
+import { CommandPalette } from '../ui/CommandPalette';
 
 export default function AppLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      setCommandPaletteOpen(true);
+    }
+    if (e.key === 'Escape') {
+      setCommandPaletteOpen(false);
+      setMobileMenuOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setCommandPaletteOpen(true);
-      }
-      if (event.key === "Escape") {
-        setCommandPaletteOpen(false);
-      }
-    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('tamad-theme') || 'light');
   }, []);
 
   return (
-    <div className="layout bg-[color:var(--color-background)] text-[color:var(--color-foreground)]">
-      <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-[color:var(--color-surface)]/80 px-6 py-4 backdrop-blur">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[color:var(--color-muted)]">Workspace</p>
-            <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Productivity operating system</h2>
-          </div>
-          <button
-            onClick={() => setCommandPaletteOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-[color:var(--color-surface-hover)] px-3 py-2 text-sm text-[color:var(--color-muted)]"
-          >
-            <Command size={16} />
-            <span>Quick actions</span>
-          </button>
-        </header>
+    <div className="layout" style={{ background: 'var(--color-background)' }}>
+      {/* Desktop sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(p => !p)} />
+      </div>
+
+      {/* Mobile sidebar */}
+      <div className="lg:hidden">
+        <Sidebar
+          isMobile
+          isOpen={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+        />
+      </div>
+
+      {/* Main content */}
+      <div className="flex flex-1 flex-col min-w-0">
+        <TopBar
+          onMenuToggle={() => setMobileMenuOpen(true)}
+          onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+        />
         <main className="main-content">
           <Outlet />
         </main>
       </div>
+
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
     </div>
   );

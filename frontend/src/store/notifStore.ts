@@ -1,7 +1,25 @@
 import { create } from 'zustand';
 import api from '../utils/api';
 
-export const useNotifStore = create((set, get) => ({
+interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  type: string;
+  time: string;
+  read: boolean | number;
+}
+
+interface NotifState {
+  notifications: Notification[];
+  unread: number;
+  fetch: () => Promise<void>;
+  markAllRead: () => Promise<void>;
+  markRead: (id: string) => Promise<void>;
+  addRealtime: (notif: Omit<Notification, 'read'>) => void;
+}
+
+export const useNotifStore = create<NotifState>((set) => ({
   notifications: [],
   unread: 0,
 
@@ -30,7 +48,6 @@ export const useNotifStore = create((set, get) => ({
       notifications: [{ ...notif, read: 0 }, ...s.notifications].slice(0, 50),
       unread: s.unread + 1,
     }));
-    // Browser notification
     if (Notification.permission === 'granted') {
       new Notification(notif.title, { body: notif.body, icon: '/favicon.ico' });
     }

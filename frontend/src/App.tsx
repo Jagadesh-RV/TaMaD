@@ -17,6 +17,8 @@ import WhiteboardPage from "./pages/WhiteboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ReportsPage from "./pages/ReportsPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
@@ -72,12 +74,14 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/focus" element={<FocusPage />} />
         <Route path="/planner" element={<PlannerPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/whiteboard" element={<WhiteboardPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
