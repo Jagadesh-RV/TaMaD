@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '../utils/api';
-import { auth, signOut } from '../services/firebase';
+import { getClientAuth, signOutFromFirebase } from '../services/firebase';
 
 interface UserShape {
   id: string;
@@ -19,13 +19,27 @@ interface UserShape {
   };
 }
 
+interface SessionInfo {
+  deviceName: string;
+  ipAddress: string;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
+}
+
 interface AuthState {
   user: UserShape | null;
   loading: boolean;
   init: () => Promise<void>;
   completeFirebaseSignIn: (rememberMe?: boolean) => Promise<UserShape>;
   logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
   updateProfile: (payload: Partial<UserShape> & { preferences?: Record<string, unknown> }) => Promise<void>;
+  syncEmailVerification: () => Promise<UserShape>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
+  getSessions: () => Promise<SessionInfo[]>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -47,7 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   completeFirebaseSignIn: async (rememberMe = false) => {
-    const firebaseUser = auth.currentUser;
+    const firebaseUser = getClientAuth().currentUser;
     if (!firebaseUser) throw new Error('Firebase sign-in did not complete');
     const idToken = await firebaseUser.getIdToken(true);
     const response = await api.post('/auth/firebase/session', { idToken, rememberMe });
@@ -59,7 +73,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await api.post('/auth/logout');
     } finally {
-      await signOut(auth);
+      await signOutFromFirebase();
+      set({ user: null });
+    }
+  },
+
+  logoutAll: async () => {
+    try {
+      await api.post('/auth/logout-all');
+    } finally {
+      await signOutFromFirebase();
       set({ user: null });
     }
   },
@@ -67,5 +90,29 @@ export const useAuthStore = create<AuthState>((set) => ({
   updateProfile: async (payload) => {
     const response = await api.put('/auth/profile', payload);
     set({ user: response.data.user });
+  },
+
+  syncEmailVerification: async () => {
+    const response = await api.post('/auth/sync-verification');
+    set({ user: response.data.user });
+    return response.data.user;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    await api.post('/auth/change-password', { currentPassword, newPassword });
+  },
+
+  deleteAccount: async () => {
+    try {
+      await api.post('/auth/delete-account');
+    } finally {
+      await signOutFromFirebase();
+      set({ user: null });
+    }
+  },
+
+  getSessions: async () => {
+    const response = await api.get('/auth/sessions');
+    return response.data.sessions;
   },
 }));
