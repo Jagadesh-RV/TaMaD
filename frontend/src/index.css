@@ -164,6 +164,35 @@
     @apply text-center text-xl tracking-[0.5em];
   }
 
+  .auth-page {
+    @apply flex min-h-screen items-center justify-center bg-[color:var(--color-background)] p-4;
+  }
+
+  .auth-card {
+    @apply w-full max-w-md animate-slide-up rounded-2xl border border-border bg-surface p-8 sm:p-10;
+    box-shadow: var(--shadow-float);
+  }
+
+  .auth-card-title {
+    @apply text-2xl font-bold tracking-tight text-[color:var(--color-foreground)];
+  }
+
+  .auth-card-subtitle {
+    @apply mt-2 text-sm text-[color:var(--color-muted)];
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-border bg-[color:var(--color-background)] px-4 py-2.5 text-sm text-[color:var(--color-foreground)] transition-colors placeholder:text-[color:var(--color-muted)]/60 focus:border-[color:var(--color-accent)] focus:outline-none focus:ring-2 focus:ring-[color:var(--color-accent)]/20;
+  }
+
+  .auth-loading {
+    @apply flex min-h-screen items-center justify-center bg-[color:var(--color-background)];
+  }
+
+  .auth-spinner {
+    @apply h-8 w-8 animate-spin rounded-full border-4 border-[color:var(--color-border)] border-t-[color:var(--color-accent)];
+  }
+
   .contact-header {
     @apply mb-8 max-w-2xl;
   }

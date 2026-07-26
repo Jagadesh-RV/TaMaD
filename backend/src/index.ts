@@ -11,14 +11,12 @@ import { connectDB } from './config/db';
 import { redis } from './config/redis';
 import logger from './utils/logger';
 import 'express-async-errors';
-import { seedAdmin } from './utils/seed';
 
 dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
 
-// Socket.io setup
 export const io = initSocket(httpServer);
 
 import authRoutes from './routes/authRoutes';
@@ -34,27 +32,30 @@ import commentRoutes from './routes/commentRoutes';
 import aiRoutes from './routes/aiRoutes';
 import contactRoutes from './routes/contactRoutes';
 
-// Rate Limiting
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  message: { error: 'Too many requests, please try again later.' }
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests, please try again later.' },
 });
 
-// Middleware
-app.use(express.json());
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : '*',
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 app.use(helmet());
 app.use(morgan('dev'));
-app.use('/api', apiLimiter); // Apply rate limiter to all /api routes
+app.use('/api', apiLimiter);
 
-// Routes
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
@@ -68,12 +69,7 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/contact', contactRoutes);
 
-// Health and readiness routes
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'TaMaD API is running' });
-});
-
-app.get('/api/ready', async (req, res) => {
+app.get('/api/ready', async (_req, res) => {
   try {
     await connectDB();
     res.status(200).json({ status: 'READY' });
@@ -82,29 +78,23 @@ app.get('/api/ready', async (req, res) => {
   }
 });
 
-// Error handling middleware
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(err.message, { stack: err.stack });
-  
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({ 
-    error: err.message, 
-    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack 
+  res.status(statusCode).json({
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
   });
 });
 
 const PORT = process.env.PORT || 5000;
 
-// Start server
 const startServer = async () => {
   try {
     await connectDB();
 
     if (redis.status === 'ready' || redis.status === 'connecting') {
-      logger.info('Redis is ready');
+      logger.info('Redis is connected');
     }
-
-    await seedAdmin();
 
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);

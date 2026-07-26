@@ -19,13 +19,27 @@ interface UserShape {
   };
 }
 
+interface SessionInfo {
+  deviceName: string;
+  ipAddress: string;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
+}
+
 interface AuthState {
   user: UserShape | null;
   loading: boolean;
   init: () => Promise<void>;
   completeFirebaseSignIn: (rememberMe?: boolean) => Promise<UserShape>;
   logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
   updateProfile: (payload: Partial<UserShape> & { preferences?: Record<string, unknown> }) => Promise<void>;
+  syncEmailVerification: () => Promise<UserShape>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
+  getSessions: () => Promise<SessionInfo[]>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -64,8 +78,41 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
+  logoutAll: async () => {
+    try {
+      await api.post('/auth/logout-all');
+    } finally {
+      await signOutFromFirebase();
+      set({ user: null });
+    }
+  },
+
   updateProfile: async (payload) => {
     const response = await api.put('/auth/profile', payload);
     set({ user: response.data.user });
+  },
+
+  syncEmailVerification: async () => {
+    const response = await api.post('/auth/sync-verification');
+    set({ user: response.data.user });
+    return response.data.user;
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    await api.post('/auth/change-password', { currentPassword, newPassword });
+  },
+
+  deleteAccount: async () => {
+    try {
+      await api.post('/auth/delete-account');
+    } finally {
+      await signOutFromFirebase();
+      set({ user: null });
+    }
+  },
+
+  getSessions: async () => {
+    const response = await api.get('/auth/sessions');
+    return response.data.sessions;
   },
 }));

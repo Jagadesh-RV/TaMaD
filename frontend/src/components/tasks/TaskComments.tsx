@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useRealtime } from '../../providers/RealtimeProvider';
 import { Send } from 'lucide-react';
-import api from '../../api/api';
+import api from '../../utils/api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
 
