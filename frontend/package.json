@@ -25,6 +25,7 @@
     "firebase": "^12.15.0",
     "framer-motion": "^12.40.0",
     "jsonwebtoken": "^9.0.3",
+    "libphonenumber-js": "^1.13.9",
     "lucide-react": "^0.344.0",
     "mongoose": "^9.7.1",
     "react": "^18.2.0",
@@ -66,13 +67,5 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^6.0.3",
     "vite": "^7.3.5"
-  },
-  "pnpm": {
-    "approvedBuilds": [
-      "esbuild",
-      "@firebase/util",
-      "core-js-pure",
-      "protobufjs"
-    ]
   }
 }

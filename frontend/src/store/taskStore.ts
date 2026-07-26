@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '../api/api';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 export const useTaskStore = create((set, get) => ({
