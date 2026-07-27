@@ -1,65 +1,112 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
-  Mail,
-  Phone,
-  Shield,
-  Globe,
-  Monitor,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  LogOut,
-  Pencil,
-  Key,
-  Smartphone,
-  Laptop,
+  Mail, Phone, Shield, Globe, Monitor, Clock,
+  CheckCircle2, XCircle, LogOut, Pencil, Key,
+  Smartphone, Laptop, Loader2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import clsx from 'clsx';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 import { useTheme } from '../hooks/useTheme';
 
-const MOCK_SESSIONS = [
-  {
-    deviceName: 'MacBook Pro — Chrome',
-    ipAddress: '192.168.1.42',
-    lastUsedAt: 'Active now',
-    isCurrent: true,
-  },
-  {
-    deviceName: 'iPhone 15 Pro — Safari',
-    ipAddress: '192.168.1.88',
-    lastUsedAt: '2 hours ago',
-    isCurrent: false,
-  },
-  {
-    deviceName: 'iPad Air — Safari',
-    ipAddress: '10.0.0.15',
-    lastUsedAt: '3 days ago',
-    isCurrent: false,
-  },
-];
-
-const STATS = [
-  { label: 'Tasks Completed', value: '24', sublabel: 'This month' },
-  { label: 'Active Projects', value: '4', sublabel: 'In progress' },
-  { label: 'Member Since', value: 'Jan 2025', sublabel: '18 months' },
-  { label: 'Focus Score', value: '87%', sublabel: 'Above average' },
-];
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+  valueColor,
+}: {
+  icon: typeof Mail;
+  label: string;
+  value: string;
+  valueColor?: string;
+}) {
+  return (
+    <div
+      className="flex items-center justify-between rounded-xl p-3"
+      style={{ background: 'var(--color-surface-hover)' }}
+    >
+      <div className="flex items-center gap-3">
+        <Icon size={18} style={{ color: 'var(--color-muted)' }} />
+        <span
+          className="text-sm font-medium"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          {label}
+        </span>
+      </div>
+      <span
+        className="text-sm font-semibold"
+        style={{ color: valueColor || 'var(--color-foreground)' }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
 export default function ProfilePage() {
-  const { user, init, loading, logout } = useAuthStore((state) => ({
+  const navigate = useNavigate();
+  const { user, init, loading, logout, getSessions, updateProfile } = useAuthStore((state) => ({
     user: state.user,
     init: state.init,
     loading: state.loading,
     logout: state.logout,
+    getSessions: state.getSessions,
+    updateProfile: state.updateProfile,
   }));
   const { isDark, toggleTheme } = useTheme();
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || '');
+      loadSessions();
+    }
+  }, [user]);
+
+  const loadSessions = useCallback(async () => {
+    setSessionsLoading(true);
+    try {
+      const data = await getSessions();
+      setSessions(data || []);
+    } catch {
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }, [getSessions]);
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) {
+      toast.error('Name cannot be empty');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await updateProfile({ name: editName.trim() });
+      toast.success('Profile updated');
+      setIsEditing(false);
+    } catch {
+      toast.error('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
 
   if (loading || !user) {
     return (
@@ -76,6 +123,17 @@ export default function ProfilePage() {
       </div>
     );
   }
+
+  const memberSince = user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    : 'Unknown';
+
+  const stats = [
+    { label: 'Auth Provider', value: user.authProvider === 'google' ? 'Google' : user.authProvider === 'phone' ? 'Phone' : 'Email' },
+    { label: 'Role', value: user.role || 'User' },
+    { label: 'Member Since', value: memberSince },
+    { label: 'Sessions', value: sessions.length.toString() },
+  ];
 
   return (
     <div className="page" style={{ padding: '0 32px 40px' }}>
@@ -122,22 +180,53 @@ export default function ProfilePage() {
                 border: '4px solid var(--color-surface)',
               }}
             >
-              {user.name?.charAt(0).toUpperCase()}
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt={user.name} className="h-full w-full rounded-2xl object-cover" />
+              ) : (
+                user.name?.charAt(0).toUpperCase()
+              )}
             </div>
             <div className="min-w-0 flex-1 pb-1">
               <div className="flex items-center gap-3">
-                <h2
-                  className="text-2xl font-bold"
-                  style={{ color: 'var(--color-foreground)' }}
-                >
-                  {user.name}
-                </h2>
-                <span
-                  className="badge badge-accent"
-                  style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                >
-                  {user.role}
-                </span>
+                {isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="input-field"
+                      style={{ width: 200 }}
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={isSaving}
+                      className="btn btn-primary btn-sm"
+                    >
+                      {isSaving ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => { setIsEditing(false); setEditName(user.name || ''); }}
+                      className="btn btn-ghost btn-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <h2
+                      className="text-2xl font-bold"
+                      style={{ color: 'var(--color-foreground)' }}
+                    >
+                      {user.name}
+                    </h2>
+                    <span
+                      className="badge badge-accent"
+                      style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                    >
+                      {user.role}
+                    </span>
+                  </>
+                )}
               </div>
               <p
                 className="mt-1 text-sm"
@@ -147,11 +236,17 @@ export default function ProfilePage() {
               </p>
             </div>
             <div className="flex gap-2 pb-1">
-              <button className="btn btn-secondary btn-sm">
-                <Pencil size={14} />
-                Edit
-              </button>
+              {!isEditing && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="btn btn-secondary btn-sm"
+                >
+                  <Pencil size={14} />
+                  Edit
+                </button>
+              )}
               <button
+                onClick={handleLogout}
                 className="btn btn-ghost btn-sm"
                 style={{ color: 'var(--color-danger)' }}
               >
@@ -165,7 +260,7 @@ export default function ProfilePage() {
 
       {/* Stats Row */}
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {STATS.map((stat, i) => (
+        {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 8 }}
@@ -184,12 +279,6 @@ export default function ProfilePage() {
               style={{ color: 'var(--color-foreground)' }}
             >
               {stat.value}
-            </p>
-            <p
-              className="mt-0.5 text-xs"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              {stat.sublabel}
             </p>
           </motion.div>
         ))}
@@ -353,75 +442,87 @@ export default function ProfilePage() {
             >
               Active Sessions
             </h3>
-            <button className="btn btn-ghost btn-sm">
-              <Key size={14} />
-              Manage
+            <button
+              onClick={loadSessions}
+              className="btn btn-ghost btn-sm"
+            >
+              Refresh
             </button>
           </div>
           <div className="card-body">
-            <div className="flex flex-col gap-3">
-              {MOCK_SESSIONS.map((session) => (
-                <div
-                  key={session.deviceName}
-                  className="flex items-center justify-between rounded-xl p-3 transition-colors"
-                  style={{
-                    background: session.isCurrent
-                      ? 'var(--color-accent-light)'
-                      : 'var(--color-surface-hover)',
-                    border: session.isCurrent
-                      ? '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)'
-                      : '1px solid transparent',
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    {session.deviceName.includes('iPhone') ||
-                    session.deviceName.includes('iPad') ? (
-                      <Smartphone
-                        size={18}
-                        style={{ color: 'var(--color-muted)' }}
-                      />
-                    ) : (
-                      <Laptop
-                        size={18}
-                        style={{ color: 'var(--color-muted)' }}
-                      />
-                    )}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p
-                          className="text-sm font-medium"
-                          style={{ color: 'var(--color-foreground)' }}
-                        >
-                          {session.deviceName}
-                        </p>
-                        {session.isCurrent && (
-                          <span
-                            className="badge badge-success"
-                            style={{ fontSize: '10px' }}
+            {sessionsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="h-6 w-6 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+              </div>
+            ) : sessions.length === 0 ? (
+              <div className="py-8 text-center text-sm" style={{ color: 'var(--color-muted)' }}>
+                No active sessions found.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {sessions.map((session, index) => (
+                  <div
+                    key={`${session.deviceName}-${index}`}
+                    className="flex items-center justify-between rounded-xl p-3 transition-colors"
+                    style={{
+                      background: session.isCurrent
+                        ? 'var(--color-accent-light)'
+                        : 'var(--color-surface-hover)',
+                      border: session.isCurrent
+                        ? '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)'
+                        : '1px solid transparent',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      {(session.deviceName || '').toLowerCase().includes('iphone') ||
+                      (session.deviceName || '').toLowerCase().includes('ipad') ? (
+                        <Smartphone
+                          size={18}
+                          style={{ color: 'var(--color-muted)' }}
+                        />
+                      ) : (
+                        <Laptop
+                          size={18}
+                          style={{ color: 'var(--color-muted)' }}
+                        />
+                      )}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p
+                            className="text-sm font-medium"
+                            style={{ color: 'var(--color-foreground)' }}
                           >
-                            Current
-                          </span>
-                        )}
+                            {session.deviceName || 'Unknown device'}
+                          </p>
+                          {session.isCurrent && (
+                            <span
+                              className="badge badge-success"
+                              style={{ fontSize: '10px' }}
+                            >
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <p
+                          className="text-xs"
+                          style={{ color: 'var(--color-muted)' }}
+                        >
+                          {session.ipAddress || 'Unknown IP'} &middot; {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleString() : 'Unknown'}
+                        </p>
                       </div>
-                      <p
-                        className="text-xs"
-                        style={{ color: 'var(--color-muted)' }}
-                      >
-                        {session.ipAddress} &middot; {session.lastUsedAt}
-                      </p>
                     </div>
+                    {!session.isCurrent && (
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: 'var(--color-danger)', fontSize: '12px' }}
+                      >
+                        Revoke
+                      </button>
+                    )}
                   </div>
-                  {!session.isCurrent && (
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      style={{ color: 'var(--color-danger)', fontSize: '12px' }}
-                    >
-                      Revoke
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -485,41 +586,6 @@ export default function ProfilePage() {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
-}
-
-function InfoRow({
-  icon: Icon,
-  label,
-  value,
-  valueColor,
-}: {
-  icon: typeof Mail;
-  label: string;
-  value: string;
-  valueColor?: string;
-}) {
-  return (
-    <div
-      className="flex items-center justify-between rounded-xl p-3"
-      style={{ background: 'var(--color-surface-hover)' }}
-    >
-      <div className="flex items-center gap-3">
-        <Icon size={18} style={{ color: 'var(--color-muted)' }} />
-        <span
-          className="text-sm font-medium"
-          style={{ color: 'var(--color-muted)' }}
-        >
-          {label}
-        </span>
-      </div>
-      <span
-        className="text-sm font-semibold"
-        style={{ color: valueColor || 'var(--color-foreground)' }}
-      >
-        {value}
-      </span>
     </div>
   );
 }

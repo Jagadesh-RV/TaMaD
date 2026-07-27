@@ -2,55 +2,73 @@ import { create } from 'zustand';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-export const useWhiteboardStore = create((set, get: any) => ({
+interface Whiteboard {
+  _id: string;
+  title: string;
+  description?: string;
+  canvas?: object;
+  workspaceId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface WhiteboardState {
+  whiteboards: Whiteboard[];
+  loading: boolean;
+  fetchWhiteboards: (workspaceId: string) => Promise<void>;
+  createWhiteboard: (payload: Partial<Whiteboard>) => Promise<Whiteboard>;
+  updateWhiteboard: (id: string, payload: Partial<Whiteboard>) => Promise<Whiteboard>;
+  deleteWhiteboard: (id: string) => Promise<void>;
+}
+
+export const useWhiteboardStore = create<WhiteboardState>((set) => ({
   whiteboards: [],
   loading: false,
 
-  fetchWhiteboards: async (workspaceId?: string) => {
+  fetchWhiteboards: async (workspaceId) => {
+    if (!workspaceId) return;
     set({ loading: true });
     try {
-      if (!workspaceId || workspaceId === 'default') {
-        workspaceId = '000000000000000000000000';
-      }
-      
       const { data } = await api.get('/whiteboards', { params: { workspaceId } });
-      set({ whiteboards: data, loading: false });
-    } catch (err) {
+      set({ whiteboards: data.whiteboards || data, loading: false });
+    } catch {
       set({ loading: false });
       toast.error('Failed to load whiteboards');
     }
   },
 
-  createWhiteboard: async (payload: any) => {
+  createWhiteboard: async (payload) => {
     try {
       const { data } = await api.post('/whiteboards', payload);
-      set((s: any) => ({ whiteboards: [data, ...s.whiteboards] }));
+      set(s => ({ whiteboards: [data, ...s.whiteboards] }));
       toast.success('Whiteboard created');
       return data;
-    } catch (err) {
+    } catch {
       toast.error('Failed to create whiteboard');
-      throw err;
+      throw new Error('Failed to create whiteboard');
     }
   },
 
-  updateWhiteboard: async (id: string, payload: any) => {
+  updateWhiteboard: async (id, payload) => {
     try {
       const { data } = await api.put(`/whiteboards/${id}`, payload);
-      set((s: any) => ({
-        whiteboards: s.whiteboards.map((w: any) => (w._id === id ? data : w)),
+      set(s => ({
+        whiteboards: s.whiteboards.map(w => (w._id === id ? data : w)),
       }));
       return data;
-    } catch (err) {
-      // toast.error('Failed to update whiteboard');
+    } catch {
+      toast.error('Failed to update whiteboard');
+      throw new Error('Failed to update whiteboard');
     }
   },
 
-  deleteWhiteboard: async (id: string) => {
+  deleteWhiteboard: async (id) => {
     try {
       await api.delete(`/whiteboards/${id}`);
-      set((s: any) => ({ whiteboards: s.whiteboards.filter((w: any) => w._id !== id) }));
+      set(s => ({ whiteboards: s.whiteboards.filter(w => w._id !== id) }));
       toast.success('Whiteboard deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete whiteboard');
     }
   },

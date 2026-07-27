@@ -1,15 +1,17 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
-  CheckCircle2, Clock, AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight,
-  LayoutGrid, BarChart3, Zap, Filter,
+  CheckCircle2, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
+  LayoutGrid, Filter,
 } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { format } from 'date-fns';
+import { format, subDays, startOfWeek, endOfWeek } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { TASKS, ACTIVITIES, WEEKLY_PRODUCTIVITY, PROJECTS, TEAM_MEMBERS, getPriorityColor } from '../data/seedData';
+import { useTaskStore } from '../store/taskStore';
+import { useProjectStore } from '../store/projectStore';
 import clsx from 'clsx';
 
 const STATUS_TABS = [
@@ -27,37 +29,94 @@ const cardVariant = {
   }),
 };
 
+const getPriorityColor = (priority: string) => {
+  switch (priority) {
+    case 'urgent': return { bg: '#fee2e2', text: '#dc2626', dot: '#ef4444' };
+    case 'high': return { bg: '#fef3c7', text: '#d97706', dot: '#f59e0b' };
+    case 'medium': return { bg: '#dbeafe', text: '#2563eb', dot: '#2563eb' };
+    case 'low': return { bg: '#f1f5f9', text: '#64748b', dot: '#94a3b8' };
+    default: return { bg: '#f1f5f9', text: '#64748b', dot: '#94a3b8' };
+  }
+};
+
+const statusColors: Record<string, { bg: string; text: string }> = {
+  'todo': { bg: 'var(--color-surface-active)', text: 'var(--color-muted)' },
+  'in-progress': { bg: 'var(--color-accent-light)', text: 'var(--color-accent)' },
+  'review': { bg: 'var(--color-warning-light)', text: 'var(--color-warning)' },
+  'done': { bg: 'var(--color-success-light)', text: 'var(--color-success)' },
+};
+
+function useAuthName() {
+  const user = useAuthStore(s => s.user);
+  return user?.name?.split(' ')[0] || 'there';
+}
+
 export default function DashboardPage() {
+  const navigate = useNavigate();
+  const workspace = useAuthStore(s => s.workspace);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const { tasks, loading: tasksLoading, fetchTasks } = useTaskStore();
+  const { projects, loading: projectsLoading, fetchProjects } = useProjectStore();
+  const workspaceId = workspace?._id || '';
   const today = format(new Date(), 'yyyy-MM-dd');
+
+  useEffect(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [workspaceId, fetchTasks, fetchProjects]);
 
   const filteredTasks = useMemo(() => {
     switch (statusFilter) {
-      case 'urgent': return TASKS.filter(t => t.priority === 'urgent' || t.priority === 'high');
-      case 'today': return TASKS.filter(t => t.dueDate === today);
-      case 'in-progress': return TASKS.filter(t => t.status === 'in-progress');
-      default: return TASKS;
+      case 'urgent': return tasks.filter(t => t.priority === 'urgent' || t.priority === 'high');
+      case 'today': return tasks.filter(t => t.dueDate === today);
+      case 'in-progress': return tasks.filter(t => t.status === 'in-progress');
+      default: return tasks;
     }
-  }, [statusFilter, today]);
+  }, [statusFilter, today, tasks]);
 
-  const totalTasks = TASKS.length;
-  const completedTasks = TASKS.filter(t => t.status === 'done').length;
-  const inProgressTasks = TASKS.filter(t => t.status === 'in-progress').length;
-  const overdueTasks = TASKS.filter(t => t.dueDate < today && t.status !== 'done').length;
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter(t => t.status === 'done').length;
+  const inProgressTasks = tasks.filter(t => t.status === 'in-progress').length;
+  const overdueTasks = tasks.filter(t => t.dueDate && t.dueDate < today && t.status !== 'done').length;
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+  const weeklyData = useMemo(() => {
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
+    return days.slice(1).map(day => {
+      const dayTasks = tasks.filter(t => {
+        if (!t.createdAt) return false;
+        const created = new Date(t.createdAt);
+        return created >= weekStart && created <= weekEnd &&
+          created.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+      });
+      const completedDayTasks = tasks.filter(t => {
+        if (!t.updatedAt || t.status !== 'done') return false;
+        const updated = new Date(t.updatedAt);
+        return updated >= weekStart && updated <= weekEnd &&
+          updated.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+      });
+      return { day, completed: completedDayTasks.length, created: dayTasks.length };
+    });
+  }, [tasks]);
+
   const stats = [
-    { label: 'Total Tasks', value: totalTasks, icon: LayoutGrid, change: '+3 this week', up: true, color: 'var(--color-accent)', bg: 'var(--color-accent-light)' },
+    { label: 'Total Tasks', value: totalTasks, icon: LayoutGrid, change: `${tasks.length} total`, up: true, color: 'var(--color-accent)', bg: 'var(--color-accent-light)' },
     { label: 'Completed', value: completedTasks, icon: CheckCircle2, change: `${completionRate}% rate`, up: true, color: 'var(--color-success)', bg: 'var(--color-success-light)' },
-    { label: 'In Progress', value: inProgressTasks, icon: Clock, change: 'On track', up: true, color: 'var(--color-info)', bg: 'var(--color-info-light)' },
+    { label: 'In Progress', value: inProgressTasks, icon: Clock, change: 'Active now', up: true, color: 'var(--color-info)', bg: 'var(--color-info-light)' },
     { label: 'Overdue', value: overdueTasks, icon: AlertTriangle, change: overdueTasks > 0 ? 'Needs attention' : 'All clear', up: false, color: 'var(--color-danger)', bg: 'var(--color-danger-light)' },
   ];
 
   const recentTasks = filteredTasks.slice(0, 6);
 
-  const activityIcons: Record<string, string> = {
-    completion: '✓', update: '↻', comment: '💬', start: '▶', review: '👁', flag: '⚑', create: '+', merge: '⑂',
-  };
+  const recentActivities = useMemo(() => {
+    return [...tasks]
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .slice(0, 6);
+  }, [tasks]);
 
   return (
     <div className="page">
@@ -79,9 +138,9 @@ export default function DashboardPage() {
         <Filter size={14} style={{ color: 'var(--color-muted)' }} className="shrink-0" />
         {STATUS_TABS.map(tab => {
           const count = tab.key === 'all' ? totalTasks
-            : tab.key === 'urgent' ? TASKS.filter(t => t.priority === 'urgent' || t.priority === 'high').length
-            : tab.key === 'today' ? TASKS.filter(t => t.dueDate === today).length
-            : TASKS.filter(t => t.status === 'in-progress').length;
+            : tab.key === 'urgent' ? tasks.filter(t => t.priority === 'urgent' || t.priority === 'high').length
+            : tab.key === 'today' ? tasks.filter(t => t.dueDate === today).length
+            : tasks.filter(t => t.status === 'in-progress').length;
           return (
             <button
               key={tab.key}
@@ -146,21 +205,27 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={WEEKLY_PRODUCTIVITY} barGap={4}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
-                    <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
-                    <Tooltip
-                      contentStyle={{
-                        background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-                        borderRadius: 8, boxShadow: 'var(--shadow-medium)', fontSize: 13,
-                      }}
-                    />
-                    <Bar dataKey="completed" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="created" fill="var(--color-border)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {tasksLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={weeklyData} barGap={4}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
+                      <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                          borderRadius: 8, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: 13,
+                        }}
+                      />
+                      <Bar dataKey="completed" fill="var(--color-accent)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="created" fill="var(--color-border)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
               </div>
             </div>
           </motion.div>
@@ -174,7 +239,7 @@ export default function DashboardPage() {
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--color-muted)' }}>Latest activity across your workspace</p>
                 </div>
                 <button
-                  onClick={() => window.location.href = '/tasks'}
+                  onClick={() => navigate('/tasks')}
                   className="text-xs font-semibold transition-colors"
                   style={{ color: 'var(--color-accent)' }}
                 >
@@ -182,67 +247,63 @@ export default function DashboardPage() {
                 </button>
               </div>
               <div className="overflow-x-auto">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Task</th>
-                      <th>Status</th>
-                      <th>Priority</th>
-                      <th>Assignee</th>
-                      <th>Due</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentTasks.map(task => {
-                      const pColor = getPriorityColor(task.priority);
-                      const assignee = TEAM_MEMBERS.find(m => m.id === task.assignee);
-                      const statusColors: Record<string, { bg: string; text: string }> = {
-                        'todo': { bg: 'var(--color-surface-active)', text: 'var(--color-muted)' },
-                        'in-progress': { bg: 'var(--color-accent-light)', text: 'var(--color-accent)' },
-                        'review': { bg: 'var(--color-warning-light)', text: 'var(--color-warning)' },
-                        'done': { bg: 'var(--color-success-light)', text: 'var(--color-success)' },
-                      };
-                      const sc = statusColors[task.status] || statusColors.todo;
-                      const isOverdue = task.dueDate < today && task.status !== 'done';
-                      return (
-                        <tr key={task._id}>
-                          <td>
-                            <div className="flex items-center gap-3">
-                              <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: pColor.dot }} />
-                              <div>
-                                <p className="font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
-                                <p className="text-xs" style={{ color: 'var(--color-muted)' }}>{task.tags[0]}</p>
+                {tasksLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                  </div>
+                ) : recentTasks.length === 0 ? (
+                  <div className="py-12 text-center text-sm" style={{ color: 'var(--color-muted)' }}>
+                    No tasks yet. Create your first task to get started.
+                  </div>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Task</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Due</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentTasks.map(task => {
+                        const pColor = getPriorityColor(task.priority);
+                        const sc = statusColors[task.status] || statusColors.todo;
+                        const isOverdue = task.dueDate && task.dueDate < today && task.status !== 'done';
+                        return (
+                          <tr key={task._id}>
+                            <td>
+                              <div className="flex items-center gap-3">
+                                <div className="h-2 w-2 shrink-0 rounded-full" style={{ background: pColor.dot }} />
+                                <div>
+                                  <p className="font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
+                                  {task.tags && task.tags.length > 0 && (
+                                    <p className="text-xs" style={{ color: 'var(--color-muted)' }}>{task.tags[0].name}</p>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge" style={{ background: sc.bg, color: sc.text }}>
-                              {task.status.replace('-', ' ')}
-                            </span>
-                          </td>
-                          <td>
-                            <span className="badge" style={{ background: pColor.bg, color: pColor.text }}>
-                              {task.priority}
-                            </span>
-                          </td>
-                          <td>
-                            <div className="flex items-center gap-2">
-                              <div className="avatar avatar-sm" style={{ background: assignee?.avatarColor || '#94a3b8', color: 'white' }}>
-                                {assignee?.initials || '?'}
-                              </div>
-                              <span className="text-xs" style={{ color: 'var(--color-muted)' }}>{assignee?.name?.split(' ')[0]}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <span className={clsx('text-xs font-medium', isOverdue && 'font-bold')} style={{ color: isOverdue ? 'var(--color-danger)' : 'var(--color-muted)' }}>
-                              {task.dueDate === today ? 'Today' : task.dueDate < today ? 'Overdue' : task.dueDate}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            </td>
+                            <td>
+                              <span className="badge" style={{ background: sc.bg, color: sc.text }}>
+                                {task.status.replace('-', ' ')}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="badge" style={{ background: pColor.bg, color: pColor.text }}>
+                                {task.priority}
+                              </span>
+                            </td>
+                            <td>
+                              <span className={clsx('text-xs font-medium', isOverdue && 'font-bold')} style={{ color: isOverdue ? 'var(--color-danger)' : 'var(--color-muted)' }}>
+                                {!task.dueDate ? 'No date' : task.dueDate === today ? 'Today' : task.dueDate < today ? 'Overdue' : task.dueDate}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           </motion.div>
@@ -255,51 +316,69 @@ export default function DashboardPage() {
             <div className="card p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Active Projects</h2>
-                <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{PROJECTS.length} projects</span>
+                <button
+                  onClick={() => navigate('/projects')}
+                  className="text-xs font-semibold transition-colors"
+                  style={{ color: 'var(--color-accent)' }}
+                >
+                  View all
+                </button>
               </div>
-              <div className="space-y-4">
-                {PROJECTS.map(project => (
-                  <div key={project.id} className="group cursor-pointer rounded-lg p-3 transition-all" style={{ background: 'var(--color-background)' }}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="h-3 w-3 shrink-0 rounded-full" style={{ background: project.color }} />
-                      <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-foreground)' }}>{project.name}</span>
+              {projectsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="py-8 text-center text-xs" style={{ color: 'var(--color-muted)' }}>
+                  No projects yet. Create one to get started.
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {projects.slice(0, 4).map(project => (
+                    <div key={project._id} className="group cursor-pointer rounded-lg p-3 transition-all" style={{ background: 'var(--color-background)' }}>
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="h-3 w-3 shrink-0 rounded-full" style={{ background: project.color }} />
+                        <span className="text-sm font-semibold truncate" style={{ color: 'var(--color-foreground)' }}>{project.name}</span>
+                      </div>
+                      {project.description && (
+                        <p className="text-xs mb-2 truncate" style={{ color: 'var(--color-muted)' }}>{project.description}</p>
+                      )}
                     </div>
-                    <div className="mb-1.5 flex items-center justify-between text-xs" style={{ color: 'var(--color-muted)' }}>
-                      <span>{project.completedTasks}/{project.totalTasks} tasks</span>
-                      <span className="font-semibold" style={{ color: project.color }}>{project.progress}%</span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-bar-fill" style={{ width: `${project.progress}%`, background: project.color }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </motion.div>
 
-          {/* Team activity */}
+          {/* Recent activity */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <div className="card p-5">
               <div className="mb-4">
-                <h2 className="text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Team Activity</h2>
-                <p className="mt-0.5 text-xs" style={{ color: 'var(--color-muted)' }}>Recent actions from your team</p>
+                <h2 className="text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Recent Activity</h2>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--color-muted)' }}>Latest changes in your workspace</p>
               </div>
               <div className="space-y-3">
-                {ACTIVITIES.slice(0, 6).map(activity => (
-                  <div key={activity.id} className="flex items-start gap-3 rounded-lg p-2 transition-colors" style={{ background: 'var(--color-background)' }}>
-                    <div className="avatar avatar-sm shrink-0" style={{ background: activity.user.avatarColor, color: 'white' }}>
-                      {activity.user.initials}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs leading-relaxed" style={{ color: 'var(--color-foreground)' }}>
-                        <span className="font-semibold">{activity.user.name.split(' ')[0]}</span>
-                        {' '}{activity.action}{' '}
-                        <span className="font-medium" style={{ color: 'var(--color-accent)' }}>{activity.target}</span>
-                      </p>
-                      <p className="mt-0.5 text-[11px]" style={{ color: 'var(--color-muted)' }}>{activity.time}</p>
-                    </div>
+                {recentActivities.length === 0 ? (
+                  <div className="py-4 text-center text-xs" style={{ color: 'var(--color-muted)' }}>
+                    No recent activity
                   </div>
-                ))}
+                ) : (
+                  recentActivities.map(task => (
+                    <div key={task._id} className="flex items-start gap-3 rounded-lg p-2 transition-colors" style={{ background: 'var(--color-background)' }}>
+                      <div className="avatar avatar-sm shrink-0" style={{ background: getPriorityColor(task.priority).dot, color: 'white' }}>
+                        {task.title.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs leading-relaxed" style={{ color: 'var(--color-foreground)' }}>
+                          <span className="font-medium" style={{ color: 'var(--color-accent)' }}>{task.title}</span>
+                        </p>
+                        <p className="mt-0.5 text-[11px]" style={{ color: 'var(--color-muted)' }}>
+                          {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </motion.div>
@@ -307,9 +386,4 @@ export default function DashboardPage() {
       </div>
     </div>
   );
-}
-
-function useAuthName() {
-  const user = useAuthStore(s => s.user);
-  return user?.name?.split(' ')[0] || 'there';
 }

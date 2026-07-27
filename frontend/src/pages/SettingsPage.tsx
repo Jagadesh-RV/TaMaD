@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react';
 import {
-  Palette,
-  Bell,
-  User,
-  Shield,
-  Save,
-  Moon,
-  Sun,
-  Monitor,
-  Mail,
-  Smartphone,
-  Clock,
-  Globe,
-  Download,
-  Key,
-  AlertTriangle,
-  Trash2,
-  CheckCircle2,
+  Palette, Bell, User, Shield, Save, Moon, Sun,
+  Mail, Clock, Globe, Download, Key, AlertTriangle,
+  Trash2, CheckCircle2, Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
@@ -99,17 +86,19 @@ function SettingRow({
 }
 
 export default function SettingsPage() {
-  const { user, init, updateProfile } = useAuthStore((state) => ({
+  const navigate = useNavigate();
+  const { user, init, updateProfile, changePassword, deleteAccount, logout } = useAuthStore((state) => ({
     user: state.user,
     init: state.init,
     updateProfile: state.updateProfile,
+    changePassword: state.changePassword,
+    deleteAccount: state.deleteAccount,
+    logout: state.logout,
   }));
   const { isDark, toggleTheme } = useTheme();
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('appearance');
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>(
-    'medium'
-  );
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
   const [notifications, setNotifications] = useState({
     push: true,
@@ -126,13 +115,21 @@ export default function SettingsPage() {
     newPw: '',
     confirm: '',
   });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  useEffect(() => {
+    if (user) {
+      setLanguage(user.preferences?.language || 'en');
+      setTimezone(user.preferences?.timezone || 'UTC');
+    }
+  }, [user]);
 
   const handleSave = async () => {
     try {
@@ -146,6 +143,44 @@ export default function SettingsPage() {
       toast.success('Settings saved successfully!');
     } catch {
       toast.error('Failed to save settings.');
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordForm.current || !passwordForm.newPw) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+    if (passwordForm.newPw.length < 8) {
+      toast.error('New password must be at least 8 characters');
+      return;
+    }
+    if (passwordForm.newPw !== passwordForm.confirm) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    setIsChangingPassword(true);
+    try {
+      await changePassword(passwordForm.current, passwordForm.newPw);
+      toast.success('Password changed successfully. Other sessions have been logged out.');
+      setPasswordForm({ current: '', newPw: '', confirm: '' });
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to change password');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+      toast.success('Account deleted');
+      navigate('/login', { replace: true });
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to delete account');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -189,11 +224,7 @@ export default function SettingsPage() {
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
                   activeTab === tab.key ? 'btn-primary' : 'btn-ghost'
                 )}
-                style={
-                  activeTab !== tab.key
-                    ? { justifyContent: 'flex-start' }
-                    : { justifyContent: 'flex-start' }
-                }
+                style={{ justifyContent: 'flex-start' }}
               >
                 <tab.icon size={16} />
                 {tab.label}
@@ -214,45 +245,20 @@ export default function SettingsPage() {
                 className="card"
               >
                 <div className="card-header">
-                  <h3
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--color-foreground)' }}
-                  >
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
                     Appearance
                   </h3>
                 </div>
                 <div className="card-body flex flex-col gap-4">
-                  {/* Theme Toggle */}
-                  <div
-                    className="rounded-xl p-4"
-                    style={{ background: 'var(--color-surface-hover)' }}
-                  >
-                    <p
-                      className="mb-1 text-sm font-semibold"
-                      style={{ color: 'var(--color-foreground)' }}
-                    >
-                      Theme
-                    </p>
-                    <p
-                      className="mb-4 text-xs"
-                      style={{ color: 'var(--color-muted)' }}
-                    >
+                  <div className="rounded-xl p-4" style={{ background: 'var(--color-surface-hover)' }}>
+                    <p className="mb-1 text-sm font-semibold" style={{ color: 'var(--color-foreground)' }}>Theme</p>
+                    <p className="mb-4 text-xs" style={{ color: 'var(--color-muted)' }}>
                       Choose between light and dark mode for the interface.
                     </p>
                     <div className="flex gap-3">
                       {[
-                        {
-                          key: 'light' as const,
-                          icon: Sun,
-                          label: 'Light',
-                          active: !isDark,
-                        },
-                        {
-                          key: 'dark' as const,
-                          icon: Moon,
-                          label: 'Dark',
-                          active: isDark,
-                        },
+                        { key: 'light' as const, icon: Sun, label: 'Light', active: !isDark },
+                        { key: 'dark' as const, icon: Moon, label: 'Dark', active: isDark },
                       ].map((option) => (
                         <button
                           key={option.key}
@@ -267,79 +273,18 @@ export default function SettingsPage() {
                           className="flex flex-col items-center gap-2 rounded-xl p-4 transition-all"
                           style={{
                             flex: 1,
-                            background: option.active
-                              ? 'var(--color-accent-light)'
-                              : 'var(--color-surface)',
-                            border: option.active
-                              ? '2px solid var(--color-accent)'
-                              : '2px solid var(--color-border)',
-                            color: option.active
-                              ? 'var(--color-accent)'
-                              : 'var(--color-muted)',
+                            background: option.active ? 'var(--color-accent-light)' : 'var(--color-surface)',
+                            border: option.active ? '2px solid var(--color-accent)' : '2px solid var(--color-border)',
+                            color: option.active ? 'var(--color-accent)' : 'var(--color-muted)',
                           }}
                         >
                           <option.icon size={24} />
-                          <span className="text-xs font-semibold">
-                            {option.label}
-                          </span>
+                          <span className="text-xs font-semibold">{option.label}</span>
                         </button>
                       ))}
                     </div>
-                    {/* Preview */}
-                    <div
-                      className="mt-4 overflow-hidden rounded-xl border"
-                      style={{
-                        borderColor: 'var(--color-border)',
-                        background: isDark
-                          ? '#0f1525'
-                          : 'var(--color-background)',
-                      }}
-                    >
-                      <div
-                        className="flex items-center gap-2 border-b px-4 py-2"
-                        style={{ borderColor: 'var(--color-border)' }}
-                      >
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: 'var(--color-danger)' }}
-                        />
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: 'var(--color-warning)' }}
-                        />
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: 'var(--color-success)' }}
-                        />
-                      </div>
-                      <div className="p-4">
-                        <div
-                          className="mb-2 h-3 w-32 rounded"
-                          style={{
-                            background: isDark ? '#1e293b' : '#e2e8f0',
-                          }}
-                        />
-                        <div
-                          className="mb-1 h-2 w-48 rounded"
-                          style={{
-                            background: isDark ? '#1e293b' : '#f1f5f9',
-                          }}
-                        />
-                        <div
-                          className="h-2 w-36 rounded"
-                          style={{
-                            background: isDark ? '#1e293b' : '#f1f5f9',
-                          }}
-                        />
-                      </div>
-                    </div>
                   </div>
-
-                  {/* Font Size */}
-                  <SettingRow
-                    title="Font Size"
-                    description="Adjust the base text size across the app."
-                  >
+                  <SettingRow title="Font Size" description="Adjust the base text size across the app.">
                     <div className="flex gap-1">
                       {(['small', 'medium', 'large'] as const).map((size) => (
                         <button
@@ -347,18 +292,9 @@ export default function SettingsPage() {
                           onClick={() => setFontSize(size)}
                           className="rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-all"
                           style={{
-                            background:
-                              fontSize === size
-                                ? 'var(--color-accent)'
-                                : 'var(--color-surface)',
-                            color:
-                              fontSize === size
-                                ? 'white'
-                                : 'var(--color-muted)',
-                            border:
-                              fontSize === size
-                                ? '1px solid var(--color-accent)'
-                                : '1px solid var(--color-border)',
+                            background: fontSize === size ? 'var(--color-accent)' : 'var(--color-surface)',
+                            color: fontSize === size ? 'white' : 'var(--color-muted)',
+                            border: fontSize === size ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
                           }}
                         >
                           {size}
@@ -379,63 +315,22 @@ export default function SettingsPage() {
                 className="card"
               >
                 <div className="card-header">
-                  <h3
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--color-foreground)' }}
-                  >
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
                     Notification Preferences
                   </h3>
                 </div>
                 <div className="card-body flex flex-col gap-3">
-                  <SettingRow
-                    title="Push Notifications"
-                    description="Receive real-time browser push notifications."
-                  >
-                    <ToggleSwitch
-                      enabled={notifications.push}
-                      onToggle={() =>
-                        setNotifications((p) => ({ ...p, push: !p.push }))
-                      }
-                    />
+                  <SettingRow title="Push Notifications" description="Receive real-time browser push notifications.">
+                    <ToggleSwitch enabled={notifications.push} onToggle={() => setNotifications(p => ({ ...p, push: !p.push }))} />
                   </SettingRow>
-                  <SettingRow
-                    title="Email Notifications"
-                    description="Get notified via email for important updates."
-                  >
-                    <ToggleSwitch
-                      enabled={notifications.email}
-                      onToggle={() =>
-                        setNotifications((p) => ({ ...p, email: !p.email }))
-                      }
-                    />
+                  <SettingRow title="Email Notifications" description="Get notified via email for important updates.">
+                    <ToggleSwitch enabled={notifications.email} onToggle={() => setNotifications(p => ({ ...p, email: !p.email }))} />
                   </SettingRow>
-                  <SettingRow
-                    title="Task Reminders"
-                    description="Reminders for upcoming task deadlines."
-                  >
-                    <ToggleSwitch
-                      enabled={notifications.taskReminders}
-                      onToggle={() =>
-                        setNotifications((p) => ({
-                          ...p,
-                          taskReminders: !p.taskReminders,
-                        }))
-                      }
-                    />
+                  <SettingRow title="Task Reminders" description="Reminders for upcoming task deadlines.">
+                    <ToggleSwitch enabled={notifications.taskReminders} onToggle={() => setNotifications(p => ({ ...p, taskReminders: !p.taskReminders }))} />
                   </SettingRow>
-                  <SettingRow
-                    title="Weekly Digest"
-                    description="Receive a weekly summary of your productivity."
-                  >
-                    <ToggleSwitch
-                      enabled={notifications.weeklyDigest}
-                      onToggle={() =>
-                        setNotifications((p) => ({
-                          ...p,
-                          weeklyDigest: !p.weeklyDigest,
-                        }))
-                      }
-                    />
+                  <SettingRow title="Weekly Digest" description="Receive a weekly summary of your productivity.">
+                    <ToggleSwitch enabled={notifications.weeklyDigest} onToggle={() => setNotifications(p => ({ ...p, weeklyDigest: !p.weeklyDigest }))} />
                   </SettingRow>
                 </div>
               </motion.div>
@@ -450,18 +345,12 @@ export default function SettingsPage() {
                 className="card"
               >
                 <div className="card-header">
-                  <h3
-                    className="text-base font-semibold"
-                    style={{ color: 'var(--color-foreground)' }}
-                  >
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
                     Account Settings
                   </h3>
                 </div>
                 <div className="card-body flex flex-col gap-3">
-                  <SettingRow
-                    title="Language"
-                    description="Select your preferred language."
-                  >
+                  <SettingRow title="Language" description="Select your preferred language.">
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
@@ -475,10 +364,7 @@ export default function SettingsPage() {
                       <option value="ja">日本語</option>
                     </select>
                   </SettingRow>
-                  <SettingRow
-                    title="Timezone"
-                    description="Set your local timezone for deadlines."
-                  >
+                  <SettingRow title="Timezone" description="Set your local timezone for deadlines.">
                     <select
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
@@ -493,15 +379,6 @@ export default function SettingsPage() {
                       <option value="Europe/London">London (GMT)</option>
                       <option value="Asia/Tokyo">Tokyo (JST)</option>
                     </select>
-                  </SettingRow>
-                  <SettingRow
-                    title="Export Data"
-                    description="Download all your data as a JSON file."
-                  >
-                    <button className="btn btn-secondary btn-sm">
-                      <Download size={14} />
-                      Export
-                    </button>
                   </SettingRow>
                 </div>
               </motion.div>
@@ -518,10 +395,7 @@ export default function SettingsPage() {
                 {/* Change Password */}
                 <div className="card">
                   <div className="card-header">
-                    <h3
-                      className="text-base font-semibold"
-                      style={{ color: 'var(--color-foreground)' }}
-                    >
+                    <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
                       Change Password
                     </h3>
                   </div>
@@ -531,86 +405,41 @@ export default function SettingsPage() {
                       placeholder="Current password"
                       className="input"
                       value={passwordForm.current}
-                      onChange={(e) =>
-                        setPasswordForm((p) => ({
-                          ...p,
-                          current: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => setPasswordForm(p => ({ ...p, current: e.target.value }))}
                     />
                     <input
                       type="password"
                       placeholder="New password"
                       className="input"
                       value={passwordForm.newPw}
-                      onChange={(e) =>
-                        setPasswordForm((p) => ({
-                          ...p,
-                          newPw: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => setPasswordForm(p => ({ ...p, newPw: e.target.value }))}
                     />
                     <input
                       type="password"
                       placeholder="Confirm new password"
                       className="input"
                       value={passwordForm.confirm}
-                      onChange={(e) =>
-                        setPasswordForm((p) => ({
-                          ...p,
-                          confirm: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => setPasswordForm(p => ({ ...p, confirm: e.target.value }))}
                     />
                     <div className="flex justify-end">
-                      <button className="btn btn-primary btn-sm">
-                        <Key size={14} />
-                        Update Password
+                      <button
+                        onClick={handleChangePassword}
+                        disabled={isChangingPassword}
+                        className="btn btn-primary btn-sm"
+                      >
+                        {isChangingPassword ? <Loader2 className="animate-spin" size={14} /> : <Key size={14} />}
+                        {isChangingPassword ? 'Updating...' : 'Update Password'}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                {/* Two-Factor Auth */}
-                <div className="card">
-                  <div className="card-header">
-                    <h3
-                      className="text-base font-semibold"
-                      style={{ color: 'var(--color-foreground)' }}
-                    >
-                      Two-Factor Authentication
-                    </h3>
-                  </div>
-                  <div className="card-body">
-                    <SettingRow
-                      title="Enable 2FA"
-                      description="Add an extra layer of security to your account."
-                    >
-                      <ToggleSwitch
-                        enabled={twoFactorEnabled}
-                        onToggle={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                      />
-                    </SettingRow>
-                  </div>
-                </div>
-
                 {/* Danger Zone */}
-                <div
-                  className="card"
-                  style={{
-                    borderColor: 'var(--color-danger)',
-                  }}
-                >
+                <div className="card" style={{ borderColor: 'var(--color-danger)' }}>
                   <div className="card-header">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle
-                        size={18}
-                        style={{ color: 'var(--color-danger)' }}
-                      />
-                      <h3
-                        className="text-base font-semibold"
-                        style={{ color: 'var(--color-danger)' }}
-                      >
+                      <AlertTriangle size={18} style={{ color: 'var(--color-danger)' }} />
+                      <h3 className="text-base font-semibold" style={{ color: 'var(--color-danger)' }}>
                         Danger Zone
                       </h3>
                     </div>
@@ -618,23 +447,14 @@ export default function SettingsPage() {
                   <div className="card-body">
                     <div
                       className="flex items-center justify-between rounded-xl p-4"
-                      style={{
-                        background: 'var(--color-danger-light)',
-                      }}
+                      style={{ background: 'var(--color-danger-light)' }}
                     >
                       <div>
-                        <p
-                          className="text-sm font-semibold"
-                          style={{ color: 'var(--color-foreground)' }}
-                        >
+                        <p className="text-sm font-semibold" style={{ color: 'var(--color-foreground)' }}>
                           Delete Account
                         </p>
-                        <p
-                          className="mt-0.5 text-xs"
-                          style={{ color: 'var(--color-muted)' }}
-                        >
-                          Permanently delete your account and all associated
-                          data. This action cannot be undone.
+                        <p className="mt-0.5 text-xs" style={{ color: 'var(--color-muted)' }}>
+                          Permanently delete your account and all associated data. This action cannot be undone.
                         </p>
                       </div>
                       {!deleteConfirm ? (
@@ -653,9 +473,13 @@ export default function SettingsPage() {
                           >
                             Cancel
                           </button>
-                          <button className="btn btn-danger btn-sm">
-                            <CheckCircle2 size={14} />
-                            Confirm Delete
+                          <button
+                            onClick={handleDeleteAccount}
+                            disabled={isDeleting}
+                            className="btn btn-danger btn-sm"
+                          >
+                            {isDeleting ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle2 size={14} />}
+                            {isDeleting ? 'Deleting...' : 'Confirm Delete'}
                           </button>
                         </div>
                       )}
