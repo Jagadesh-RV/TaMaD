@@ -1,0 +1,106 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isWorkspaceMember(workspaceId) {
+      return isAuthenticated() && exists(/databases/$(database)/documents/workspaces/$(workspaceId));
+    }
+
+    function isWorkspaceOwner(workspaceId) {
+      return isAuthenticated() && get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.ownerId == request.auth.uid;
+    }
+
+    function isWorkspaceAdmin(workspaceId) {
+      return isAuthenticated() && request.auth.uid in
+        get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.members[?(@.role == 'admin' || @.role == 'owner')].userId;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+
+    // Workspaces collection
+    match /workspaces/{workspaceId} {
+      allow read: if isAuthenticated() && (
+        isWorkspaceOwner(workspaceId) ||
+        request.auth.uid in get(/databases/$(database)/documents/workspaces/$(workspaceId)).data.members[*].userId
+      );
+      allow create: if isAuthenticated();
+      allow update: if isWorkspaceOwner(workspaceId) || isWorkspaceAdmin(workspaceId);
+      allow delete: if isWorkspaceOwner(workspaceId);
+
+      // Workspace sub-collections
+      match /tasks/{taskId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+        allow update: if isWorkspaceMember(workspaceId);
+        allow delete: if isWorkspaceMember(workspaceId);
+      }
+
+      match /projects/{projectId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+        allow update: if isWorkspaceMember(workspaceId);
+        allow delete: if isWorkspaceMember(workspaceId);
+      }
+
+      match /notes/{noteId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+        allow update: if isWorkspaceMember(workspaceId);
+        allow delete: if isWorkspaceMember(workspaceId);
+      }
+
+      match /whiteboards/{whiteboardId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+        allow update: if isWorkspaceMember(workspaceId);
+        allow delete: if isWorkspaceMember(workspaceId);
+      }
+
+      match /comments/{commentId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+        allow update: if request.auth.uid == resource.data.authorId;
+        allow delete: if request.auth.uid == resource.data.authorId || isWorkspaceAdmin(workspaceId);
+      }
+
+      match /notifications/{notificationId} {
+        allow read: if request.auth.uid == resource.data.userId;
+        allow update: if request.auth.uid == resource.data.userId;
+        allow delete: if request.auth.uid == resource.data.userId;
+      }
+
+      match /activity/{activityId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow create: if isWorkspaceMember(workspaceId);
+      }
+
+      match /settings/{settingId} {
+        allow read: if isWorkspaceMember(workspaceId);
+        allow update: if isWorkspaceOwner(workspaceId) || isWorkspaceAdmin(workspaceId);
+      }
+    }
+
+    // Notifications collection (global)
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+  }
+}

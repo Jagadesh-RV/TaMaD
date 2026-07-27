@@ -3,18 +3,22 @@ import { Plus, Calendar as CalendarIcon, AlignLeft } from 'lucide-react';
 import clsx from 'clsx';
 import { format, addDays, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { useProjectStore } from '../store/projectStore';
+import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 
 const COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-indigo-500', 'bg-teal-500', 'bg-rose-500'];
 
 export default function RoadmapPage() {
+  const workspace = useAuthStore(s => s.workspace);
   const { projects, fetchProjects, createProject } = useProjectStore() as any;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDate] = useState(new Date());
 
+  const workspaceId = workspace?._id || '';
+
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (workspaceId) fetchProjects(workspaceId);
+  }, [fetchProjects, workspaceId]);
   
   // Generate a timeline spanning 30 days from start of month
   const timelineStart = startOfMonth(currentDate);

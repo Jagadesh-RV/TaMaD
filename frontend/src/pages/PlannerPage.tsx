@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { format, subDays } from 'date-fns';
 import { useGoalStore } from '../store/goalStore';
 import { useHabitStore } from '../store/habitStore';
+import { useAuthStore } from '../store/authStore';
 import GoalModal from '../components/planner/GoalModal';
 import HabitModal from '../components/planner/HabitModal';
 
@@ -11,21 +12,26 @@ export default function PlannerPage() {
   const [activeTab, setActiveTab] = useState<'habits' | 'goals'>('habits');
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
+  const workspace = useAuthStore(s => s.workspace);
 
   const { goals, fetchGoals, createGoal } = useGoalStore() as any;
   const { habits, fetchHabits, createHabit } = useHabitStore() as any;
 
+  const workspaceId = workspace?._id || '';
+
   useEffect(() => {
-    fetchGoals();
-    fetchHabits();
-  }, [fetchGoals, fetchHabits]);
+    if (workspaceId) {
+      fetchGoals(workspaceId);
+      fetchHabits(workspaceId);
+    }
+  }, [fetchGoals, fetchHabits, workspaceId]);
 
   const handleSaveGoal = async (data: any) => {
-    await createGoal({ ...data, workspaceId: '000000000000000000000000' });
+    await createGoal({ ...data, workspaceId });
   };
 
   const handleSaveHabit = async (data: any) => {
-    await createHabit({ ...data, workspaceId: '000000000000000000000000' });
+    await createHabit({ ...data, workspaceId });
   };
 
   return (

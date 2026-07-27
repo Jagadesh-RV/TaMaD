@@ -19,6 +19,13 @@ interface UserShape {
   };
 }
 
+interface WorkspaceShape {
+  _id: string;
+  name: string;
+  description?: string;
+  role: string;
+}
+
 interface SessionInfo {
   deviceName: string;
   ipAddress: string;
@@ -30,6 +37,7 @@ interface SessionInfo {
 
 interface AuthState {
   user: UserShape | null;
+  workspace: WorkspaceShape | null;
   loading: boolean;
   init: () => Promise<void>;
   completeFirebaseSignIn: (rememberMe?: boolean) => Promise<UserShape>;
@@ -40,22 +48,26 @@ interface AuthState {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   getSessions: () => Promise<SessionInfo[]>;
+  getWorkspace: () => Promise<WorkspaceShape | null>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
+  workspace: null,
   loading: true,
 
   init: async () => {
     try {
       const response = await api.get('/auth/me');
       set({ user: response.data.user, loading: false });
+      await get().getWorkspace();
     } catch {
       try {
         const response = await api.post('/auth/refresh');
         set({ user: response.data.user, loading: false });
+        await get().getWorkspace();
       } catch {
-        set({ user: null, loading: false });
+        set({ user: null, workspace: null, loading: false });
       }
     }
   },
@@ -66,6 +78,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const idToken = await firebaseUser.getIdToken(true);
     const response = await api.post('/auth/firebase/session', { idToken, rememberMe });
     set({ user: response.data.user });
+    await get().getWorkspace();
     return response.data.user;
   },
 
@@ -74,7 +87,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post('/auth/logout');
     } finally {
       await signOutFromFirebase();
-      set({ user: null });
+      set({ user: null, workspace: null });
     }
   },
 
@@ -83,7 +96,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post('/auth/logout-all');
     } finally {
       await signOutFromFirebase();
-      set({ user: null });
+      set({ user: null, workspace: null });
     }
   },
 
@@ -107,12 +120,23 @@ export const useAuthStore = create<AuthState>((set) => ({
       await api.post('/auth/delete-account');
     } finally {
       await signOutFromFirebase();
-      set({ user: null });
+      set({ user: null, workspace: null });
     }
   },
 
   getSessions: async () => {
     const response = await api.get('/auth/sessions');
     return response.data.sessions;
+  },
+
+  getWorkspace: async () => {
+    try {
+      const response = await api.get('/auth/workspace');
+      const workspace = response.data.workspace;
+      set({ workspace });
+      return workspace;
+    } catch {
+      return null;
+    }
   },
 }));

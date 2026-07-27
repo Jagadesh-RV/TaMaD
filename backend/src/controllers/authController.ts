@@ -351,3 +351,39 @@ export const getSessions = async (req: any, res: Response) => {
   }));
   res.json({ sessions });
 };
+
+export const getWorkspace = async (req: any, res: Response) => {
+  try {
+    const Workspace = (await import('../models/Workspace')).default;
+    let workspace = await Workspace.findOne({
+      'members.userId': req.user._id,
+      isActive: true,
+    }).sort({ createdAt: 1 });
+
+    if (!workspace) {
+      workspace = await Workspace.create({
+        name: 'Personal Workspace',
+        description: 'Your default personal workspace',
+        ownerId: req.user._id,
+        members: [{ userId: req.user._id, role: 'owner' }],
+      });
+    }
+
+    const memberEntry = workspace.members.find(
+      (m: any) => m.userId.toString() === req.user._id.toString(),
+    );
+
+    res.json({
+      workspace: {
+        _id: workspace._id,
+        name: workspace.name,
+        description: workspace.description,
+        role: memberEntry?.role || 'owner',
+      },
+    });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: error.message || 'Unable to fetch workspace' });
+  }
+};
