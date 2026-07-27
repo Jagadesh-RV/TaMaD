@@ -55,6 +55,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile, isOpen, onClose }: SidebarProps) {
   const user = useAuthStore(s => s.user);
+  const workspace = useAuthStore(s => s.workspace);
   const logout = useAuthStore(s => s.logout);
   const unread = useNotifStore(s => s.unread);
   const navigate = useNavigate();
@@ -85,7 +86,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-muted)' }}>Workspace</p>
           <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-foreground)' }}>
             <div className="h-2 w-2 rounded-full" style={{ background: 'var(--color-success)' }} />
-            Productivity Hub
+            {workspace?.name || 'Personal Workspace'}
           </div>
         </div>
       )}

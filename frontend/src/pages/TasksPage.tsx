@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, LayoutGrid, List, CalendarDays,
-  ChevronDown, Clock, Tag, X, Inbox, GripVertical,
+  ChevronDown, Clock, X, Inbox, GripVertical,
   ArrowUpDown, ChevronUp, AlertTriangle,
 } from 'lucide-react';
 import {
@@ -22,7 +22,8 @@ import { CSS } from '@dnd-kit/utilities';
 import { useDroppable } from '@dnd-kit/core';
 import { format, isToday, isBefore, parseISO } from 'date-fns';
 import clsx from 'clsx';
-import { TASKS, TEAM_MEMBERS, PROJECTS, TAGS } from '../data/seedData';
+import { useTaskStore } from '../store/taskStore';
+import { useAuthStore } from '../store/authStore';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 
@@ -90,14 +91,6 @@ function getStatusStyle(status: string) {
   }
 }
 
-function getMember(id: string) {
-  return TEAM_MEMBERS.find(m => m.id === id);
-}
-
-function getProject(id: string) {
-  return PROJECTS.find(p => p.id === id);
-}
-
 function isOverdue(task: Task) {
   if (!task.dueDate || task.status === 'done') return false;
   try {
@@ -115,16 +108,15 @@ function formatDueDate(dateStr: string) {
 }
 
 function MemberAvatar({ memberId, size = 'sm' }: { memberId: string; size?: 'sm' | 'md' }) {
-  const member = getMember(memberId);
-  if (!member) return null;
   const dims = size === 'sm' ? 'h-6 w-6 text-[10px]' : 'h-8 w-8 text-[11px]';
+  const initial = memberId?.charAt(0)?.toUpperCase() || '?';
   return (
     <div
       className={clsx(dims, 'inline-flex items-center justify-center rounded-full font-semibold text-white shrink-0')}
-      style={{ background: member.avatarColor }}
-      title={member.name}
+      style={{ background: 'var(--color-accent)' }}
+      title={memberId}
     >
-      {member.initials}
+      {initial}
     </div>
   );
 }
@@ -166,8 +158,6 @@ function EmptyState({ message }: { message: string }) {
     </div>
   );
 }
-
-// ─── Kanban Card (draggable) ────────────────────────────────────────────────
 
 function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -211,7 +201,7 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
 
         <div className="mb-3 flex flex-wrap gap-1.5">
           <PriorityBadge priority={task.priority} />
-          {task.tags?.slice(0, 2).map(tag => (
+          {task.tags?.slice(0, 2).map((tag: string) => (
             <span
               key={tag}
               className="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -253,8 +243,6 @@ function KanbanOverlay({ task }: { task: Task }) {
     </div>
   );
 }
-
-// ─── Kanban Column (droppable) ──────────────────────────────────────────────
 
 function KanbanColumn({
   colId,
@@ -321,8 +309,6 @@ function KanbanColumn({
   );
 }
 
-// ─── List View ──────────────────────────────────────────────────────────────
-
 function ListRow({
   task,
   index,
@@ -332,9 +318,6 @@ function ListRow({
   index: number;
   onClick: () => void;
 }) {
-  const member = getMember(task.assignee);
-  const project = getProject(task.projectId);
-
   return (
     <motion.tr
       initial={{ opacity: 0 }}
@@ -355,24 +338,12 @@ function ListRow({
           <span className="text-[13px] font-medium truncate" style={{ color: 'var(--color-foreground)' }}>
             {task.title}
           </span>
-          {project && (
-            <span className="text-[11px] font-medium" style={{ color: 'var(--color-muted)' }}>
-              {project.name}
-            </span>
-          )}
         </div>
       </td>
       <td className="px-4 py-3"><StatusBadge status={task.status} /></td>
       <td className="px-4 py-3"><PriorityBadge priority={task.priority} /></td>
       <td className="px-4 py-3">
-        {member ? (
-          <div className="flex items-center gap-2">
-            <MemberAvatar memberId={task.assignee} />
-            <span className="text-[12px] font-medium" style={{ color: 'var(--color-foreground)' }}>{member.name}</span>
-          </div>
-        ) : (
-          <span className="text-[12px]" style={{ color: 'var(--color-muted)' }}>Unassigned</span>
-        )}
+        <MemberAvatar memberId={task.assignee} />
       </td>
       <td className="px-4 py-3">
         {task.dueDate ? (
@@ -390,8 +361,6 @@ function ListRow({
     </motion.tr>
   );
 }
-
-// ─── Calendar Mini View (inside TasksPage) ──────────────────────────────────
 
 function CalendarMiniView({ tasks }: { tasks: Task[] }) {
   const now = new Date();
@@ -461,19 +430,28 @@ function CalendarMiniView({ tasks }: { tasks: Task[] }) {
   );
 }
 
-// ─── Main Page ──────────────────────────────────────────────────────────────
-
 export default function TasksPage() {
+  const { tasks, fetchTasks, createTask, reorderTask } = useTaskStore();
+  const workspace = useAuthStore(s => s.workspace);
+  const workspaceId = workspace?._id || '';
+
   const [view, setView] = useState<ViewMode>('kanban');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [assigneeFilter, setAssigneeFilter] = useState<string>('all');
   const [quickTitle, setQuickTitle] = useState('');
-  const [localTasks, setLocalTasks] = useState<Task[]>(TASKS as Task[]);
+  const [localTasks, setLocalTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [listSort, setListSort] = useState<SortField>('title');
   const [listSortAsc, setListSortAsc] = useState(true);
+
+  useEffect(() => {
+    if (workspaceId) fetchTasks(workspaceId);
+  }, [fetchTasks, workspaceId]);
+
+  useEffect(() => {
+    setLocalTasks(tasks as Task[]);
+  }, [tasks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -485,10 +463,9 @@ export default function TasksPage() {
       if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
       if (statusFilter !== 'all' && t.status !== statusFilter) return false;
       if (priorityFilter !== 'all' && t.priority !== priorityFilter) return false;
-      if (assigneeFilter !== 'all' && t.assignee !== assigneeFilter) return false;
       return true;
     });
-  }, [localTasks, search, statusFilter, priorityFilter, assigneeFilter]);
+  }, [localTasks, search, statusFilter, priorityFilter]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -497,7 +474,7 @@ export default function TasksPage() {
         case 'title': cmp = a.title.localeCompare(b.title); break;
         case 'status': cmp = (a.status).localeCompare(b.status); break;
         case 'priority': cmp = (PRIORITY_ORDER[a.priority] ?? 9) - (PRIORITY_ORDER[b.priority] ?? 9); break;
-        case 'assignee': cmp = (getMember(a.assignee)?.name ?? '').localeCompare(getMember(b.assignee)?.name ?? ''); break;
+        case 'assignee': cmp = (a.assignee || '').localeCompare(b.assignee || ''); break;
         case 'dueDate': cmp = (a.dueDate || '').localeCompare(b.dueDate || ''); break;
       }
       return listSortAsc ? cmp : -cmp;
@@ -512,20 +489,12 @@ export default function TasksPage() {
 
   const handleQuickAdd = () => {
     if (!quickTitle.trim()) return;
-    const newTask: Task = {
-      _id: `t${Date.now()}`,
+    createTask({
       title: quickTitle.trim(),
-      description: '',
       status: 'todo',
       priority: 'medium',
-      projectId: 'p1',
-      assignee: '1',
-      tags: [],
-      dueDate: '',
-      createdAt: new Date().toISOString(),
-      order: localTasks.length * 1000 + 1000,
-    };
-    setLocalTasks(prev => [...prev, newTask]);
+      workspaceId,
+    });
     setQuickTitle('');
   };
 
@@ -584,7 +553,7 @@ export default function TasksPage() {
 
   return (
     <div className="page flex flex-col h-[calc(100vh-80px)] relative z-10">
-      {/* ─── Header ──────────────────────────────────────────── */}
+      {/* Header */}
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Tasks</h1>
@@ -594,7 +563,6 @@ export default function TasksPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* View Toggle */}
           <div
             className="inline-flex rounded-xl p-1"
             style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}
@@ -620,7 +588,7 @@ export default function TasksPage() {
         </div>
       </div>
 
-      {/* ─── Filter Bar ──────────────────────────────────────── */}
+      {/* Filter Bar */}
       <div
         className="mb-4 flex flex-col gap-3 rounded-2xl border p-3 sm:flex-row sm:items-center"
         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
@@ -628,7 +596,7 @@ export default function TasksPage() {
         <div className="search-input flex-1">
           <Search size={16} style={{ color: 'var(--color-muted)' }} />
           <input
-            placeholder="Search tasks…"
+            placeholder="Search tasks..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -643,11 +611,7 @@ export default function TasksPage() {
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
           className="rounded-xl border px-3 py-2 text-[12px] font-medium outline-none transition-all"
-          style={{
-            background: 'var(--color-surface)',
-            borderColor: 'var(--color-border)',
-            color: 'var(--color-foreground)',
-          }}
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-foreground)' }}
         >
           {STATUS_OPTIONS.map(s => (
             <option key={s} value={s}>{statusLabels[s]}{s !== 'all' && statusCounts[s] !== undefined ? ` (${statusCounts[s]})` : ''}</option>
@@ -658,36 +622,16 @@ export default function TasksPage() {
           value={priorityFilter}
           onChange={e => setPriorityFilter(e.target.value)}
           className="rounded-xl border px-3 py-2 text-[12px] font-medium outline-none transition-all"
-          style={{
-            background: 'var(--color-surface)',
-            borderColor: 'var(--color-border)',
-            color: 'var(--color-foreground)',
-          }}
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-foreground)' }}
         >
           {PRIORITY_OPTIONS.map(p => (
             <option key={p} value={p}>{priorityLabels[p]}</option>
           ))}
         </select>
 
-        <select
-          value={assigneeFilter}
-          onChange={e => setAssigneeFilter(e.target.value)}
-          className="rounded-xl border px-3 py-2 text-[12px] font-medium outline-none transition-all"
-          style={{
-            background: 'var(--color-surface)',
-            borderColor: 'var(--color-border)',
-            color: 'var(--color-foreground)',
-          }}
-        >
-          <option value="all">All Members</option>
-          {TEAM_MEMBERS.map(m => (
-            <option key={m.id} value={m.id}>{m.name}</option>
-          ))}
-        </select>
-
-        {(search || statusFilter !== 'all' || priorityFilter !== 'all' || assigneeFilter !== 'all') && (
+        {(search || statusFilter !== 'all' || priorityFilter !== 'all') && (
           <button
-            onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); setAssigneeFilter('all'); }}
+            onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); }}
             className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors"
             style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
           >
@@ -697,7 +641,7 @@ export default function TasksPage() {
         )}
       </div>
 
-      {/* ─── Quick Add ───────────────────────────────────────── */}
+      {/* Quick Add */}
       <div
         className="mb-4 flex items-center gap-3 rounded-2xl border p-2.5"
         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
@@ -709,7 +653,7 @@ export default function TasksPage() {
           value={quickTitle}
           onChange={e => setQuickTitle(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
-          placeholder="Quick add a task…"
+          placeholder="Quick add a task..."
           className="flex-1 bg-transparent text-[13px] font-medium outline-none"
           style={{ color: 'var(--color-foreground)' }}
         />
@@ -724,9 +668,8 @@ export default function TasksPage() {
         )}
       </div>
 
-      {/* ─── Content ─────────────────────────────────────────── */}
+      {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        {/* KANBAN VIEW */}
         {view === 'kanban' && (
           filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
           <DndContext
@@ -754,7 +697,6 @@ export default function TasksPage() {
           </DndContext>
         )}
 
-        {/* LIST VIEW */}
         {view === 'list' && (
           filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
           <div
@@ -802,7 +744,6 @@ export default function TasksPage() {
           </div>
         )}
 
-        {/* CALENDAR VIEW */}
         {view === 'calendar' && (
           <CalendarMiniView tasks={filtered} />
         )}

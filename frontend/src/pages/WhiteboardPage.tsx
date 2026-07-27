@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Pen, Square, Circle, Eraser, MousePointer2, Plus, Users, Share2, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 import { useWhiteboardStore } from '../store/whiteboardStore';
+import { useAuthStore } from '../store/authStore';
 import WhiteboardModal from '../components/whiteboards/WhiteboardModal';
 
 export default function WhiteboardPage() {
@@ -13,15 +14,14 @@ export default function WhiteboardPage() {
   const [activeBoard, setActiveBoard] = useState<any>(null);
 
   const { whiteboards, fetchWhiteboards, createWhiteboard, updateWhiteboard } = useWhiteboardStore() as any;
+  const workspace = useAuthStore(s => s.workspace);
   const canvasRef = useRef<HTMLDivElement>(null);
 
+  const workspaceId = workspace?._id || '';
+
   useEffect(() => {
-    fetchWhiteboards().then(() => {
-      if (!activeBoard && whiteboards?.length > 0) {
-        setActiveBoard(whiteboards[0]);
-      }
-    });
-  }, [fetchWhiteboards]);
+    if (workspaceId) fetchWhiteboards(workspaceId);
+  }, [fetchWhiteboards, workspaceId]);
 
   useEffect(() => {
     if (!activeBoard && whiteboards?.length > 0) {
@@ -63,7 +63,7 @@ export default function WhiteboardPage() {
   };
 
   const handleSaveBoard = async (data: any) => {
-    const newBoard = await createWhiteboard({ ...data, workspaceId: '000000000000000000000000' });
+    const newBoard = await createWhiteboard({ ...data, workspaceId });
     if (newBoard) {
       setActiveBoard(newBoard);
     }

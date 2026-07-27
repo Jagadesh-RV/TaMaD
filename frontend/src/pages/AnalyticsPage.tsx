@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target,
@@ -7,10 +7,9 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
 } from 'recharts';
-import {
-  TASKS, STATUS_DISTRIBUTION, PRIORITY_DISTRIBUTION, WEEKLY_PRODUCTIVITY, TEAM_MEMBERS,
-} from '../data/seedData';
-import clsx from 'clsx';
+import { useTaskStore } from '../store/taskStore';
+import { useProjectStore } from '../store/projectStore';
+import { useAuthStore } from '../store/authStore';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 12 },
@@ -21,30 +20,79 @@ const cardVariant = {
 };
 
 export default function AnalyticsPage() {
-  const totalTasks = TASKS.length;
-  const completed = TASKS.filter(t => t.status === 'done').length;
-  const inProgress = TASKS.filter(t => t.status === 'in-progress').length;
+  const { tasks, fetchTasks } = useTaskStore();
+  const { projects, fetchProjects } = useProjectStore();
+  const workspace = useAuthStore(s => s.workspace);
+  const workspaceId = workspace?._id || '';
+
+  useEffect(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId]);
+
+  const totalTasks = tasks.length;
+  const completed = tasks.filter((t: any) => t.status === 'done').length;
+  const inProgress = tasks.filter((t: any) => t.status === 'in-progress').length;
   const efficiency = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0;
 
-  const teamVelocity = useMemo(() => {
-    return TEAM_MEMBERS.map(member => {
-      const memberTasks = TASKS.filter(t => t.assignee === member.id);
-      const done = memberTasks.filter(t => t.status === 'done').length;
-      return { name: member.name.split(' ')[0], tasks: memberTasks.length, completed: done, color: member.avatarColor };
+  const weeklyProductivity = useMemo(() => {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const now = new Date();
+    return days.map((day, i) => {
+      const date = new Date(now);
+      date.setDate(now.getDate() - (6 - i));
+      const dateStr = date.toISOString().slice(0, 10);
+      const completedCount = tasks.filter((t: any) => {
+        if (!t.updatedAt) return false;
+        return t.updatedAt.slice(0, 10) === dateStr && t.status === 'done';
+      }).length;
+      const createdCount = tasks.filter((t: any) => {
+        if (!t.createdAt) return false;
+        return t.createdAt.slice(0, 10) === dateStr;
+      }).length;
+      return { day, completed: completedCount, created: createdCount };
     });
-  }, []);
+  }, [tasks]);
+
+  const statusDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    tasks.forEach((t: any) => {
+      counts[t.status] = (counts[t.status] || 0) + 1;
+    });
+    return [
+      { name: 'To Do', value: counts['todo'] || 0, color: 'var(--color-muted)' },
+      { name: 'In Progress', value: counts['in-progress'] || 0, color: 'var(--color-accent)' },
+      { name: 'Review', value: counts['review'] || 0, color: 'var(--color-warning)' },
+      { name: 'Done', value: counts['done'] || 0, color: 'var(--color-success)' },
+    ].filter(s => s.value > 0);
+  }, [tasks]);
+
+  const priorityDistribution = useMemo(() => {
+    const counts: Record<string, number> = {};
+    tasks.forEach((t: any) => {
+      counts[t.priority] = (counts[t.priority] || 0) + 1;
+    });
+    return [
+      { name: 'Urgent', value: counts['urgent'] || 0, color: 'var(--color-danger)' },
+      { name: 'High', value: counts['high'] || 0, color: 'var(--color-warning)' },
+      { name: 'Medium', value: counts['medium'] || 0, color: 'var(--color-accent)' },
+      { name: 'Low', value: counts['low'] || 0, color: 'var(--color-muted)' },
+    ].filter(p => p.value > 0);
+  }, [tasks]);
 
   const stats = [
     { label: 'Tasks Completed', value: completed, sub: `of ${totalTasks} total`, icon: CheckCircle2, color: 'var(--color-success)', bg: 'var(--color-success-light)' },
     { label: 'Completion Rate', value: `${efficiency}%`, sub: 'overall efficiency', icon: TrendingUp, color: 'var(--color-accent)', bg: 'var(--color-accent-light)' },
     { label: 'In Progress', value: inProgress, sub: 'active tasks', icon: Clock, color: 'var(--color-info)', bg: 'var(--color-info-light)' },
-    { label: 'Team Velocity', value: `${Math.round(completed / 7 * 10) / 10}`, sub: 'tasks/day avg', icon: Zap, color: 'var(--color-warning)', bg: 'var(--color-warning-light)' },
+    { label: 'Projects', value: projects.length, sub: 'total projects', icon: Zap, color: 'var(--color-warning)', bg: 'var(--color-warning-light)' },
   ];
 
   const insights = [
     { title: 'Focus Opportunity', text: `${inProgress} tasks are in progress. Consider finishing before starting new ones.`, icon: Target, color: 'var(--color-info)' },
     { title: 'Great Progress', text: `You've completed ${completed} tasks so far. Keep up the momentum!`, icon: CheckCircle2, color: 'var(--color-success)' },
-    { title: 'Priority Alert', text: `${TASKS.filter(t => t.priority === 'urgent').length} urgent tasks need immediate attention.`, icon: Zap, color: 'var(--color-warning)' },
+    { title: 'Priority Alert', text: `${tasks.filter((t: any) => t.priority === 'urgent').length} urgent tasks need immediate attention.`, icon: Zap, color: 'var(--color-warning)' },
   ];
 
   const tooltipStyle = {
@@ -93,7 +141,7 @@ export default function AnalyticsPage() {
             <p className="mb-5 text-xs" style={{ color: 'var(--color-muted)' }}>Tasks completed vs created</p>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={WEEKLY_PRODUCTIVITY} barGap={4}>
+                <BarChart data={weeklyProductivity} barGap={4}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
                   <XAxis dataKey="day" tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 12, fill: 'var(--color-muted)' }} axisLine={false} tickLine={false} />
@@ -115,7 +163,7 @@ export default function AnalyticsPage() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={STATUS_DISTRIBUTION}
+                    data={statusDistribution}
                     cx="50%"
                     cy="50%"
                     innerRadius={50}
@@ -124,7 +172,7 @@ export default function AnalyticsPage() {
                     dataKey="value"
                     strokeWidth={0}
                   >
-                    {STATUS_DISTRIBUTION.map((entry, i) => (
+                    {statusDistribution.map((entry, i) => (
                       <Cell key={i} fill={entry.color} />
                     ))}
                   </Pie>
@@ -133,7 +181,7 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             </div>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              {STATUS_DISTRIBUTION.map(item => (
+              {statusDistribution.map(item => (
                 <div key={item.name} className="flex items-center gap-2 text-xs">
                   <span className="h-2.5 w-2.5 rounded-sm shrink-0" style={{ background: item.color }} />
                   <span style={{ color: 'var(--color-muted)' }}>{item.name}</span>
@@ -153,8 +201,8 @@ export default function AnalyticsPage() {
             <h3 className="mb-1 text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Priority Breakdown</h3>
             <p className="mb-5 text-xs" style={{ color: 'var(--color-muted)' }}>Tasks by priority level</p>
             <div className="space-y-3">
-              {PRIORITY_DISTRIBUTION.map(item => {
-                const maxVal = Math.max(...PRIORITY_DISTRIBUTION.map(d => d.value));
+              {priorityDistribution.map(item => {
+                const maxVal = Math.max(...priorityDistribution.map(d => d.value));
                 const width = maxVal > 0 ? (item.value / maxVal) * 100 : 0;
                 return (
                   <div key={item.name}>
@@ -178,32 +226,30 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
 
-        {/* Team performance */}
+        {/* Project breakdown */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="xl:col-span-1">
           <div className="card p-5">
-            <h3 className="mb-1 text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Team Performance</h3>
-            <p className="mb-4 text-xs" style={{ color: 'var(--color-muted)' }}>Tasks completed by member</p>
+            <h3 className="mb-1 text-base font-bold" style={{ color: 'var(--color-foreground)' }}>Projects</h3>
+            <p className="mb-4 text-xs" style={{ color: 'var(--color-muted)' }}>Active project count</p>
             <div className="space-y-3">
-              {teamVelocity.map(member => {
-                const maxTasks = Math.max(...teamVelocity.map(m => m.tasks));
-                const width = maxTasks > 0 ? (member.completed / maxTasks) * 100 : 0;
+              {projects.slice(0, 5).map((project: any) => {
+                const maxTasks = Math.max(...tasks.map((t: any) => 1), 1);
                 return (
-                  <div key={member.name} className="flex items-center gap-3">
-                    <div className="avatar avatar-sm shrink-0" style={{ background: member.color, color: 'white' }}>
-                      {member.name.charAt(0)}
+                  <div key={project._id} className="flex items-center gap-3">
+                    <div className="avatar avatar-sm shrink-0" style={{ background: project.color || 'var(--color-accent)', color: 'white' }}>
+                      {project.name?.charAt(0) || 'P'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-medium truncate" style={{ color: 'var(--color-foreground)' }}>{member.name}</span>
-                        <span className="font-semibold shrink-0" style={{ color: 'var(--color-muted)' }}>{member.completed}/{member.tasks}</span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'var(--color-border-light)' }}>
-                        <div className="h-full rounded-full transition-all" style={{ width: `${width}%`, background: member.color }} />
+                        <span className="font-medium truncate" style={{ color: 'var(--color-foreground)' }}>{project.name}</span>
                       </div>
                     </div>
                   </div>
                 );
               })}
+              {projects.length === 0 && (
+                <p className="text-xs" style={{ color: 'var(--color-muted)' }}>No projects yet</p>
+              )}
             </div>
           </div>
         </motion.div>
