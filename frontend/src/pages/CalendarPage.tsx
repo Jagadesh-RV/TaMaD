@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   ChevronLeft, ChevronRight, Calendar as CalendarIcon,
-  Clock, AlertTriangle, CheckCircle2, ListTodo,
+  Clock, AlertTriangle, CheckCircle2,
 } from 'lucide-react';
 import {
   format,
@@ -21,8 +21,9 @@ import {
   addDays,
 } from 'date-fns';
 import clsx from 'clsx';
-import { TASKS, TEAM_MEMBERS, PROJECTS } from '../data/seedData';
-import { Card } from '../components/ui/Card';
+import { useTaskStore } from '../store/taskStore';
+import { useProjectStore } from '../store/projectStore';
+import { useAuthStore } from '../store/authStore';
 
 function getPriorityDot(priority: string) {
   switch (priority) {
@@ -34,10 +35,6 @@ function getPriorityDot(priority: string) {
   }
 }
 
-function getMember(id: string) {
-  return TEAM_MEMBERS.find(m => m.id === id);
-}
-
 function isOverdue(dateStr: string) {
   if (!dateStr) return false;
   try {
@@ -46,15 +43,14 @@ function isOverdue(dateStr: string) {
 }
 
 function MemberAvatar({ memberId }: { memberId: string }) {
-  const member = getMember(memberId);
-  if (!member) return null;
+  const initial = memberId?.charAt(0)?.toUpperCase() || '?';
   return (
     <div
       className="h-5 w-5 inline-flex items-center justify-center rounded-full text-[9px] font-bold text-white shrink-0"
-      style={{ background: member.avatarColor }}
-      title={member.name}
+      style={{ background: 'var(--color-accent)' }}
+      title={memberId}
     >
-      {member.initials}
+      {initial}
     </div>
   );
 }
@@ -66,6 +62,18 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [projectFilter, setProjectFilter] = useState<string[]>([]);
 
+  const { tasks, fetchTasks } = useTaskStore();
+  const { projects, fetchProjects } = useProjectStore();
+  const workspace = useAuthStore(s => s.workspace);
+  const workspaceId = workspace?._id || '';
+
+  useEffect(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId]);
+
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calStart = startOfWeek(monthStart);
@@ -74,13 +82,13 @@ export default function CalendarPage() {
   const totalWeeks = Math.ceil(days.length / 7);
 
   const filteredTasks = useMemo(() => {
-    if (projectFilter.length === 0) return TASKS;
-    return TASKS.filter(t => projectFilter.includes(t.projectId));
-  }, [projectFilter]);
+    if (projectFilter.length === 0) return tasks;
+    return tasks.filter((t: any) => projectFilter.includes(t.projectId));
+  }, [tasks, projectFilter]);
 
   const tasksByDate = useMemo(() => {
-    const map: Record<string, typeof TASKS> = {};
-    filteredTasks.forEach(t => {
+    const map: Record<string, any[]> = {};
+    filteredTasks.forEach((t: any) => {
       if (!t.dueDate) return;
       try {
         const key = format(parseISO(t.dueDate), 'yyyy-MM-dd');
@@ -95,24 +103,24 @@ export default function CalendarPage() {
     const now = new Date();
     const weekFromNow = addDays(now, 7);
     return filteredTasks
-      .filter(t => {
+      .filter((t: any) => {
         if (!t.dueDate || t.status === 'done') return false;
         try {
           const d = parseISO(t.dueDate);
           return d >= now && d <= weekFromNow;
         } catch { return false; }
       })
-      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+      .sort((a: any, b: any) => a.dueDate.localeCompare(b.dueDate));
   }, [filteredTasks]);
 
   const overdueCount = useMemo(() => {
-    return filteredTasks.filter(t => t.status !== 'done' && isOverdue(t.dueDate)).length;
+    return filteredTasks.filter((t: any) => t.status !== 'done' && isOverdue(t.dueDate)).length;
   }, [filteredTasks]);
 
   const thisWeekCount = useMemo(() => {
     const now = new Date();
     const weekEnd = addDays(now, 7);
-    return filteredTasks.filter(t => {
+    return filteredTasks.filter((t: any) => {
       if (!t.dueDate) return false;
       try {
         const d = parseISO(t.dueDate);
@@ -129,7 +137,7 @@ export default function CalendarPage() {
 
   return (
     <div className="page flex flex-col h-[calc(100vh-80px)] relative z-10">
-      {/* ─── Header ──────────────────────────────────────────── */}
+      {/* Header */}
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Calendar</h1>
@@ -147,50 +155,29 @@ export default function CalendarPage() {
             Today
           </button>
 
-          <div
-            className="inline-flex items-center rounded-xl p-1"
-            style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}
-          >
-            <button
-              onClick={() => setCurrentDate(d => subMonths(d, 1))}
-              className="rounded-lg p-2 transition-colors"
-              style={{ color: 'var(--color-muted)' }}
-            >
+          <div className="inline-flex items-center rounded-xl p-1" style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}>
+            <button onClick={() => setCurrentDate(d => subMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }}>
               <ChevronLeft size={16} />
             </button>
-            <span
-              className="min-w-[140px] text-center text-[13px] font-bold uppercase tracking-wider"
-              style={{ color: 'var(--color-foreground)' }}
-            >
+            <span className="min-w-[140px] text-center text-[13px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-foreground)' }}>
               {format(currentDate, 'MMMM yyyy')}
             </span>
-            <button
-              onClick={() => setCurrentDate(d => addMonths(d, 1))}
-              className="rounded-lg p-2 transition-colors"
-              style={{ color: 'var(--color-muted)' }}
-            >
+            <button onClick={() => setCurrentDate(d => addMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }}>
               <ChevronRight size={16} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ─── Main Layout ─────────────────────────────────────── */}
+      {/* Main Layout */}
       <div className="flex flex-1 min-h-0 gap-5">
         {/* Calendar Grid */}
         <div className="flex-1 flex flex-col min-w-0">
-          <div
-            className="flex flex-1 flex-col rounded-2xl border overflow-hidden"
-            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-          >
+          <div className="flex flex-1 flex-col rounded-2xl border overflow-hidden" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}>
             {/* Day Headers */}
             <div className="grid grid-cols-7" style={{ borderBottom: '1px solid var(--color-border)' }}>
               {DAY_NAMES.map(d => (
-                <div
-                  key={d}
-                  className="py-3 text-center text-[11px] font-bold uppercase tracking-widest"
-                  style={{ color: 'var(--color-muted)' }}
-                >
+                <div key={d} className="py-3 text-center text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
                   {d}
                 </div>
               ))}
@@ -215,17 +202,11 @@ export default function CalendarPage() {
                     )}
                     style={{
                       borderColor: 'var(--color-border-light)',
-                      background: selected
-                        ? 'var(--color-accent-light)'
-                        : today
-                        ? 'var(--color-surface-hover)'
-                        : 'transparent',
+                      background: selected ? 'var(--color-accent-light)' : today ? 'var(--color-surface-hover)' : 'transparent',
                     }}
                   >
                     <div
-                      className={clsx(
-                        'mb-1.5 flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-bold transition-all',
-                      )}
+                      className={clsx('mb-1.5 flex h-7 w-7 items-center justify-center rounded-full text-[12px] font-bold transition-all')}
                       style={{
                         background: today ? 'var(--color-accent)' : 'transparent',
                         color: today ? 'white' : inMonth ? 'var(--color-foreground)' : 'var(--color-muted)',
@@ -235,20 +216,14 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="flex flex-1 flex-col gap-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-                      {dayTasks.slice(0, 3).map(task => (
+                      {dayTasks.slice(0, 3).map((task: any) => (
                         <div
                           key={task._id}
                           className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] font-medium transition-colors truncate"
-                          style={{
-                            background: 'var(--color-surface-active)',
-                            color: 'var(--color-foreground)',
-                          }}
+                          style={{ background: 'var(--color-surface-active)', color: 'var(--color-foreground)' }}
                           title={task.title}
                         >
-                          <span
-                            className="h-1.5 w-1.5 rounded-full shrink-0"
-                            style={{ background: getPriorityDot(task.priority) }}
-                          />
+                          <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: getPriorityDot(task.priority) }} />
                           <span className="truncate">{task.title}</span>
                         </div>
                       ))}
@@ -265,22 +240,14 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* ─── Sidebar ──────────────────────────────────────── */}
+        {/* Sidebar */}
         <div className="hidden w-[280px] shrink-0 flex-col gap-5 xl:flex">
           {/* Quick Stats */}
           <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-            <div
-              className="rounded-2xl border p-4"
-              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
-                Quick Stats
-              </h3>
+            <div className="rounded-2xl border p-4" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}>
+              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>Quick Stats</h3>
               <div className="grid grid-cols-2 gap-3">
-                <div
-                  className="rounded-xl p-3"
-                  style={{ background: 'var(--color-accent-light)' }}
-                >
+                <div className="rounded-xl p-3" style={{ background: 'var(--color-accent-light)' }}>
                   <div className="mb-1 flex items-center gap-1.5">
                     <CalendarIcon size={12} style={{ color: 'var(--color-accent)' }} />
                     <span className="text-[10px] font-semibold uppercase" style={{ color: 'var(--color-accent)' }}>This Week</span>
@@ -288,19 +255,12 @@ export default function CalendarPage() {
                   <div className="text-xl font-bold" style={{ color: 'var(--color-accent)' }}>{thisWeekCount}</div>
                 </div>
 
-                <div
-                  className="rounded-xl p-3"
-                  style={{ background: overdueCount > 0 ? 'var(--color-danger-light)' : 'var(--color-success-light)' }}
-                >
+                <div className="rounded-xl p-3" style={{ background: overdueCount > 0 ? 'var(--color-danger-light)' : 'var(--color-success-light)' }}>
                   <div className="mb-1 flex items-center gap-1.5">
                     <AlertTriangle size={12} style={{ color: overdueCount > 0 ? 'var(--color-danger)' : 'var(--color-success)' }} />
-                    <span className="text-[10px] font-semibold uppercase" style={{ color: overdueCount > 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
-                      Overdue
-                    </span>
+                    <span className="text-[10px] font-semibold uppercase" style={{ color: overdueCount > 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>Overdue</span>
                   </div>
-                  <div className="text-xl font-bold" style={{ color: overdueCount > 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
-                    {overdueCount}
-                  </div>
+                  <div className="text-xl font-bold" style={{ color: overdueCount > 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>{overdueCount}</div>
                 </div>
               </div>
             </div>
@@ -308,14 +268,9 @@ export default function CalendarPage() {
 
           {/* Upcoming Tasks */}
           <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="flex flex-1 flex-col min-h-0">
-            <div
-              className="flex flex-1 flex-col rounded-2xl border overflow-hidden"
-              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
+            <div className="flex flex-1 flex-col rounded-2xl border overflow-hidden" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}>
               <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                <h3 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
-                  Upcoming · Next 7 Days
-                </h3>
+                <h3 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>Upcoming &middot; Next 7 Days</h3>
               </div>
               <div className="flex-1 overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
                 {upcomingTasks.length === 0 ? (
@@ -325,40 +280,27 @@ export default function CalendarPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1.5">
-                    {upcomingTasks.map((task, i) => {
-                      const member = getMember(task.assignee);
-                      return (
-                        <motion.div
-                          key={task._id}
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.04 }}
-                          className="flex items-start gap-2.5 rounded-xl p-2.5 transition-colors"
-                          style={{ background: isOverdue(task.dueDate) ? 'var(--color-danger-light)' : 'transparent' }}
-                        >
-                          <span
-                            className="mt-1 h-2 w-2 rounded-full shrink-0"
-                            style={{ background: getPriorityDot(task.priority) }}
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-medium truncate" style={{ color: 'var(--color-foreground)' }}>
-                              {task.title}
-                            </p>
-                            <div className="mt-1 flex items-center gap-2">
-                              <span
-                                className="text-[10px] font-semibold"
-                                style={{ color: isOverdue(task.dueDate) ? 'var(--color-danger)' : 'var(--color-muted)' }}
-                              >
-                                {(() => {
-                                  try { return format(parseISO(task.dueDate), 'MMM d'); } catch { return task.dueDate; }
-                                })()}
-                              </span>
-                              {member && <MemberAvatar memberId={task.assignee} />}
-                            </div>
+                    {upcomingTasks.map((task: any, i: number) => (
+                      <motion.div
+                        key={task._id}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.04 }}
+                        className="flex items-start gap-2.5 rounded-xl p-2.5 transition-colors"
+                        style={{ background: isOverdue(task.dueDate) ? 'var(--color-danger-light)' : 'transparent' }}
+                      >
+                        <span className="mt-1 h-2 w-2 rounded-full shrink-0" style={{ background: getPriorityDot(task.priority) }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[12px] font-medium truncate" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-[10px] font-semibold" style={{ color: isOverdue(task.dueDate) ? 'var(--color-danger)' : 'var(--color-muted)' }}>
+                              {(() => { try { return format(parseISO(task.dueDate), 'MMM d'); } catch { return task.dueDate; } })()}
+                            </span>
+                            {task.assignee && <MemberAvatar memberId={task.assignee} />}
                           </div>
-                        </motion.div>
-                      );
-                    })}
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -367,42 +309,31 @@ export default function CalendarPage() {
 
           {/* Project Filter */}
           <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-            <div
-              className="rounded-2xl border p-4"
-              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-            >
-              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>
-                Filter by Project
-              </h3>
+            <div className="rounded-2xl border p-4" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}>
+              <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-muted)' }}>Filter by Project</h3>
               <div className="flex flex-col gap-2">
-                {PROJECTS.map(project => (
+                {projects.map((project: any) => (
                   <label
-                    key={project.id}
+                    key={project._id}
                     className="flex cursor-pointer items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors"
-                    style={{ background: projectFilter.includes(project.id) ? 'var(--color-surface-hover)' : 'transparent' }}
+                    style={{ background: projectFilter.includes(project._id) ? 'var(--color-surface-hover)' : 'transparent' }}
                   >
                     <input
                       type="checkbox"
-                      checked={projectFilter.includes(project.id)}
-                      onChange={() => toggleProject(project.id)}
+                      checked={projectFilter.includes(project._id)}
+                      onChange={() => toggleProject(project._id)}
                       className="h-3.5 w-3.5 rounded accent-current"
-                      style={{ accentColor: project.color }}
+                      style={{ accentColor: project.color || 'var(--color-accent)' }}
                     />
-                    <span
-                      className="h-2.5 w-2.5 rounded-full shrink-0"
-                      style={{ background: project.color }}
-                    />
-                    <span className="text-[12px] font-medium" style={{ color: 'var(--color-foreground)' }}>
-                      {project.name}
-                    </span>
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: project.color || 'var(--color-accent)' }} />
+                    <span className="text-[12px] font-medium" style={{ color: 'var(--color-foreground)' }}>{project.name}</span>
                   </label>
                 ))}
+                {projects.length === 0 && (
+                  <p className="text-[12px]" style={{ color: 'var(--color-muted)' }}>No projects yet</p>
+                )}
                 {projectFilter.length > 0 && (
-                  <button
-                    onClick={() => setProjectFilter([])}
-                    className="mt-1 text-[11px] font-semibold transition-colors"
-                    style={{ color: 'var(--color-accent)' }}
-                  >
+                  <button onClick={() => setProjectFilter([])} className="mt-1 text-[11px] font-semibold transition-colors" style={{ color: 'var(--color-accent)' }}>
                     Clear filter
                   </button>
                 )}
