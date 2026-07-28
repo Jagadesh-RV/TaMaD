@@ -11,6 +11,8 @@ export interface INotification extends Document {
   read: boolean;
   link?: string;
   createdBy?: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const NotificationSchema: Schema = new Schema(
