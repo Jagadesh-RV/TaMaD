@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import User from '../models/User';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -20,10 +21,21 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
-    const user = await User.findById(decoded.id);
-    if (!user || !user.isActive) {
+    
+    const cacheKey = CACHE_KEYS.USER(decoded.id);
+    let user = await cache.get<any>(cacheKey);
+    
+    if (!user) {
+      const dbUser = await User.findById(decoded.id);
+      if (!dbUser || !dbUser.isActive) {
+        return res.status(401).json({ error: 'Not authorized, user not found' });
+      }
+      user = dbUser.toObject();
+      await cache.set(cacheKey, user, CACHE_TTL.USER);
+    } else if (!user.isActive) {
       return res.status(401).json({ error: 'Not authorized, user not found' });
     }
+    
     req.user = user;
     next();
   } catch (error) {

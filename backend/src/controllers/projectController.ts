@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Project from '../models/Project';
 import '../models/User';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 // @desc    Get all projects for a workspace
 // @route   GET /api/projects?workspaceId=...
@@ -13,10 +14,17 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'workspaceId is required' });
   }
 
+  const cacheKey = CACHE_KEYS.PROJECTS(workspaceId as string);
+  const cached = await cache.get<any>(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
+
   const projects = await Project.find({ workspaceId, isArchived: false })
     .populate('members.userId', 'name email avatarUrl')
     .sort({ createdAt: -1 });
 
+  await cache.set(cacheKey, projects, CACHE_TTL.PROJECTS);
   res.json(projects);
 };
 
@@ -41,6 +49,8 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     members: [{ userId: req.user._id, role: 'manager' }],
   });
 
+  await cache.invalidatePattern(CACHE_KEYS.PROJECTS(workspaceId));
+
   res.status(201).json(project);
 };
 
@@ -60,6 +70,8 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     { new: true, runValidators: true }
   ).populate('members.userId', 'name email avatarUrl');
 
+  await cache.invalidatePattern(CACHE_KEYS.PROJECTS(project.workspaceId.toString()));
+
   res.json(updatedProject);
 };
 
@@ -74,5 +86,8 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
   }
 
   await project.deleteOne();
+  
+  await cache.invalidatePattern(CACHE_KEYS.PROJECTS(project.workspaceId.toString()));
+  
   res.json({ message: 'Project removed' });
 };

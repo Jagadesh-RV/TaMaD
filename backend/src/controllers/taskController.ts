@@ -7,6 +7,7 @@ import '../models/User';
 import { getIO } from '../sockets/socketManager';
 import { createAuditLog } from '../utils/auditLogger';
 import { createNotification } from './notificationController';
+import { cache, CACHE_KEYS } from '../utils/cache';
 
 const emitTaskAssigned = async (taskId: string, taskTitle: string, newAssigneeIds: string[], assignedBy: string, workspaceId: string) => {
   const io = getIO();
@@ -107,6 +108,8 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
   getIO().to(`workspace_${workspaceId}`).emit('task_created', populatedTask);
 
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(workspaceId as string, '*'));
+
   if (assignees && assignees.length > 0) {
     await emitTaskAssigned(task._id.toString(), title, assignees, req.user._id, workspaceId as string);
   }
@@ -148,6 +151,8 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
   getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updatedTask);
 
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(task.workspaceId.toString(), '*'));
+
   if (updatedTask && req.body.assignees && Array.isArray(req.body.assignees)) {
     const newAssigneeIds = req.body.assignees.filter((id: string) => !previousAssigneeIds.includes(id));
     if (newAssigneeIds.length > 0) {
@@ -184,6 +189,8 @@ export const reorderTask = async (req: AuthRequest, res: Response) => {
 
   getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', task);
 
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(task.workspaceId.toString(), '*'));
+
   res.json(task);
 };
 
@@ -200,6 +207,8 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
   await task.deleteOne();
   
   getIO().to(`workspace_${task.workspaceId}`).emit('task_deleted', { taskId: req.params.id });
+  
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(task.workspaceId.toString(), '*'));
   
   await createAuditLog(
     task.workspaceId.toString(),
@@ -229,6 +238,8 @@ export const bulkUpdateTasks = async (req: AuthRequest, res: Response) => {
 
   getIO().to(`workspace_${req.body.workspaceId}`).emit('tasks_bulk_updated', { taskIds, updates });
 
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(req.body.workspaceId, '*'));
+
   res.json({ message: 'Tasks updated successfully' });
 };
 
@@ -244,6 +255,8 @@ export const bulkDeleteTasks = async (req: AuthRequest, res: Response) => {
   await Task.deleteMany({ _id: { $in: taskIds }, workspaceId });
   
   getIO().to(`workspace_${workspaceId}`).emit('tasks_bulk_deleted', { taskIds });
+
+  await cache.invalidatePattern(CACHE_KEYS.TASKS(workspaceId, '*'));
 
   res.json({ message: 'Tasks deleted successfully' });
 };

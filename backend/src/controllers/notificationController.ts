@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Notification from '../models/Notification';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   const { page = '1', limit = '50', unreadOnly } = req.query;
@@ -41,6 +42,7 @@ export const markRead = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Notification not found' });
   }
 
+  await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
   res.json(notification);
 };
 
@@ -50,6 +52,7 @@ export const markAllRead = async (req: AuthRequest, res: Response) => {
     { $set: { read: true } }
   );
 
+  await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
   res.json({ message: 'All notifications marked as read' });
 };
 
@@ -79,7 +82,7 @@ export const createNotification = async (
   type: string = 'info',
   extra?: { entityId?: string; entityType?: string; link?: string; createdBy?: string }
 ) => {
-  return Notification.create({
+  const notification = await Notification.create({
     userId,
     workspaceId,
     title,
@@ -87,4 +90,8 @@ export const createNotification = async (
     type,
     ...extra,
   });
+  
+  await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(userId));
+  
+  return notification;
 };

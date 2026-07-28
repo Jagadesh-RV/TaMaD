@@ -10,6 +10,7 @@ import Goal from '../models/Goal';
 import Habit from '../models/Habit';
 import Workspace from '../models/Workspace';
 import { getFirebaseAuth } from '../config/firebase';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 const accessCookieName = 'tamad_access_token';
 const refreshCookieName = 'tamad_refresh_token';
@@ -205,6 +206,10 @@ export const logout = async (req: any, res: Response) => {
     );
     await user.save();
   }
+  
+  await cache.del(CACHE_KEYS.USER(req.user._id));
+  await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+  
   res.clearCookie(accessCookieName, accessCookieOptions);
   res.clearCookie(refreshCookieName, refreshCookieOptions);
   res.json({ message: 'Logged out successfully' });
@@ -212,6 +217,10 @@ export const logout = async (req: any, res: Response) => {
 
 export const logoutAll = async (req: any, res: Response) => {
   await User.findByIdAndUpdate(req.user._id, { $set: { sessions: [] } });
+  
+  await cache.del(CACHE_KEYS.USER(req.user._id));
+  await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+  
   res.clearCookie(accessCookieName, accessCookieOptions);
   res.clearCookie(refreshCookieName, refreshCookieOptions);
   res.json({ message: 'Logged out from all devices' });
@@ -259,6 +268,7 @@ export const updateProfile = async (req: any, res: Response) => {
   if (preferences) user.preferences = { ...user.preferences, ...preferences };
 
   await user.save();
+  await cache.del(CACHE_KEYS.USER(req.user._id));
   res.json({ user: buildUserPayload(user) });
 };
 
@@ -307,6 +317,9 @@ export const changePassword = async (req: any, res: Response) => {
       user.sessions = [];
     }
     await user.save();
+
+    await cache.del(CACHE_KEYS.USER(req.user._id));
+    await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
 
     res.json({ message: 'Password changed successfully. Other sessions have been logged out.' });
   } catch (error: any) {
@@ -377,6 +390,9 @@ export const deleteAccount = async (req: any, res: Response) => {
     // Delete from MongoDB
     await User.findByIdAndDelete(user._id);
 
+    await cache.del(CACHE_KEYS.USER(req.user._id));
+    await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+
     // Clear cookies
     res.clearCookie(accessCookieName, accessCookieOptions);
     res.clearCookie(refreshCookieName, refreshCookieOptions);
@@ -435,6 +451,12 @@ export const getSessions = async (req: any, res: Response) => {
 
 export const getWorkspace = async (req: any, res: Response) => {
   try {
+    const cacheKey = CACHE_KEYS.WORKSPACE(req.user._id);
+    const cached = await cache.get<any>(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const Workspace = (await import('../models/Workspace')).default;
     let workspace = await Workspace.findOne({
       'members.userId': req.user._id,
@@ -454,14 +476,17 @@ export const getWorkspace = async (req: any, res: Response) => {
       (m: any) => m.userId.toString() === req.user._id.toString(),
     );
 
-    res.json({
+    const result = {
       workspace: {
         _id: workspace._id,
         name: workspace.name,
         description: workspace.description,
         role: memberEntry?.role || 'owner',
       },
-    });
+    };
+
+    await cache.set(cacheKey, result, CACHE_TTL.WORKSPACE);
+    res.json(result);
   } catch (error: any) {
     res
       .status(500)
