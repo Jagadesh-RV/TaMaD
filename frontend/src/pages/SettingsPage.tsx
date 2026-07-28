@@ -576,6 +576,23 @@ export default function SettingsPage() {
                               IP: {session.ipAddress || 'Unknown'} · Last active: {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleDateString() : 'Unknown'}
                             </p>
                           </div>
+                          {!session.isCurrent && (
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await useAuthStore.getState().revokeSession(i);
+                                  toast.success('Session revoked');
+                                  fetchSessions();
+                                } catch {
+                                  toast.error('Failed to revoke session');
+                                }
+                              }}
+                              className="btn btn-ghost btn-sm shrink-0"
+                              style={{ color: 'var(--color-danger)' }}
+                            >
+                              <LogOut size={14} />
+                            </button>
+                          )}
                         </div>
                       ))}
                     </div>
