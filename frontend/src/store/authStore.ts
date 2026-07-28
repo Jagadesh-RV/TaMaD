@@ -49,6 +49,7 @@ interface AuthState {
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   getSessions: () => Promise<SessionInfo[]>;
+  revokeSession: (sessionIndex: number) => Promise<void>;
   getWorkspace: () => Promise<WorkspaceShape | null>;
 }
 
@@ -148,6 +149,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   getSessions: async () => {
     const response = await api.get('/auth/sessions');
     return response.data.sessions;
+  },
+
+  revokeSession: async (sessionIndex: number) => {
+    await api.post('/auth/sessions/revoke', { sessionIndex });
   },
 
   getWorkspace: async () => {
