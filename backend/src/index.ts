@@ -10,9 +10,11 @@ import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db';
 import { redis } from './config/redis';
 import logger from './utils/logger';
+import { validateEnv } from './utils/validateEnv';
 import 'express-async-errors';
 
 dotenv.config();
+validateEnv();
 
 const app = express();
 const httpServer = createServer(app);
@@ -31,6 +33,7 @@ import healthRoutes from './routes/healthRoutes';
 import commentRoutes from './routes/commentRoutes';
 import aiRoutes from './routes/aiRoutes';
 import contactRoutes from './routes/contactRoutes';
+import notificationRoutes from './routes/notificationRoutes';
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -68,6 +71,7 @@ app.use('/api/whiteboards', whiteboardRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {
