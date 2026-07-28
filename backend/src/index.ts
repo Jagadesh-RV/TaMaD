@@ -1,17 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { initSocket } from './sockets/socketManager';
-import rateLimit from 'express-rate-limit';
 import { connectDB } from './config/db';
 import { redis } from './config/redis';
 import logger from './utils/logger';
 import { validateEnv } from './utils/validateEnv';
 import { startBackgroundJobs } from './utils/jobs';
+import { setupSecurity } from './utils/security';
 import 'express-async-errors';
 
 dotenv.config();
