@@ -43,6 +43,14 @@ import fileRoutes from './routes/fileRoutes';
 import searchRoutes from './routes/searchRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import focusSessionRoutes from './routes/focusSessionRoutes';
+import automationRoutes from './routes/automationRoutes';
+import queueRoutes from './routes/queueRoutes';
+import monitoringRoutes from './routes/monitoringRoutes';
+import seedRoutes from './routes/seedRoutes';
+import { seedDatabase } from './utils/seed';
+import { initSentry } from './utils/monitoring';
+
+initSentry();
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -82,6 +90,10 @@ app.use('/api/files', fileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/focus-sessions', focusSessionRoutes);
+app.use('/api/automation', automationRoutes);
+app.use('/api/queue', queueRoutes);
+app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/admin', seedRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {
@@ -116,6 +128,10 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
+
+    if (process.env.NODE_ENV !== 'production') {
+      seedDatabase().catch((err) => logger.error('Seed failed:', err));
+    }
   } catch (error) {
     logger.error('Failed to start server', error);
     process.exit(1);
