@@ -90,6 +90,7 @@ export default function App() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/ai" element={<AIAssistantPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
