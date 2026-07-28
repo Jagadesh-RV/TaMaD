@@ -69,6 +69,9 @@ export const CACHE_KEYS = {
   GOALS: (workspaceId: string) => `goals:${workspaceId}`,
   WHITEBOARDS: (workspaceId: string) => `whiteboards:${workspaceId}`,
   NOTIFICATIONS_UNREAD: (userId: string) => `notifications:unread:${userId}`,
+  TAGS: (workspaceId: string) => `tags:${workspaceId}`,
+  CATEGORIES: (workspaceId: string) => `categories:${workspaceId}`,
+  PORTFOLIOS: (workspaceId: string) => `portfolios:${workspaceId}`,
 };
 
 export const CACHE_TTL = {

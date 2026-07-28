@@ -34,6 +34,15 @@ import commentRoutes from './routes/commentRoutes';
 import aiRoutes from './routes/aiRoutes';
 import contactRoutes from './routes/contactRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import portfolioRoutes from './routes/portfolioRoutes';
+import milestoneRoutes from './routes/milestoneRoutes';
+import tagRoutes from './routes/tagRoutes';
+import categoryRoutes from './routes/categoryRoutes';
+import workspaceRoutes from './routes/workspaceRoutes';
+import fileRoutes from './routes/fileRoutes';
+import searchRoutes from './routes/searchRoutes';
+import analyticsRoutes from './routes/analyticsRoutes';
+import focusSessionRoutes from './routes/focusSessionRoutes';
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -64,6 +73,15 @@ app.use('/api/comments', commentRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/portfolios', portfolioRoutes);
+app.use('/api/milestones', milestoneRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/workspaces', workspaceRoutes);
+app.use('/api/files', fileRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/focus-sessions', focusSessionRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {
@@ -75,10 +93,11 @@ app.get('/api/ready', async (_req, res) => {
 });
 
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error(err.message, { stack: err.stack });
+  logger.error(err.message, { stack: err.stack, requestId: _req.headers['x-request-id'] });
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   res.status(statusCode).json({
     error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    requestId: _req.headers['x-request-id'],
   });
 });
 

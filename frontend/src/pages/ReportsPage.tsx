@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
+import api from '../utils/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
 
@@ -79,8 +80,47 @@ export default function ReportsPage() {
     if (workspaceId) fetchTasks(workspaceId);
   }, [fetchTasks, workspaceId]);
 
-  const completedTasks = tasks.filter((t: any) => t.status === 'done').length;
-  const totalTasks = tasks.length;
+  // Filter tasks by date range
+  const filteredTasks = useMemo(() => {
+    const now = new Date();
+    let startDate: Date | null = null;
+    if (dateRange === 'This Week') {
+      startDate = new Date(now);
+      startDate.setDate(now.getDate() - 7);
+    } else if (dateRange === 'This Month') {
+      startDate = new Date(now);
+      startDate.setMonth(now.getMonth() - 1);
+    } else if (dateRange === 'Last 3 Months') {
+      startDate = new Date(now);
+      startDate.setMonth(now.getMonth() - 3);
+    } else if (dateRange === 'Year') {
+      startDate = new Date(now);
+      startDate.setFullYear(now.getFullYear() - 1);
+    }
+    if (!startDate) return tasks;
+    return tasks.filter((t: any) => {
+      const created = t.createdAt ? new Date(t.createdAt) : null;
+      return created && created >= startDate!;
+    });
+  }, [tasks, dateRange]);
+
+  const handleExport = useCallback(async () => {
+    try {
+      const { data } = await api.get('/analytics/export/csv', {
+        params: { workspaceId },
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tamad-report-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch {}
+  }, [workspaceId]);
+
+  const completedTasks = filteredTasks.filter((t: any) => t.status === 'done').length;
+  const totalTasks = filteredTasks.length;
 
   const weeklyProductivity = useMemo(() => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -89,21 +129,21 @@ export default function ReportsPage() {
       const date = new Date(now);
       date.setDate(now.getDate() - (6 - i));
       const dateStr = date.toISOString().slice(0, 10);
-      const completedCount = tasks.filter((t: any) => {
+      const completedCount = filteredTasks.filter((t: any) => {
         if (!t.updatedAt) return false;
         return t.updatedAt.slice(0, 10) === dateStr && t.status === 'done';
       }).length;
-      const createdCount = tasks.filter((t: any) => {
+      const createdCount = filteredTasks.filter((t: any) => {
         if (!t.createdAt) return false;
         return t.createdAt.slice(0, 10) === dateStr;
       }).length;
       return { day, completed: completedCount, created: createdCount };
     });
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const statusDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
-    tasks.forEach((t: any) => {
+    filteredTasks.forEach((t: any) => {
       counts[t.status] = (counts[t.status] || 0) + 1;
     });
     return [
@@ -112,11 +152,11 @@ export default function ReportsPage() {
       { name: 'Review', value: counts['review'] || 0, color: 'var(--color-warning)' },
       { name: 'Done', value: counts['done'] || 0, color: 'var(--color-success)' },
     ].filter(s => s.value > 0);
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const priorityDistribution = useMemo(() => {
     const counts: Record<string, number> = {};
-    tasks.forEach((t: any) => {
+    filteredTasks.forEach((t: any) => {
       counts[t.priority] = (counts[t.priority] || 0) + 1;
     });
     return [
@@ -125,11 +165,11 @@ export default function ReportsPage() {
       { name: 'Medium', value: counts['medium'] || 0, color: 'var(--color-accent)' },
       { name: 'Low', value: counts['low'] || 0, color: 'var(--color-muted)' },
     ].filter(p => p.value > 0);
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const teamPerformance = useMemo(() => {
     const members: Record<string, { name: string; tasks: number; hours: number }> = {};
-    tasks.forEach((t: any) => {
+    filteredTasks.forEach((t: any) => {
       const assignee = t.assignee || 'Unassigned';
       if (!members[assignee]) {
         members[assignee] = { name: assignee, tasks: 0, hours: 0 };
@@ -140,7 +180,7 @@ export default function ReportsPage() {
       ...m,
       hours: m.tasks * 2,
     }));
-  }, [tasks]);
+  }, [filteredTasks]);
 
   const productivityScore = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
@@ -179,7 +219,7 @@ export default function ReportsPage() {
               </button>
             ))}
           </div>
-          <button className="btn btn-secondary btn-sm">
+          <button onClick={handleExport} className="btn btn-secondary btn-sm">
             <Download size={14} />
             Export
           </button>

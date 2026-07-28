@@ -1,6 +1,7 @@
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { Express } from 'express';
+import { Express, Request, Response, NextFunction } from 'express';
+import crypto from 'crypto';
 
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
@@ -53,8 +54,38 @@ export const strictRateLimiter = createRateLimiter(
   'Too many requests, please try again later.'
 );
 
+// Sanitize request body - strip potential XSS/injection from string fields
+export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
+  if (req.body && typeof req.body === 'object') {
+    const sanitize = (obj: any): any => {
+      if (typeof obj === 'string') {
+        return obj.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
+      }
+      if (Array.isArray(obj)) return obj.map(sanitize);
+      if (obj && typeof obj === 'object') {
+        const cleaned: any = {};
+        for (const key of Object.keys(obj)) {
+          cleaned[key] = sanitize(obj[key]);
+        }
+        return cleaned;
+      }
+      return obj;
+    };
+    req.body = sanitize(req.body);
+  }
+  next();
+};
+
+// Add request ID for tracing
+export const requestId = (req: Request, _res: Response, next: NextFunction) => {
+  req.headers['x-request-id'] = req.headers['x-request-id'] || crypto.randomUUID();
+  next();
+};
+
 export const setupSecurity = (app: Express) => {
+  app.use(requestId);
   app.use(securityHeaders);
+  app.use(sanitizeInput);
   app.use('/api', globalRateLimiter);
   app.use('/api/auth', authRateLimiter);
   app.use('/api/contact', strictRateLimiter);

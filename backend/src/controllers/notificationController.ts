@@ -2,6 +2,7 @@ import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Notification from '../models/Notification';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
+import { getIO } from '../sockets/socketManager';
 
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   const { page = '1', limit = '50', unreadOnly } = req.query;
@@ -43,6 +44,12 @@ export const markRead = async (req: AuthRequest, res: Response) => {
   }
 
   await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
+  
+  getIO().to(`user_${req.user._id}`).emit('notification_updated', {
+    notificationId: notification._id,
+    read: true,
+  });
+  
   res.json(notification);
 };
 
@@ -53,6 +60,9 @@ export const markAllRead = async (req: AuthRequest, res: Response) => {
   );
 
   await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
+  
+  getIO().to(`user_${req.user._id}`).emit('notification_read_all');
+  
   res.json({ message: 'All notifications marked as read' });
 };
 
@@ -66,11 +76,18 @@ export const deleteNotification = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Notification not found' });
   }
 
+  await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
+  
+  getIO().to(`user_${req.user._id}`).emit('notification_deleted', {
+    notificationId: notification._id,
+  });
+  
   res.json({ message: 'Notification removed' });
 };
 
 export const deleteAllNotifications = async (req: AuthRequest, res: Response) => {
   await Notification.deleteMany({ userId: req.user._id });
+  await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(req.user._id));
   res.json({ message: 'All notifications deleted' });
 };
 
@@ -92,6 +109,18 @@ export const createNotification = async (
   });
   
   await cache.del(CACHE_KEYS.NOTIFICATIONS_UNREAD(userId));
+  
+  getIO().to(`user_${userId}`).emit('notification_created', {
+    _id: notification._id,
+    title: notification.title,
+    body: notification.body,
+    type: notification.type,
+    entityId: notification.entityId,
+    entityType: notification.entityType,
+    link: notification.link,
+    read: notification.read,
+    createdAt: notification.createdAt,
+  });
   
   return notification;
 };

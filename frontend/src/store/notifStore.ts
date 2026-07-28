@@ -56,7 +56,7 @@ export const useNotifStore = create<NotifState>((set) => ({
 
   markRead: async (id) => {
     try {
-      await api.patch(`/notifications/${id}/read`);
+      await api.patch(`/notifications/${id}`);
       set(s => ({
         notifications: s.notifications.map(n => n._id === id ? { ...n, read: true } : n),
         unread: Math.max(0, s.unread - 1),
