@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 
 type Theme = 'light' | 'dark';
 
+const STORAGE_KEY = 'tamad_theme';
+
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('tamad-theme') as Theme;
+      const stored = localStorage.getItem(STORAGE_KEY) as Theme;
       if (stored) return stored;
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
@@ -13,14 +15,18 @@ export function useTheme() {
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('tamad-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem('tamad-theme')) {
+      if (!localStorage.getItem(STORAGE_KEY)) {
         setThemeState(e.matches ? 'dark' : 'light');
       }
     };

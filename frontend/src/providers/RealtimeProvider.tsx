@@ -2,13 +2,21 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
+import { useNotifStore } from '../store/notifStore';
 
 interface RealtimeContextType {
   socket: Socket | null;
   isConnected: boolean;
+  onlineUsers: string[];
+  requestNotificationPermission: () => Promise<NotificationPermission>;
 }
 
-const RealtimeContext = createContext<RealtimeContextType>({ socket: null, isConnected: false });
+const RealtimeContext = createContext<RealtimeContextType>({
+  socket: null,
+  isConnected: false,
+  onlineUsers: [],
+  requestNotificationPermission: async () => 'default',
+});
 
 export const useRealtime = () => useContext(RealtimeContext);
 
@@ -16,10 +24,19 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const user = useAuthStore(s => s.user);
   const workspace = useAuthStore(s => s.workspace);
   const fetchTasks = useTaskStore(s => s.fetchTasks);
+  const addRealtime = useNotifStore(s => s.addRealtime);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   const workspaceId = workspace?._id;
+
+  const requestNotificationPermission = useCallback(async (): Promise<NotificationPermission> => {
+    if (!('Notification' in window)) return 'denied';
+    if (Notification.permission === 'granted') return 'granted';
+    if (Notification.permission === 'denied') return 'denied';
+    return await Notification.requestPermission();
+  }, []);
 
   useEffect(() => {
     if (!user || !workspaceId) return;
@@ -47,15 +64,31 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     newSocket.on('tasks_bulk_updated', () => fetchTasks(workspaceId));
     newSocket.on('tasks_bulk_deleted', () => fetchTasks(workspaceId));
 
+    newSocket.on('presence_update', (data: { workspaceId: string; users: string[] }) => {
+      if (data.workspaceId === workspaceId) {
+        setOnlineUsers(data.users);
+      }
+    });
+
+    newSocket.on('task_assigned', (data: { taskId: string; taskTitle: string; assignedBy: string }) => {
+      addRealtime({
+        id: `task_assigned_${data.taskId}_${Date.now()}`,
+        title: 'Task Assigned',
+        body: `You have been assigned to "${data.taskTitle}"`,
+        type: 'task_assigned',
+        time: new Date().toISOString(),
+      });
+    });
+
     setSocket(newSocket);
 
     return () => {
       newSocket.close();
     };
-  }, [user, workspaceId, fetchTasks]);
+  }, [user, workspaceId, fetchTasks, addRealtime]);
 
   return (
-    <RealtimeContext.Provider value={{ socket, isConnected }}>
+    <RealtimeContext.Provider value={{ socket, isConnected, onlineUsers, requestNotificationPermission }}>
       {children}
     </RealtimeContext.Provider>
   );

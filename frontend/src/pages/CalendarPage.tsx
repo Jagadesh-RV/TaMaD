@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   ChevronLeft, ChevronRight, Calendar as CalendarIcon,
@@ -24,6 +24,8 @@ import clsx from 'clsx';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useAuthStore } from '../store/authStore';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
 
 function getPriorityDot(priority: string) {
   switch (priority) {
@@ -62,10 +64,20 @@ export default function CalendarPage() {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [projectFilter, setProjectFilter] = useState<string[]>([]);
 
-  const { tasks, fetchTasks } = useTaskStore();
-  const { projects, fetchProjects } = useProjectStore();
+  const { tasks, fetchTasks, loading: tasksLoading, error: tasksError } = useTaskStore();
+  const { projects, fetchProjects, loading: projectsLoading, error: projectsError } = useProjectStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+
+  const isLoading = tasksLoading || projectsLoading;
+  const error = tasksError || projectsError;
+
+  const retry = useCallback(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId]);
 
   useEffect(() => {
     if (workspaceId) {
@@ -169,7 +181,12 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      {isLoading && <LoadingSpinner text="Loading calendar..." />}
+
+      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+
       {/* Main Layout */}
+      {!isLoading && !error && (
       <div className="flex flex-1 min-h-0 gap-5">
         {/* Calendar Grid */}
         <div className="flex-1 flex flex-col min-w-0">
@@ -342,6 +359,7 @@ export default function CalendarPage() {
           </motion.div>
         </div>
       </div>
+      )}
     </div>
   );
 }

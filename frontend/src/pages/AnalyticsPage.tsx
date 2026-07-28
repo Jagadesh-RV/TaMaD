@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target,
@@ -10,6 +10,8 @@ import {
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useAuthStore } from '../store/authStore';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 12 },
@@ -20,10 +22,20 @@ const cardVariant = {
 };
 
 export default function AnalyticsPage() {
-  const { tasks, fetchTasks } = useTaskStore();
-  const { projects, fetchProjects } = useProjectStore();
+  const { tasks, fetchTasks, loading: tasksLoading, error: tasksError } = useTaskStore();
+  const { projects, fetchProjects, loading: projectsLoading, error: projectsError } = useProjectStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+
+  const isLoading = tasksLoading || projectsLoading;
+  const error = tasksError || projectsError;
+
+  const retry = useCallback(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId]);
 
   useEffect(() => {
     if (workspaceId) {
@@ -111,7 +123,13 @@ export default function AnalyticsPage() {
         <p className="page-subtitle">Track productivity and performance insights across your workspace.</p>
       </div>
 
-      {/* Stat cards */}
+      {isLoading && <LoadingSpinner text="Loading analytics..." />}
+
+      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+
+      {!isLoading && !error && (
+        <>
+          {/* Stat cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
@@ -275,6 +293,8 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
       </div>
+        </>
+      )}
     </div>
   );
 }

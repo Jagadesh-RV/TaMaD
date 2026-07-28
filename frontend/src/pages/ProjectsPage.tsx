@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus,
   Calendar,
@@ -15,15 +15,27 @@ import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
 
 export default function ProjectsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { projects, fetchProjects, createProject } = useProjectStore() as any;
+  const { projects, fetchProjects, createProject, deleteProject, loading: projectsLoading, error: projectsError } = useProjectStore() as any;
   const { tasks, fetchTasks } = useTaskStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+
+  const isLoading = projectsLoading;
+  const error = projectsError;
+
+  const retry = useCallback(() => {
+    if (workspaceId) {
+      fetchProjects(workspaceId);
+      fetchTasks(workspaceId);
+    }
+  }, [fetchProjects, fetchTasks, workspaceId]);
 
   useEffect(() => {
     if (workspaceId) {
@@ -63,6 +75,12 @@ export default function ProjectsPage() {
 
   const handleSaveProject = async (data: any) => {
     await createProject({ ...data, workspaceId });
+  };
+
+  const handleDeleteProject = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+      deleteProject(id);
+    }
   };
 
   return (
@@ -109,7 +127,11 @@ export default function ProjectsPage() {
       </div>
 
       {/* Projects Grid */}
-      {projects.length === 0 ? (
+      {isLoading && <LoadingSpinner text="Loading projects..." />}
+
+      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+
+      {!isLoading && !error && projects.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">
             <FolderKanban size={32} />

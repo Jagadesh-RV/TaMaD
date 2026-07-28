@@ -1,29 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Loader2, Mail, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getClientAuth, resendVerificationEmail } from '../../services/firebase';
 import { useAuthStore } from '../../store/authStore';
 
+const AUTO_CHECK_INTERVAL = 10;
+
 export default function VerifyEmailPage() {
   const navigate = useNavigate();
   const syncEmailVerification = useAuthStore((state) => state.syncEmailVerification);
   const [isSending, setIsSending] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
+  const [countdown, setCountdown] = useState(AUTO_CHECK_INTERVAL);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const resend = async () => {
-    setIsSending(true);
-    try {
-      await resendVerificationEmail();
-      toast.success('Verification email sent. Check your inbox.');
-    } catch (error: any) {
-      toast.error(error.message || 'Unable to send verification email.');
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const checkVerification = async () => {
+  const checkVerification = useCallback(async () => {
     setIsChecking(true);
     try {
       await getClientAuth().currentUser?.reload();
@@ -39,7 +31,35 @@ export default function VerifyEmailPage() {
     } finally {
       setIsChecking(false);
     }
+  }, [syncEmailVerification, navigate]);
+
+  const resend = async () => {
+    setIsSending(true);
+    try {
+      await resendVerificationEmail();
+      toast.success('Verification email sent. Check your inbox.');
+    } catch (error: any) {
+      toast.error(error.message || 'Unable to send verification email.');
+    } finally {
+      setIsSending(false);
+    }
   };
+
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          checkVerification();
+          return AUTO_CHECK_INTERVAL;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [checkVerification]);
 
   return (
     <div className="auth-page">
@@ -68,6 +88,10 @@ export default function VerifyEmailPage() {
             )}
             {isChecking ? 'Checking...' : "I've verified my email"}
           </button>
+
+          <div className="text-center text-xs" style={{ color: 'var(--color-muted)' }}>
+            Auto-checking in {countdown}s
+          </div>
 
           <button
             type="button"

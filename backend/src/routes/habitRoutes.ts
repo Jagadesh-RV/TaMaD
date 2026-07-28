@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { getHabits, createHabit, toggleHabitDate, deleteHabit } from '../controllers/habitController';
 import { protect } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { habitCreateSchema } from '../middleware/schemas';
 
 const router = Router();
 
@@ -8,7 +10,7 @@ router.use(protect);
 
 router.route('/')
   .get(getHabits)
-  .post(createHabit);
+  .post(validate(habitCreateSchema), createHabit);
 
 router.route('/:id')
   .delete(deleteHabit);

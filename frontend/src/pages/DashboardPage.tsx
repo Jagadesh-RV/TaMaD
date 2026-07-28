@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
-  LayoutGrid, Filter,
+  LayoutGrid, Filter, AlertCircle, X,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -54,7 +54,14 @@ function useAuthName() {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const workspace = useAuthStore(s => s.workspace);
+  const user = useAuthStore(s => s.user);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [emailBannerDismissed, setEmailBannerDismissed] = useState(() => {
+    if (user?.id) {
+      return localStorage.getItem(`email_verify_dismissed_${user.id}`) === 'true';
+    }
+    return false;
+  });
   const { tasks, loading: tasksLoading, fetchTasks } = useTaskStore();
   const { projects, loading: projectsLoading, fetchProjects } = useProjectStore();
   const workspaceId = workspace?._id || '';
@@ -118,8 +125,55 @@ export default function DashboardPage() {
       .slice(0, 6);
   }, [tasks]);
 
+  const handleDismissEmailBanner = () => {
+    if (user?.id) {
+      localStorage.setItem(`email_verify_dismissed_${user.id}`, 'true');
+    }
+    setEmailBannerDismissed(true);
+  };
+
+  const showEmailBanner = user && user.emailVerified === false && user.authProvider === 'email' && !emailBannerDismissed;
+
   return (
     <div className="page">
+      {/* Email verification banner */}
+      {showEmailBanner && (
+        <div
+          className="mb-6 flex items-center justify-between gap-4 rounded-xl px-4 py-3"
+          style={{
+            background: 'var(--color-warning-light)',
+            border: '1px solid var(--color-warning)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle size={18} style={{ color: 'var(--color-warning)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-warning)' }}>
+              Please verify your email address
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/verify-email')}
+              className="rounded-lg px-3 py-1.5 text-xs font-bold transition-colors"
+              style={{
+                background: 'var(--color-warning)',
+                color: 'white',
+              }}
+            >
+              Verify Now
+            </button>
+            <button
+              onClick={handleDismissEmailBanner}
+              className="rounded-lg p-1 transition-colors"
+              style={{ color: 'var(--color-warning)' }}
+              aria-label="Dismiss"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>

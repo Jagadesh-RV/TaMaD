@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Download,
   Clock,
@@ -26,6 +26,8 @@ import {
 } from 'recharts';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
 
 const DATE_RANGES = ['This Week', 'This Month', 'Last 3 Months', 'Year'];
 
@@ -62,9 +64,16 @@ const CustomTooltip = ({
 
 export default function ReportsPage() {
   const [dateRange, setDateRange] = useState('This Month');
-  const { tasks, fetchTasks } = useTaskStore();
+  const { tasks, fetchTasks, loading: tasksLoading, error: tasksError } = useTaskStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+
+  const isLoading = tasksLoading;
+  const error = tasksError;
+
+  const retry = useCallback(() => {
+    if (workspaceId) fetchTasks(workspaceId);
+  }, [fetchTasks, workspaceId]);
 
   useEffect(() => {
     if (workspaceId) fetchTasks(workspaceId);
@@ -177,7 +186,13 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Summary Stats */}
+      {isLoading && <LoadingSpinner text="Loading reports..." />}
+
+      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+
+      {!isLoading && !error && (
+        <>
+          {/* Summary Stats */}
       <div className="mb-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {SUMMARY_STATS.map((stat, i) => (
           <motion.div
@@ -360,6 +375,8 @@ export default function ReportsPage() {
           </div>
         </motion.div>
       </div>
+        </>
+      )}
     </div>
   );
 }

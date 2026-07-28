@@ -7,6 +7,13 @@ import '../models/User';
 import { getIO } from '../sockets/socketManager';
 import { createAuditLog } from '../utils/auditLogger';
 
+const emitTaskAssigned = async (taskId: string, taskTitle: string, newAssigneeIds: string[], assignedBy: string) => {
+  const io = getIO();
+  for (const userId of newAssigneeIds) {
+    io.to(`user_${userId}`).emit('task_assigned', { taskId, taskTitle, assignedBy });
+  }
+};
+
 // @desc    Get all tasks for a workspace
 // @route   GET /api/tasks?workspaceId=...
 // @access  Private
@@ -90,7 +97,11 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     .populate('parentTaskId', 'title');
 
   getIO().to(`workspace_${workspaceId}`).emit('task_created', populatedTask);
-  
+
+  if (assignees && assignees.length > 0) {
+    await emitTaskAssigned(task._id.toString(), title, assignees, req.user._id);
+  }
+
   await createAuditLog(
     workspaceId as string,
     req.user._id,
@@ -113,6 +124,8 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Task not found' });
   }
 
+  const previousAssigneeIds = (task.assignees || []).map((id: any) => id.toString());
+
   const updatedTask = await Task.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
@@ -125,6 +138,13 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     .populate('parentTaskId', 'title');
 
   getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updatedTask);
+
+  if (updatedTask && req.body.assignees && Array.isArray(req.body.assignees)) {
+    const newAssigneeIds = req.body.assignees.filter((id: string) => !previousAssigneeIds.includes(id));
+    if (newAssigneeIds.length > 0) {
+      await emitTaskAssigned(task._id.toString(), updatedTask.title, newAssigneeIds, req.user._id);
+    }
+  }
 
   await createAuditLog(
     task.workspaceId.toString(),

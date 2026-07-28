@@ -5,10 +5,11 @@ import { format } from 'date-fns';
 import { useNoteStore } from '../store/noteStore';
 import { useAuthStore } from '../store/authStore';
 import NoteModal from '../components/notes/NoteModal';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function NotesPage() {
   const workspace = useAuthStore(s => s.workspace);
-  const { notes, fetchNotes, createNote, updateNote } = useNoteStore() as any;
+  const { notes, fetchNotes, createNote, updateNote, loading } = useNoteStore() as any;
   const [activeDoc, setActiveDoc] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -75,7 +76,8 @@ export default function NotesPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {notes?.length === 0 ? (
+          {loading && <LoadingSpinner text="Loading notes..." />}
+          {!loading && notes?.length === 0 ? (
             <div className="text-center p-4 text-sm text-gray-400 font-medium">
               No notes yet. Click + to create one.
             </div>

@@ -2,6 +2,13 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import type { CookieOptions, Request, Response } from 'express';
 import User from '../models/User';
+import Task from '../models/Task';
+import Project from '../models/Project';
+import Note from '../models/Note';
+import Whiteboard from '../models/Whiteboard';
+import Goal from '../models/Goal';
+import Habit from '../models/Habit';
+import Workspace from '../models/Workspace';
 import { getFirebaseAuth } from '../config/firebase';
 
 const accessCookieName = 'tamad_access_token';
@@ -314,9 +321,53 @@ export const changePassword = async (req: any, res: Response) => {
 
 export const deleteAccount = async (req: any, res: Response) => {
   try {
-    const { password } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Find all workspaces the user belongs to
+    const workspaces = await Workspace.find({ 'members.userId': user._id });
+    const workspaceIds = workspaces.map((w) => w._id);
+
+    // Delete all associated data
+    await Promise.all([
+      Task.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { assignee: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Project.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Note.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Whiteboard.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Goal.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Habit.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+    ]);
 
     // Delete from Firebase Auth
     if (user.firebaseUid) {
