@@ -149,8 +149,16 @@ export default function AnalyticsPage() {
     <div className="page">
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">Analytics</h1>
-        <p className="page-subtitle">Track productivity and performance insights across your workspace.</p>
+        <div>
+          <h1 className="page-title">Analytics</h1>
+          <p className="page-subtitle">Track productivity and performance insights across your workspace.</p>
+        </div>
+        {!isLoading && !error && tasks.length > 0 && (
+          <button onClick={exportCSV} className="btn btn-ghost btn-sm">
+            <Download size={14} />
+            Export CSV
+          </button>
+        )}
       </div>
 
       {isLoading && <LoadingSpinner text="Loading analytics..." />}
