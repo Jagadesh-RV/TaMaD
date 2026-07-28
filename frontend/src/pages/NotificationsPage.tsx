@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   Bell,
   CheckCheck,
@@ -7,6 +7,8 @@ import {
   CheckCircle,
   AlertOctagon,
   Inbox,
+  Trash2,
+  RefreshCw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -26,35 +28,49 @@ const TYPE_CONFIG: Record<string, { icon: typeof Bell; color: string; bg: string
   info: { icon: Info, color: 'var(--color-info)', bg: 'var(--color-info-light)', label: 'Info' },
   success: { icon: CheckCircle, color: 'var(--color-success)', bg: 'var(--color-success-light)', label: 'Success' },
   danger: { icon: AlertOctagon, color: 'var(--color-danger)', bg: 'var(--color-danger-light)', label: 'Danger' },
+  task_assigned: { icon: Bell, color: 'var(--color-accent)', bg: 'var(--color-accent-light)', label: 'Assignment' },
+  task_updated: { icon: Info, color: 'var(--color-info)', bg: 'var(--color-info-light)', label: 'Update' },
+  mention: { icon: AlertTriangle, color: 'var(--color-warning)', bg: 'var(--color-warning-light)', label: 'Mention' },
+  comment: { icon: Info, color: 'var(--color-info)', bg: 'var(--color-info-light)', label: 'Comment' },
+  reminder: { icon: AlertOctagon, color: 'var(--color-danger)', bg: 'var(--color-danger-light)', label: 'Reminder' },
 };
 
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
-  const { notifications, fetchNotifications, markRead, markAllRead } = useNotifStore();
+  const { notifications, unread, loading, fetchNotifications, markRead, markAllRead, deleteNotification } = useNotifStore();
 
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n: any) => !n.read).length,
-    [notifications]
-  );
+  const handleMarkRead = useCallback((id: string) => {
+    void markRead(id);
+  }, [markRead]);
+
+  const handleMarkAllRead = useCallback(() => {
+    void markAllRead();
+  }, [markAllRead]);
+
+  const handleDelete = useCallback((id: string) => {
+    void deleteNotification(id);
+  }, [deleteNotification]);
 
   const filteredNotifications = useMemo(() => {
     switch (activeTab) {
       case 'unread':
-        return notifications.filter((n: any) => !n.read);
+        return notifications.filter((n) => !n.read);
       case 'mentions':
         return notifications.filter(
-          (n: any) =>
+          (n) =>
+            n.type === 'mention' ||
             n.title?.toLowerCase().includes('comment') ||
             n.body?.toLowerCase().includes('commented') ||
             n.body?.toLowerCase().includes('@')
         );
       case 'assignments':
         return notifications.filter(
-          (n: any) =>
+          (n) =>
+            n.type === 'task_assigned' ||
             n.title?.toLowerCase().includes('assigned') ||
             n.body?.toLowerCase().includes('assigned')
         );
@@ -63,17 +79,23 @@ export default function NotificationsPage() {
     }
   }, [notifications, activeTab]);
 
-  const handleMarkRead = (id: string) => {
-    void markRead(id);
-  };
-
-  const handleMarkAllRead = () => {
-    void markAllRead();
+  const formatTime = (dateStr: string) => {
+    if (!dateStr) return 'Just now';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   return (
     <div className="page" style={{ padding: '0 32px 40px' }}>
-      {/* Header */}
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--color-muted)' }}>
@@ -85,7 +107,14 @@ export default function NotificationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {unreadCount > 0 && (
+          <button
+            onClick={() => fetchNotifications()}
+            className="btn btn-ghost btn-sm"
+            title="Refresh"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
+          {unread > 0 && (
             <motion.button
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -101,12 +130,11 @@ export default function NotificationsPage() {
             style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-muted)' }}
           >
             <Bell size={16} style={{ color: 'var(--color-accent)' }} />
-            {unreadCount} unread
+            {unread} unread
           </div>
         </div>
       </div>
 
-      {/* Filter Tabs */}
       <div
         className="mb-6 flex gap-1 rounded-xl p-1"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', width: 'fit-content' }}
@@ -119,21 +147,28 @@ export default function NotificationsPage() {
             style={activeTab === tab.key ? {} : { color: 'var(--color-muted)' }}
           >
             {tab.label}
-            {tab.key === 'unread' && unreadCount > 0 && (
+            {tab.key === 'unread' && unread > 0 && (
               <span
                 className="ml-1.5 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] font-bold"
                 style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
               >
-                {unreadCount}
+                {unread}
               </span>
             )}
           </button>
         ))}
       </div>
 
-      {/* Notification List */}
       <AnimatePresence mode="popLayout">
-        {filteredNotifications.length === 0 ? (
+        {loading && notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div
+              className="h-8 w-8 animate-spin rounded-full border-2"
+              style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }}
+            />
+            <p className="mt-4 text-sm" style={{ color: 'var(--color-muted)' }}>Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
           <motion.div
             key="empty"
             initial={{ opacity: 0, y: 10 }}
@@ -157,19 +192,19 @@ export default function NotificationsPage() {
           </motion.div>
         ) : (
           <div className="flex flex-col gap-2">
-            {filteredNotifications.map((notification: any, index: number) => {
+            {filteredNotifications.map((notification, index) => {
               const config = TYPE_CONFIG[notification.type] || TYPE_CONFIG.info;
               const Icon = config.icon;
 
               return (
                 <motion.div
-                  key={notification._id || notification.id}
+                  key={notification._id}
                   layout
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   transition={{ delay: index * 0.03 }}
-                  onClick={() => !notification.read && handleMarkRead(notification._id || notification.id)}
+                  onClick={() => !notification.read && handleMarkRead(notification._id)}
                   className={clsx(
                     'group flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all',
                     !notification.read ? 'hover:shadow-soft' : 'opacity-70 hover:opacity-100'
@@ -198,12 +233,25 @@ export default function NotificationsPage() {
                           {notification.body}
                         </p>
                       </div>
-                      <span className="flex-shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: config.bg, color: config.color }}>
-                        {config.label}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex-shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold" style={{ background: config.bg, color: config.color }}>
+                          {config.label}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(notification._id);
+                          }}
+                          className="flex-shrink-0 rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50"
+                          style={{ color: 'var(--color-danger)' }}
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                     <p className="mt-2 text-xs" style={{ color: 'var(--color-muted)', opacity: 0.7 }}>
-                      {notification.time || 'Just now'}
+                      {formatTime(notification.createdAt)}
                     </p>
                   </div>
                 </motion.div>
