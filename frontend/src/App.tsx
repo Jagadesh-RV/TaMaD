@@ -26,6 +26,8 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 import ContactPage from "./pages/ContactPage";
+import DocumentsPage from "./pages/DocumentsPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
 
 function LoadingSpinner() {
   return (
@@ -85,6 +87,8 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/ai" element={<AIAssistantPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />

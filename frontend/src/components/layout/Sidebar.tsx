@@ -4,6 +4,7 @@ import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
   FileText, PenTool, BarChart3, Bell, Settings, User, ChevronLeft,
   ChevronRight, LogOut, Sparkles, TrendingUp, FolderKanban, Users,
+  Brain,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
@@ -27,6 +28,7 @@ const sections = [
     label: 'CREATIVE',
     links: [
       { label: 'Notes', path: '/notes', icon: FileText },
+      { label: 'Documents', path: '/documents', icon: FileText },
       { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
     ],
   },
@@ -35,6 +37,12 @@ const sections = [
     links: [
       { label: 'Analytics', path: '/analytics', icon: BarChart3 },
       { label: 'Reports', path: '/reports', icon: TrendingUp },
+    ],
+  },
+  {
+    label: 'AI & TOOLS',
+    links: [
+      { label: 'AI Assistant', path: '/ai', icon: Brain },
     ],
   },
   {
