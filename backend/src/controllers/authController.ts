@@ -388,6 +388,36 @@ export const deleteAccount = async (req: any, res: Response) => {
   }
 };
 
+export const revokeSession = async (req: any, res: Response) => {
+  try {
+    const { sessionIndex } = req.body;
+    if (typeof sessionIndex !== 'number') {
+      return res.status(400).json({ error: 'sessionIndex (number) is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (sessionIndex < 0 || sessionIndex >= user.sessions.length) {
+      return res.status(400).json({ error: 'Invalid session index' });
+    }
+
+    const session = user.sessions[sessionIndex];
+    const currentHash = req.cookies?.[refreshCookieName]
+      ? hashToken(req.cookies[refreshCookieName])
+      : null;
+    if (currentHash && session.tokenHash === currentHash) {
+      return res.status(400).json({ error: 'Cannot revoke your current session. Use logout instead.' });
+    }
+
+    user.sessions.splice(sessionIndex, 1);
+    await user.save();
+    res.json({ message: 'Session revoked' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Unable to revoke session' });
+  }
+};
+
 export const getSessions = async (req: any, res: Response) => {
   const user = await User.findById(req.user._id);
   const sessions = (user?.sessions || []).map((s: any) => ({

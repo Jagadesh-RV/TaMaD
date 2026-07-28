@@ -25,6 +25,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const workspace = useAuthStore(s => s.workspace);
   const fetchTasks = useTaskStore(s => s.fetchTasks);
   const addRealtime = useNotifStore(s => s.addRealtime);
+  const fetchNotifications = useNotifStore(s => s.fetchNotifications);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
@@ -52,6 +53,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     newSocket.on('connect', () => {
       setIsConnected(true);
       newSocket.emit('join_workspace', workspaceId);
+      fetchNotifications();
     });
 
     newSocket.on('disconnect', () => {
@@ -63,6 +65,8 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     newSocket.on('task_deleted', () => fetchTasks(workspaceId));
     newSocket.on('tasks_bulk_updated', () => fetchTasks(workspaceId));
     newSocket.on('tasks_bulk_deleted', () => fetchTasks(workspaceId));
+
+    newSocket.on('notification_created', () => fetchNotifications());
 
     newSocket.on('presence_update', (data: { workspaceId: string; users: string[] }) => {
       if (data.workspaceId === workspaceId) {
@@ -85,7 +89,7 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       newSocket.close();
     };
-  }, [user, workspaceId, fetchTasks, addRealtime]);
+  }, [user, workspaceId, fetchTasks, addRealtime, fetchNotifications]);
 
   return (
     <RealtimeContext.Provider value={{ socket, isConnected, onlineUsers, requestNotificationPermission }}>

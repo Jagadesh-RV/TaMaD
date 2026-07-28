@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Palette, Bell, User, Shield, Save, Moon, Sun,
   Mail, Clock, Globe, Download, Key, AlertTriangle,
-  Trash2, CheckCircle2, Loader2,
+  Trash2, CheckCircle2, Loader2, Monitor, Smartphone,
+  Laptop, LogOut,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -11,13 +12,14 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 import { useTheme } from '../hooks/useTheme';
 
-type SettingsTab = 'appearance' | 'notifications' | 'account' | 'security';
+type SettingsTab = 'appearance' | 'notifications' | 'account' | 'security' | 'sessions';
 
 const TABS: { key: SettingsTab; label: string; icon: typeof Palette }[] = [
   { key: 'appearance', label: 'Appearance', icon: Palette },
   { key: 'notifications', label: 'Notifications', icon: Bell },
   { key: 'account', label: 'Account', icon: User },
   { key: 'security', label: 'Security', icon: Shield },
+  { key: 'sessions', label: 'Sessions', icon: Monitor },
 ];
 
 function ToggleSwitch({
@@ -119,6 +121,8 @@ export default function SettingsPage() {
 
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
 
   useEffect(() => {
     void init();
@@ -130,6 +134,23 @@ export default function SettingsPage() {
       setTimezone(user.preferences?.timezone || 'UTC');
     }
   }, [user]);
+
+  const fetchSessions = useCallback(async () => {
+    setSessionsLoading(true);
+    try {
+      const { getSessions } = useAuthStore.getState();
+      const data = await getSessions();
+      setSessions(data || []);
+    } catch {
+      setSessions([]);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'sessions') fetchSessions();
+  }, [activeTab, fetchSessions]);
 
   const handleSave = async () => {
     try {
@@ -485,6 +506,80 @@ export default function SettingsPage() {
                       )}
                     </div>
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'sessions' && (
+              <motion.div
+                key="sessions"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="card"
+              >
+                <div className="card-header">
+                  <h3 className="text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>
+                    Active Sessions
+                  </h3>
+                </div>
+                <div className="card-body">
+                  {sessionsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 size={20} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
+                    </div>
+                  ) : sessions.length === 0 ? (
+                    <div className="py-8 text-center text-sm" style={{ color: 'var(--color-muted)' }}>
+                      No active sessions found.
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {sessions.map((session: any, i: number) => (
+                        <div
+                          key={i}
+                          className={clsx(
+                            'flex items-center gap-4 rounded-xl border p-4',
+                            session.isCurrent ? 'border-[var(--color-accent)]' : ''
+                          )}
+                          style={{
+                            background: session.isCurrent ? 'var(--color-accent-light)' : 'var(--color-surface-hover)',
+                            borderColor: session.isCurrent ? 'var(--color-accent)' : 'var(--color-border-light)',
+                          }}
+                        >
+                          <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                            style={{ background: 'var(--color-surface)', color: 'var(--color-muted)' }}
+                          >
+                            {session.deviceName?.toLowerCase().includes('mobile') ? (
+                              <Smartphone size={18} />
+                            ) : session.deviceName?.toLowerCase().includes('mac') ? (
+                              <Laptop size={18} />
+                            ) : (
+                              <Monitor size={18} />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-semibold truncate" style={{ color: 'var(--color-foreground)' }}>
+                                {session.deviceName || 'Unknown Device'}
+                              </p>
+                              {session.isCurrent && (
+                                <span
+                                  className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                                  style={{ background: 'var(--color-accent)', color: 'white' }}
+                                >
+                                  Current
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs" style={{ color: 'var(--color-muted)' }}>
+                              IP: {session.ipAddress || 'Unknown'} · Last active: {session.lastUsedAt ? new Date(session.lastUsedAt).toLocaleDateString() : 'Unknown'}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
