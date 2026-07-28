@@ -28,6 +28,7 @@ import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 import ContactPage from "./pages/ContactPage";
 import DocumentsPage from "./pages/DocumentsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
+import TemplatesPage from "./pages/TemplatesPage";
 
 function LoadingSpinner() {
   return (
