@@ -17,6 +17,8 @@ import WhiteboardPage from "./pages/WhiteboardPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ReportsPage from "./pages/ReportsPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
@@ -24,6 +26,12 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 import ContactPage from "./pages/ContactPage";
+import DocumentsPage from "./pages/DocumentsPage";
+import FilesPage from "./pages/FilesPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import TemplatesPage from "./pages/TemplatesPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 function LoadingSpinner() {
   return (
@@ -51,6 +59,7 @@ export default function App() {
   if (loading) return <LoadingSpinner />;
 
   return (
+    <ErrorBoundary>
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
@@ -72,18 +81,25 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/roadmap" element={<RoadmapPage />} />
         <Route path="/focus" element={<FocusPage />} />
         <Route path="/planner" element={<PlannerPage />} />
         <Route path="/notes" element={<NotesPage />} />
         <Route path="/whiteboard" element={<WhiteboardPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/files" element={<FilesPage />} />
+        <Route path="/ai" element={<AIAssistantPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </ErrorBoundary>
   );
 }

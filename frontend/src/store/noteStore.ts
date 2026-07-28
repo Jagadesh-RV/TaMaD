@@ -2,55 +2,76 @@ import { create } from 'zustand';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-export const useNoteStore = create((set, get: any) => ({
+interface Note {
+  _id: string;
+  title: string;
+  content: string;
+  workspaceId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface NoteState {
+  notes: Note[];
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  fetchNotes: (workspaceId: string) => Promise<void>;
+  createNote: (payload: Partial<Note>) => Promise<Note>;
+  updateNote: (id: string, payload: Partial<Note>) => Promise<Note>;
+  deleteNote: (id: string) => Promise<void>;
+}
+
+export const useNoteStore = create<NoteState>((set) => ({
   notes: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
-  fetchNotes: async (workspaceId?: string) => {
+  fetchNotes: async (workspaceId) => {
+    if (!workspaceId) return;
     set({ loading: true });
     try {
-      if (!workspaceId || workspaceId === 'default') {
-        workspaceId = '000000000000000000000000';
-      }
-      
       const { data } = await api.get('/notes', { params: { workspaceId } });
-      set({ notes: data, loading: false });
-    } catch (err) {
-      set({ loading: false });
+      set({ notes: data.notes || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load notes' });
       toast.error('Failed to load notes');
     }
   },
 
-  createNote: async (payload: any) => {
+  createNote: async (payload) => {
     try {
       const { data } = await api.post('/notes', payload);
-      set((s: any) => ({ notes: [data, ...s.notes] }));
+      set(s => ({ notes: [data, ...s.notes] }));
       toast.success('Note created');
       return data;
-    } catch (err) {
+    } catch {
       toast.error('Failed to create note');
-      throw err;
+      throw new Error('Failed to create note');
     }
   },
 
-  updateNote: async (id: string, payload: any) => {
+  updateNote: async (id, payload) => {
     try {
       const { data } = await api.put(`/notes/${id}`, payload);
-      set((s: any) => ({
-        notes: s.notes.map((n: any) => (n._id === id ? data : n)),
+      set(s => ({
+        notes: s.notes.map(n => (n._id === id ? data : n)),
       }));
       return data;
-    } catch (err) {
+    } catch {
       toast.error('Failed to update note');
+      throw new Error('Failed to update note');
     }
   },
 
-  deleteNote: async (id: string) => {
+  deleteNote: async (id) => {
     try {
       await api.delete(`/notes/${id}`);
-      set((s: any) => ({ notes: s.notes.filter((n: any) => n._id !== id) }));
+      set(s => ({ notes: s.notes.filter(n => n._id !== id) }));
       toast.success('Note deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete note');
     }
   },

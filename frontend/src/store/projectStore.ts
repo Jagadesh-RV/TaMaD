@@ -2,43 +2,75 @@ import { create } from 'zustand';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-export const useProjectStore = create((set, get: any) => ({
+interface Project {
+  _id: string;
+  name: string;
+  description?: string;
+  color: string;
+  workspaceId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ProjectState {
+  projects: Project[];
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  fetchProjects: (workspaceId: string) => Promise<void>;
+  createProject: (payload: Partial<Project>) => Promise<Project>;
+  updateProject: (id: string, payload: Partial<Project>) => Promise<Project>;
+  deleteProject: (id: string) => Promise<void>;
+}
+
+export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
-  fetchProjects: async (workspaceId?: string) => {
+  fetchProjects: async (workspaceId) => {
+    if (!workspaceId) return;
     set({ loading: true });
     try {
-      if (!workspaceId || workspaceId === 'default') {
-        workspaceId = '000000000000000000000000';
-      }
-      
       const { data } = await api.get('/projects', { params: { workspaceId } });
-      set({ projects: data, loading: false });
-    } catch (err) {
-      set({ loading: false });
+      set({ projects: data.projects || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load projects' });
       toast.error('Failed to load projects');
     }
   },
 
-  createProject: async (payload: any) => {
+  createProject: async (payload) => {
     try {
       const { data } = await api.post('/projects', payload);
-      set((s: any) => ({ projects: [data, ...s.projects] }));
+      set(s => ({ projects: [data, ...s.projects] }));
       toast.success('Project created');
       return data;
-    } catch (err) {
+    } catch {
       toast.error('Failed to create project');
-      throw err;
+      throw new Error('Failed to create project');
     }
   },
 
-  deleteProject: async (id: string) => {
+  updateProject: async (id, payload) => {
+    try {
+      const { data } = await api.put(`/projects/${id}`, payload);
+      set(s => ({ projects: s.projects.map(p => p._id === id ? data : p) }));
+      return data;
+    } catch {
+      toast.error('Failed to update project');
+      throw new Error('Failed to update project');
+    }
+  },
+
+  deleteProject: async (id) => {
     try {
       await api.delete(`/projects/${id}`);
-      set((s: any) => ({ projects: s.projects.filter((p: any) => p._id !== id) }));
+      set(s => ({ projects: s.projects.filter(p => p._id !== id) }));
       toast.success('Project deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete project');
     }
   },

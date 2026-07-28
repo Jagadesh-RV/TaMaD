@@ -2,43 +2,75 @@ import { create } from 'zustand';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-export const useGoalStore = create((set, get: any) => ({
+interface Goal {
+  _id: string;
+  title: string;
+  description?: string;
+  progress: number;
+  workspaceId: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface GoalState {
+  goals: Goal[];
+  loading: boolean;
+  error: string | null;
+  clearError: () => void;
+  fetchGoals: (workspaceId: string) => Promise<void>;
+  createGoal: (payload: Partial<Goal>) => Promise<Goal>;
+  updateGoal: (id: string, payload: Partial<Goal>) => Promise<Goal>;
+  deleteGoal: (id: string) => Promise<void>;
+}
+
+export const useGoalStore = create<GoalState>((set) => ({
   goals: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
-  fetchGoals: async (workspaceId?: string) => {
+  fetchGoals: async (workspaceId) => {
+    if (!workspaceId) return;
     set({ loading: true });
     try {
-      if (!workspaceId || workspaceId === 'default') {
-        workspaceId = '000000000000000000000000';
-      }
-      
       const { data } = await api.get('/goals', { params: { workspaceId } });
-      set({ goals: data, loading: false });
-    } catch (err) {
-      set({ loading: false });
+      set({ goals: data.goals || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load goals' });
       toast.error('Failed to load goals');
     }
   },
 
-  createGoal: async (payload: any) => {
+  createGoal: async (payload) => {
     try {
       const { data } = await api.post('/goals', payload);
-      set((s: any) => ({ goals: [...s.goals, data] }));
+      set(s => ({ goals: [...s.goals, data] }));
       toast.success('Goal created');
       return data;
-    } catch (err) {
+    } catch {
       toast.error('Failed to create goal');
-      throw err;
+      throw new Error('Failed to create goal');
     }
   },
 
-  deleteGoal: async (id: string) => {
+  updateGoal: async (id, payload) => {
+    try {
+      const { data } = await api.put(`/goals/${id}`, payload);
+      set(s => ({ goals: s.goals.map(g => (g._id === id ? data : g)) }));
+      return data;
+    } catch {
+      toast.error('Failed to update goal');
+      throw new Error('Failed to update goal');
+    }
+  },
+
+  deleteGoal: async (id) => {
     try {
       await api.delete(`/goals/${id}`);
-      set((s: any) => ({ goals: s.goals.filter((g: any) => g._id !== id) }));
+      set(s => ({ goals: s.goals.filter(g => g._id !== id) }));
       toast.success('Goal deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete goal');
     }
   },

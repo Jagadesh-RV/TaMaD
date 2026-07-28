@@ -23,6 +23,10 @@ api.interceptors.response.use(
       await refreshRequest;
       return api(request);
     } catch {
+      const loginPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/phone-login'];
+      if (!loginPaths.some(p => window.location.pathname.startsWith(p))) {
+        window.location.href = '/login';
+      }
       return Promise.reject(error);
     }
   },

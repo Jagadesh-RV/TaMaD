@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { getTasks, createTask, updateTask, deleteTask, reorderTask, bulkUpdateTasks, bulkDeleteTasks } from '../controllers/taskController';
 import { getComments, addComment } from '../controllers/commentController';
 import { protect } from '../middleware/auth';
+import { validate } from '../middleware/validate';
+import { taskCreateSchema, taskUpdateSchema } from '../middleware/schemas';
 
 const router = Router();
 
@@ -9,14 +11,14 @@ router.use(protect); // All task routes require authentication
 
 router.route('/')
   .get(getTasks)
-  .post(createTask);
+  .post(validate(taskCreateSchema), createTask);
 
 router.route('/bulk')
   .put(bulkUpdateTasks)
   .delete(bulkDeleteTasks);
 
 router.route('/:id')
-  .put(updateTask)
+  .put(validate(taskUpdateSchema), updateTask)
   .delete(deleteTask);
 
 router.put('/:id/reorder', reorderTask);

@@ -3,21 +3,21 @@ import { FileText, Plus, Search, MoreVertical, Bold, Italic, List, CheckSquare }
 import clsx from 'clsx';
 import { format } from 'date-fns';
 import { useNoteStore } from '../store/noteStore';
+import { useAuthStore } from '../store/authStore';
 import NoteModal from '../components/notes/NoteModal';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function NotesPage() {
-  const { notes, fetchNotes, createNote, updateNote } = useNoteStore() as any;
+  const workspace = useAuthStore(s => s.workspace);
+  const { notes, fetchNotes, createNote, updateNote, loading } = useNoteStore() as any;
   const [activeDoc, setActiveDoc] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const workspaceId = workspace?._id || '';
+
   useEffect(() => {
-    fetchNotes().then(() => {
-      // Auto-select first note if it exists and none is selected
-      if (!activeDoc && notes?.length > 0) {
-        setActiveDoc(notes[0]);
-      }
-    });
-  }, [fetchNotes]);
+    if (workspaceId) fetchNotes(workspaceId);
+  }, [fetchNotes, workspaceId]);
 
   // Handle auto-selecting the first note after notes are loaded
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function NotesPage() {
   }, [notes, activeDoc]);
 
   const handleSaveNote = async (data: any) => {
-    const newNote = await createNote({ ...data, workspaceId: '000000000000000000000000' });
+    const newNote = await createNote({ ...data, workspaceId });
     if (newNote) {
       setActiveDoc(newNote);
     }
@@ -76,7 +76,8 @@ export default function NotesPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-1">
-          {notes?.length === 0 ? (
+          {loading && <LoadingSpinner text="Loading notes..." />}
+          {!loading && notes?.length === 0 ? (
             <div className="text-center p-4 text-sm text-gray-400 font-medium">
               No notes yet. Click + to create one.
             </div>

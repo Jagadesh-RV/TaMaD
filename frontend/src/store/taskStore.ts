@@ -2,32 +2,83 @@ import { create } from 'zustand';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 
-export const useTaskStore = create((set, get) => ({
+interface Task {
+  _id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority: string;
+  workspaceId: string;
+  dueDate?: string;
+  order: number;
+  tags?: Array<{ name: string; color: string }>;
+  assignees?: Array<{ name: string; email: string; avatarUrl?: string }>;
+  categoryId?: { name: string; color: string };
+  parentTaskId?: { title: string };
+  dependencies?: Array<{ title: string; status: string }>;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  isArchived: boolean;
+}
+
+interface TaskFilters {
+  status: string;
+  priority: string;
+  tag: string;
+  search: string;
+  date: string;
+}
+
+interface TaskState {
+  tasks: Task[];
+  pagination: { total: number; page: number; limit: number; totalPages: number } | null;
+  loading: boolean;
+  error: string | null;
+  filters: TaskFilters;
+  setFilter: (key: keyof TaskFilters, value: string) => void;
+  clearFilters: () => void;
+  clearError: () => void;
+  fetchTasks: (workspaceId: string) => Promise<void>;
+  createTask: (payload: Partial<Task>) => Promise<Task>;
+  updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
+  reorderTask: (id: string, status: string, newOrder: number) => Promise<Task>;
+  deleteTask: (id: string) => Promise<void>;
+  toggleStatus: (id: string, currentStatus: string) => Promise<void>;
+  bulkUpdate: (taskIds: string[], updates: Partial<Task>, workspaceId: string) => Promise<void>;
+  bulkDelete: (taskIds: string[], workspaceId: string) => Promise<void>;
+}
+
+export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   pagination: null,
   loading: false,
+  error: null,
   filters: { status: '', priority: '', tag: '', search: '', date: '' },
 
   setFilter: (key, value) => set(s => ({ filters: { ...s.filters, [key]: value } })),
   clearFilters: () => set({ filters: { status: '', priority: '', tag: '', search: '', date: '' } }),
+  clearError: () => set({ error: null }),
 
   fetchTasks: async (workspaceId) => {
+    if (!workspaceId) return;
     set({ loading: true });
     try {
-      if (!workspaceId || workspaceId === 'default') {
-        workspaceId = '000000000000000000000000'; // Valid ObjectId format
-      }
-      const params = { ...get().filters, workspaceId };
-      Object.keys(params).forEach(k => !params[k] && delete params[k]);
-      
-      const { data } = await api.get('/tasks', { params });
-      set({ 
-        tasks: data.tasks || data, 
-        pagination: data.pagination || null,
-        loading: false 
+      const params: Record<string, string> = { workspaceId };
+      const filters = get().filters;
+      Object.entries(filters).forEach(([k, v]) => {
+        if (v) params[k] = v;
       });
-    } catch (err) {
-      set({ loading: false });
+
+      const { data } = await api.get('/tasks', { params });
+      set({
+        tasks: data.tasks || data,
+        pagination: data.pagination || null,
+        loading: false,
+        error: null,
+      });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load tasks' });
       toast.error('Failed to load tasks');
     }
   },
@@ -58,7 +109,6 @@ export const useTaskStore = create((set, get) => ({
   reorderTask: async (id, status, newOrder) => {
     try {
       const { data } = await api.put(`/tasks/${id}/reorder`, { status, newOrder });
-      // We don't need to update local state here if we already optimistically updated it
       return data;
     } catch (err) {
       toast.error('Failed to reorder task');
@@ -85,10 +135,10 @@ export const useTaskStore = create((set, get) => ({
     try {
       await api.put('/tasks/bulk', { taskIds, updates, workspaceId });
       set(s => ({
-        tasks: s.tasks.map(t => taskIds.includes(t._id) ? { ...t, ...updates } : t)
+        tasks: s.tasks.map(t => taskIds.includes(t._id) ? { ...t, ...updates } : t),
       }));
       toast.success('Tasks updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update tasks');
     }
   },
@@ -97,10 +147,10 @@ export const useTaskStore = create((set, get) => ({
     try {
       await api.delete('/tasks/bulk', { data: { taskIds, workspaceId } });
       set(s => ({
-        tasks: s.tasks.filter(t => !taskIds.includes(t._id))
+        tasks: s.tasks.filter(t => !taskIds.includes(t._id)),
       }));
       toast.success('Tasks deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete tasks');
     }
   },

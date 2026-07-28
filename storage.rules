@@ -1,0 +1,88 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*')
+        && request.resource.size < 5 * 1024 * 1024; // 5MB
+    }
+
+    function isValidFile() {
+      return request.resource.size < 50 * 1024 * 1024; // 50MB
+    }
+
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+
+    function isPdf() {
+      return request.resource.contentType == 'application/pdf';
+    }
+
+    function isDocument() {
+      return request.resource.contentType.matches('image/.*')
+        || request.resource.contentType == 'application/pdf'
+        || request.resource.contentType.matches('text/.*')
+        || request.resource.contentType.matches('application/msword')
+        || request.resource.contentType.matches('application/vnd.openxmlformats.*');
+    }
+
+    // User profile images
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isOwner(userId) && isValidImage();
+    }
+
+    // Workspace files
+    match /workspaces/{workspaceId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFile();
+      allow delete: if isAuthenticated();
+    }
+
+    // Task attachments
+    match /workspaces/{workspaceId}/tasks/{taskId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFile();
+      allow delete: if isAuthenticated();
+    }
+
+    // Project files
+    match /workspaces/{workspaceId}/projects/{projectId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFile();
+      allow delete: if isAuthenticated();
+    }
+
+    // Notes attachments
+    match /workspaces/{workspaceId}/notes/{noteId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidFile();
+      allow delete: if isAuthenticated();
+    }
+
+    // Whiteboard images
+    match /workspaces/{workspaceId}/whiteboards/{whiteboardId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isImage() && request.resource.size < 10 * 1024 * 1024; // 10MB
+      allow delete: if isAuthenticated();
+    }
+
+    // Default deny everything else
+    match /{allPaths=**} {
+      allow read: if false;
+      allow write: if false;
+      allow delete: if false;
+    }
+  }
+}
