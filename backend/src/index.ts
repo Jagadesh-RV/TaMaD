@@ -47,6 +47,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173', 'http://localhost:3000'];
 
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(
@@ -55,7 +56,19 @@ app.use(
     credentials: true,
   }),
 );
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseio.com', 'wss:'],
+      fontSrc: ["'self'", 'data:'],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
 app.use(morgan('dev'));
 app.use('/api', apiLimiter);
 
