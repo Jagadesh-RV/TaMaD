@@ -35,14 +35,6 @@ import aiRoutes from './routes/aiRoutes';
 import contactRoutes from './routes/contactRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests, please try again later.' },
-});
-
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173', 'http://localhost:3000'];
@@ -56,21 +48,8 @@ app.use(
     credentials: true,
   }),
 );
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", 'https://*.googleapis.com', 'https://*.firebaseio.com', 'wss:'],
-      fontSrc: ["'self'", 'data:'],
-    },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+setupSecurity(app);
 app.use(morgan('dev'));
-app.use('/api', apiLimiter);
 
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
