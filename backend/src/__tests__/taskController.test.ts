@@ -40,7 +40,7 @@ vi.mock('../utils/cache', () => ({
   },
 }));
 
-vi.mock('./notificationController', () => ({
+vi.mock('../controllers/notificationController', () => ({
   createNotification: vi.fn(),
 }));
 
@@ -142,9 +142,8 @@ describe('Task Controller', () => {
     });
 
     it('deletes a task successfully', async () => {
-      const mockTask = createMockTask();
+      const mockTask = { ...createMockTask(), deleteOne: vi.fn().mockResolvedValue(undefined) };
       vi.mocked(Task.findById).mockResolvedValue(mockTask as any);
-      mockTask.deleteOne = vi.fn().mockResolvedValue(undefined);
 
       const req = createMockReq({ params: { id: 'task123' }, user: createMockUser() });
       const res = createMockRes();

@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 
-export const createMockReq = (overrides: Partial<Request> = {}): Request => {
+export const createMockReq = (overrides: Record<string, any> = {}): any => {
   return {
     headers: {},
     cookies: {},
@@ -9,7 +9,7 @@ export const createMockReq = (overrides: Partial<Request> = {}): Request => {
     query: {},
     body: {},
     ...overrides,
-  } as Request;
+  };
 };
 
 export const createMockRes = (): Response => {
