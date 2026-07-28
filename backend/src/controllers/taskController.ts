@@ -6,11 +6,20 @@ import '../models/Tag';
 import '../models/User';
 import { getIO } from '../sockets/socketManager';
 import { createAuditLog } from '../utils/auditLogger';
+import { createNotification } from './notificationController';
 
-const emitTaskAssigned = async (taskId: string, taskTitle: string, newAssigneeIds: string[], assignedBy: string) => {
+const emitTaskAssigned = async (taskId: string, taskTitle: string, newAssigneeIds: string[], assignedBy: string, workspaceId: string) => {
   const io = getIO();
   for (const userId of newAssigneeIds) {
     io.to(`user_${userId}`).emit('task_assigned', { taskId, taskTitle, assignedBy });
+    await createNotification(
+      userId,
+      workspaceId,
+      'Task Assigned',
+      `You have been assigned to "${taskTitle}"`,
+      'task_assigned',
+      { entityId: taskId, entityType: 'task', createdBy: assignedBy }
+    );
   }
 };
 
@@ -99,7 +108,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   getIO().to(`workspace_${workspaceId}`).emit('task_created', populatedTask);
 
   if (assignees && assignees.length > 0) {
-    await emitTaskAssigned(task._id.toString(), title, assignees, req.user._id);
+    await emitTaskAssigned(task._id.toString(), title, assignees, req.user._id, workspaceId as string);
   }
 
   await createAuditLog(
@@ -142,7 +151,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
   if (updatedTask && req.body.assignees && Array.isArray(req.body.assignees)) {
     const newAssigneeIds = req.body.assignees.filter((id: string) => !previousAssigneeIds.includes(id));
     if (newAssigneeIds.length > 0) {
-      await emitTaskAssigned(task._id.toString(), updatedTask.title, newAssigneeIds, req.user._id);
+      await emitTaskAssigned(task._id.toString(), updatedTask.title, newAssigneeIds, req.user._id, task.workspaceId.toString());
     }
   }
 

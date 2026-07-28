@@ -72,11 +72,11 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     newSocket.on('task_assigned', (data: { taskId: string; taskTitle: string; assignedBy: string }) => {
       addRealtime({
-        id: `task_assigned_${data.taskId}_${Date.now()}`,
         title: 'Task Assigned',
         body: `You have been assigned to "${data.taskTitle}"`,
         type: 'task_assigned',
-        time: new Date().toISOString(),
+        entityId: data.taskId,
+        entityType: 'task',
       });
     });
 
