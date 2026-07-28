@@ -5,7 +5,7 @@ import {
   AlertCircle, Loader2, Trash2,
 } from 'lucide-react';
 import clsx from 'clsx';
-import { useFileUpload, formatFileSize } from '../hooks/useFileUpload';
+import { useFileUpload, formatFileSize } from '../../hooks/useFileUpload';
 
 interface FileItem {
   file: File;
