@@ -43,6 +43,7 @@ const sections = [
     label: 'AI & TOOLS',
     links: [
       { label: 'AI Assistant', path: '/ai', icon: Brain },
+      { label: 'Templates', path: '/templates', icon: FileText },
     ],
   },
   {
