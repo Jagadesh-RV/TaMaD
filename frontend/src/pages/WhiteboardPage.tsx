@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useWhiteboardStore } from '../store/whiteboardStore';
 import { useAuthStore } from '../store/authStore';
 import WhiteboardModal from '../components/whiteboards/WhiteboardModal';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 export default function WhiteboardPage() {
   const [activeTool, setActiveTool] = useState<'select' | 'pen' | 'square' | 'circle' | 'eraser'>('pen');
@@ -13,7 +14,7 @@ export default function WhiteboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeBoard, setActiveBoard] = useState<any>(null);
 
-  const { whiteboards, fetchWhiteboards, createWhiteboard, updateWhiteboard } = useWhiteboardStore() as any;
+  const { whiteboards, fetchWhiteboards, createWhiteboard, updateWhiteboard, loading } = useWhiteboardStore() as any;
   const workspace = useAuthStore(s => s.workspace);
   const canvasRef = useRef<HTMLDivElement>(null);
 
@@ -140,6 +141,11 @@ export default function WhiteboardPage() {
       </div>
 
       {/* Infinite Canvas Area */}
+      {loading ? (
+        <div className="flex-1 w-full h-full flex items-center justify-center">
+          <LoadingSpinner text="Loading whiteboards..." />
+        </div>
+      ) : (
       <div
         ref={canvasRef}
         className="flex-1 w-full h-full bg-[radial-gradient(#e5e5e5_1px,transparent_1px)] [background-size:24px_24px] cursor-crosshair touch-none"
@@ -183,6 +189,7 @@ export default function WhiteboardPage() {
           </svg>
         )}
       </div>
+      )}
 
       <WhiteboardModal 
         isOpen={isModalOpen}

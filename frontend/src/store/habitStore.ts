@@ -16,6 +16,8 @@ interface Habit {
 interface HabitState {
   habits: Habit[];
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   fetchHabits: (workspaceId: string) => Promise<void>;
   createHabit: (payload: Partial<Habit>) => Promise<Habit>;
   updateHabit: (id: string, payload: Partial<Habit>) => Promise<Habit>;
@@ -25,15 +27,17 @@ interface HabitState {
 export const useHabitStore = create<HabitState>((set) => ({
   habits: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
   fetchHabits: async (workspaceId) => {
     if (!workspaceId) return;
     set({ loading: true });
     try {
       const { data } = await api.get('/habits', { params: { workspaceId } });
-      set({ habits: data.habits || data, loading: false });
-    } catch {
-      set({ loading: false });
+      set({ habits: data.habits || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load habits' });
       toast.error('Failed to load habits');
     }
   },

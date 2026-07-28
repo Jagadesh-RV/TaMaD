@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
-  LayoutGrid, Filter,
+  LayoutGrid, Filter, AlertCircle, X, Inbox, FolderKanban, Activity,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -12,6 +12,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
+import { EmptyState } from '../components/ui/EmptyState';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { SkeletonTable } from '../components/ui/Skeleton';
+import { staggerContainer, cardVariant } from '../lib/animations';
 import clsx from 'clsx';
 
 const STATUS_TABS = [
@@ -20,14 +24,6 @@ const STATUS_TABS = [
   { key: 'today', label: 'Due Today' },
   { key: 'in-progress', label: 'In Progress' },
 ] as const;
-
-const cardVariant = {
-  hidden: { opacity: 0, y: 12 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.06, duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
-  }),
-};
 
 const getPriorityColor = (priority: string) => {
   switch (priority) {
@@ -54,7 +50,14 @@ function useAuthName() {
 export default function DashboardPage() {
   const navigate = useNavigate();
   const workspace = useAuthStore(s => s.workspace);
+  const user = useAuthStore(s => s.user);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [emailBannerDismissed, setEmailBannerDismissed] = useState(() => {
+    if (user?.id) {
+      return localStorage.getItem(`email_verify_dismissed_${user.id}`) === 'true';
+    }
+    return false;
+  });
   const { tasks, loading: tasksLoading, fetchTasks } = useTaskStore();
   const { projects, loading: projectsLoading, fetchProjects } = useProjectStore();
   const workspaceId = workspace?._id || '';
@@ -118,8 +121,55 @@ export default function DashboardPage() {
       .slice(0, 6);
   }, [tasks]);
 
+  const handleDismissEmailBanner = () => {
+    if (user?.id) {
+      localStorage.setItem(`email_verify_dismissed_${user.id}`, 'true');
+    }
+    setEmailBannerDismissed(true);
+  };
+
+  const showEmailBanner = user && user.emailVerified === false && user.authProvider === 'email' && !emailBannerDismissed;
+
   return (
     <div className="page">
+      {/* Email verification banner */}
+      {showEmailBanner && (
+        <div
+          className="mb-6 flex items-center justify-between gap-4 rounded-xl px-4 py-3"
+          style={{
+            background: 'var(--color-warning-light)',
+            border: '1px solid var(--color-warning)',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <AlertCircle size={18} style={{ color: 'var(--color-warning)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--color-warning)' }}>
+              Please verify your email address
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/verify-email')}
+              className="rounded-lg px-3 py-1.5 text-xs font-bold transition-colors"
+              style={{
+                background: 'var(--color-warning)',
+                color: 'white',
+              }}
+            >
+              Verify Now
+            </button>
+            <button
+              onClick={handleDismissEmailBanner}
+              className="rounded-lg p-1 transition-colors"
+              style={{ color: 'var(--color-warning)' }}
+              aria-label="Dismiss"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="page-header flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
@@ -207,7 +257,7 @@ export default function DashboardPage() {
               <div className="h-64">
                 {tasksLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                    <LoadingSpinner size="md" />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -248,13 +298,16 @@ export default function DashboardPage() {
               </div>
               <div className="overflow-x-auto">
                 {tasksLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="h-8 w-8 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                  <div className="p-6">
+                    <SkeletonTable rows={5} cols={4} />
                   </div>
                 ) : recentTasks.length === 0 ? (
-                  <div className="py-12 text-center text-sm" style={{ color: 'var(--color-muted)' }}>
-                    No tasks yet. Create your first task to get started.
-                  </div>
+                  <EmptyState
+                    icon={Inbox}
+                    title="No tasks yet"
+                    description="Create your first task to get started"
+                    action={{ label: 'Create Task', onClick: () => navigate('/tasks') }}
+                  />
                 ) : (
                   <table>
                     <thead>
@@ -326,12 +379,15 @@ export default function DashboardPage() {
               </div>
               {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2" style={{ borderColor: 'var(--color-border)', borderTopColor: 'var(--color-accent)' }} />
+                  <LoadingSpinner size="sm" />
                 </div>
               ) : projects.length === 0 ? (
-                <div className="py-8 text-center text-xs" style={{ color: 'var(--color-muted)' }}>
-                  No projects yet. Create one to get started.
-                </div>
+                <EmptyState
+                  icon={FolderKanban}
+                  title="No projects yet"
+                  description="Create your first project to get started"
+                  action={{ label: 'Create Project', onClick: () => navigate('/projects') }}
+                />
               ) : (
                 <div className="space-y-4">
                   {projects.slice(0, 4).map(project => (
@@ -359,9 +415,11 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-3">
                 {recentActivities.length === 0 ? (
-                  <div className="py-4 text-center text-xs" style={{ color: 'var(--color-muted)' }}>
-                    No recent activity
-                  </div>
+                  <EmptyState
+                    icon={Activity}
+                    title="No recent activity"
+                    description="Start working on tasks to see activity here"
+                  />
                 ) : (
                   recentActivities.map(task => (
                     <div key={task._id} className="flex items-start gap-3 rounded-lg p-2 transition-colors" style={{ background: 'var(--color-background)' }}>

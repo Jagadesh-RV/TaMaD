@@ -16,6 +16,8 @@ interface Goal {
 interface GoalState {
   goals: Goal[];
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   fetchGoals: (workspaceId: string) => Promise<void>;
   createGoal: (payload: Partial<Goal>) => Promise<Goal>;
   updateGoal: (id: string, payload: Partial<Goal>) => Promise<Goal>;
@@ -25,15 +27,17 @@ interface GoalState {
 export const useGoalStore = create<GoalState>((set) => ({
   goals: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
   fetchGoals: async (workspaceId) => {
     if (!workspaceId) return;
     set({ loading: true });
     try {
       const { data } = await api.get('/goals', { params: { workspaceId } });
-      set({ goals: data.goals || data, loading: false });
-    } catch {
-      set({ loading: false });
+      set({ goals: data.goals || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load goals' });
       toast.error('Failed to load goals');
     }
   },

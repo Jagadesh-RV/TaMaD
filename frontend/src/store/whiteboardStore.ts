@@ -16,6 +16,8 @@ interface Whiteboard {
 interface WhiteboardState {
   whiteboards: Whiteboard[];
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   fetchWhiteboards: (workspaceId: string) => Promise<void>;
   createWhiteboard: (payload: Partial<Whiteboard>) => Promise<Whiteboard>;
   updateWhiteboard: (id: string, payload: Partial<Whiteboard>) => Promise<Whiteboard>;
@@ -25,15 +27,17 @@ interface WhiteboardState {
 export const useWhiteboardStore = create<WhiteboardState>((set) => ({
   whiteboards: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
   fetchWhiteboards: async (workspaceId) => {
     if (!workspaceId) return;
     set({ loading: true });
     try {
       const { data } = await api.get('/whiteboards', { params: { workspaceId } });
-      set({ whiteboards: data.whiteboards || data, loading: false });
-    } catch {
-      set({ loading: false });
+      set({ whiteboards: data.whiteboards || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load whiteboards' });
       toast.error('Failed to load whiteboards');
     }
   },

@@ -1,7 +1,7 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target,
+  TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target, Download,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -10,6 +10,9 @@ import {
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useAuthStore } from '../store/authStore';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorState from '../components/ui/ErrorState';
+import toast from 'react-hot-toast';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 12 },
@@ -20,10 +23,49 @@ const cardVariant = {
 };
 
 export default function AnalyticsPage() {
-  const { tasks, fetchTasks } = useTaskStore();
-  const { projects, fetchProjects } = useProjectStore();
+  const { tasks, fetchTasks, loading: tasksLoading, error: tasksError } = useTaskStore();
+  const { projects, fetchProjects, loading: projectsLoading, error: projectsError } = useProjectStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+
+  const isLoading = tasksLoading || projectsLoading;
+  const error = tasksError || projectsError;
+
+  const retry = useCallback(() => {
+    if (workspaceId) {
+      fetchTasks(workspaceId);
+      fetchProjects(workspaceId);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId]);
+
+  const exportCSV = useCallback(() => {
+    try {
+      const header = 'Title,Status,Priority,Project,Created,Updated,Assignee';
+      const rows = tasks.map((t: any) => {
+        const project = projects.find((p: any) => p._id === t.projectId);
+        return [
+          `"${(t.title || '').replace(/"/g, '""')}"`,
+          t.status || '',
+          t.priority || '',
+          project?.name || '',
+          t.createdAt ? new Date(t.createdAt).toISOString().slice(0, 10) : '',
+          t.updatedAt ? new Date(t.updatedAt).toISOString().slice(0, 10) : '',
+          t.assigneeName || t.assignee || '',
+        ].join(',');
+      });
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tamad-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Analytics exported as CSV');
+    } catch {
+      toast.error('Failed to export analytics');
+    }
+  }, [tasks, projects]);
 
   useEffect(() => {
     if (workspaceId) {
@@ -107,11 +149,25 @@ export default function AnalyticsPage() {
     <div className="page">
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">Analytics</h1>
-        <p className="page-subtitle">Track productivity and performance insights across your workspace.</p>
+        <div>
+          <h1 className="page-title">Analytics</h1>
+          <p className="page-subtitle">Track productivity and performance insights across your workspace.</p>
+        </div>
+        {!isLoading && !error && tasks.length > 0 && (
+          <button onClick={exportCSV} className="btn btn-ghost btn-sm">
+            <Download size={14} />
+            Export CSV
+          </button>
+        )}
       </div>
 
-      {/* Stat cards */}
+      {isLoading && <LoadingSpinner text="Loading analytics..." />}
+
+      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+
+      {!isLoading && !error && (
+        <>
+          {/* Stat cards */}
       <div className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, i) => {
           const Icon = stat.icon;
@@ -275,6 +331,8 @@ export default function AnalyticsPage() {
           </div>
         </motion.div>
       </div>
+        </>
+      )}
     </div>
   );
 }

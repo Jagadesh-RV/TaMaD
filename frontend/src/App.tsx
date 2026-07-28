@@ -26,6 +26,12 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import PhoneLoginPage from "./pages/auth/PhoneLoginPage";
 import ContactPage from "./pages/ContactPage";
+import DocumentsPage from "./pages/DocumentsPage";
+import FilesPage from "./pages/FilesPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import TemplatesPage from "./pages/TemplatesPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 function LoadingSpinner() {
   return (
@@ -53,6 +59,7 @@ export default function App() {
   if (loading) return <LoadingSpinner />;
 
   return (
+    <ErrorBoundary>
     <Routes>
       <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
@@ -85,9 +92,14 @@ export default function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/files" element={<FilesPage />} />
+        <Route path="/ai" element={<AIAssistantPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
+    </ErrorBoundary>
   );
 }

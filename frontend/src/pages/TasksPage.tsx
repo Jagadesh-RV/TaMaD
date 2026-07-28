@@ -24,6 +24,7 @@ import { format, isToday, isBefore, parseISO } from 'date-fns';
 import clsx from 'clsx';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 
@@ -431,7 +432,7 @@ function CalendarMiniView({ tasks }: { tasks: Task[] }) {
 }
 
 export default function TasksPage() {
-  const { tasks, fetchTasks, createTask, reorderTask } = useTaskStore();
+  const { tasks, fetchTasks, createTask, reorderTask, loading } = useTaskStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
 
@@ -670,7 +671,9 @@ export default function TasksPage() {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        {view === 'kanban' && (
+        {loading && <LoadingSpinner text="Loading tasks..." />}
+
+        {!loading && view === 'kanban' && (
           filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
           <DndContext
             sensors={sensors}
@@ -697,7 +700,7 @@ export default function TasksPage() {
           </DndContext>
         )}
 
-        {view === 'list' && (
+        {!loading && view === 'list' && (
           filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
           <div
             className="rounded-2xl border overflow-hidden"
@@ -744,7 +747,7 @@ export default function TasksPage() {
           </div>
         )}
 
-        {view === 'calendar' && (
+        {!loading && view === 'calendar' && (
           <CalendarMiniView tasks={filtered} />
         )}
       </div>

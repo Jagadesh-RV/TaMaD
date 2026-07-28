@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw, Zap, CheckCircle2 } from 'lucide-react';
 import clsx from 'clsx';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '../store/authStore';
+import api from '../utils/api';
 
 const PRESETS = [
   { label: 'Pomodoro', work: 25, break: 5 },
@@ -17,6 +19,17 @@ export default function FocusPage() {
   const [running, setRunning] = useState(false);
   const [completed, setCompleted] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const sessionRef = useRef<string | null>(null);
+  const workspace = useAuthStore(s => s.workspace);
+  const workspaceId = workspace?._id || '';
+
+  // Load today's session count
+  useEffect(() => {
+    if (!workspaceId) return;
+    api.get('/focus-sessions/stats', { params: { workspaceId } })
+      .then(({ data }) => setCompleted(data.todaySessions || 0))
+      .catch(() => {});
+  }, [workspaceId]);
 
   useEffect(() => {
     setMinutes(mode === 'work' ? PRESETS[preset].work : PRESETS[preset].break);
@@ -52,8 +65,22 @@ export default function FocusPage() {
     setRunning(false);
     if (mode === 'work') {
       setCompleted((c) => c + 1);
-      toast.success('🎉 Focus session complete! Take a break.', { duration: 4000 });
+      toast.success('Focus session complete! Take a break.', { duration: 4000 });
       if (Notification.permission === 'granted') new Notification('TaMaD', { body: 'Focus session done! Take a break.' });
+      // Persist session to backend
+      if (workspaceId) {
+        api.post('/focus-sessions', {
+          workspaceId,
+          preset: PRESETS[preset].label,
+          durationMinutes: PRESETS[preset].work,
+        }).then(({ data }) => { sessionRef.current = data._id; })
+          .then(() => {
+            if (sessionRef.current) {
+              api.put(`/focus-sessions/${sessionRef.current}/complete`).catch(() => {});
+            }
+          })
+          .catch(() => {});
+      }
       setMode('break');
     } else {
       toast.success('Break over! Time to focus.', { duration: 3000 });

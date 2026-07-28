@@ -3,11 +3,13 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
   FileText, PenTool, BarChart3, Bell, Settings, User, ChevronLeft,
-  ChevronRight, LogOut, Sparkles, TrendingUp, FolderKanban,
+  ChevronRight, LogOut, Sparkles, TrendingUp, FolderKanban, Users,
+  Brain, HardDrive,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifStore } from '../../store/notifStore';
+import { useRealtime } from '../../providers/RealtimeProvider';
 
 const sections = [
   {
@@ -26,6 +28,8 @@ const sections = [
     label: 'CREATIVE',
     links: [
       { label: 'Notes', path: '/notes', icon: FileText },
+      { label: 'Documents', path: '/documents', icon: FileText },
+      { label: 'Files', path: '/files', icon: HardDrive },
       { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
     ],
   },
@@ -34,6 +38,13 @@ const sections = [
     links: [
       { label: 'Analytics', path: '/analytics', icon: BarChart3 },
       { label: 'Reports', path: '/reports', icon: TrendingUp },
+    ],
+  },
+  {
+    label: 'AI & TOOLS',
+    links: [
+      { label: 'AI Assistant', path: '/ai', icon: Brain },
+      { label: 'Templates', path: '/templates', icon: FileText },
     ],
   },
   {
@@ -58,6 +69,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
   const workspace = useAuthStore(s => s.workspace);
   const logout = useAuthStore(s => s.logout);
   const unread = useNotifStore(s => s.unread);
+  const { onlineUsers } = useRealtime();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -155,6 +167,28 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
           </button>
         </div>
       )}
+
+      {/* Online presence */}
+      <div className="px-2 pb-2">
+        <div
+          className={clsx(
+            'flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium',
+            collapsed && 'justify-center px-2'
+          )}
+          style={{ color: 'var(--color-muted)' }}
+        >
+          <div className="relative flex h-2 w-2 shrink-0 items-center justify-center">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: 'var(--color-success)' }} />
+            <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: 'var(--color-success)' }} />
+          </div>
+          {!collapsed && (
+            <span>{onlineUsers.length} online</span>
+          )}
+          {collapsed && (
+            <span className="sr-only">{onlineUsers.length} online</span>
+          )}
+        </div>
+      </div>
 
       {/* User profile */}
       <div className="mt-auto border-t px-2 pt-3" style={{ borderColor: 'var(--color-border-light)' }}>

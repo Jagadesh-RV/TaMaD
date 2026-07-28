@@ -45,9 +45,11 @@ interface AuthState {
   logoutAll: () => Promise<void>;
   updateProfile: (payload: Partial<UserShape> & { preferences?: Record<string, unknown> }) => Promise<void>;
   syncEmailVerification: () => Promise<UserShape>;
+  syncPhotoUrl: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
   deleteAccount: () => Promise<void>;
   getSessions: () => Promise<SessionInfo[]>;
+  revokeSession: (sessionIndex: number) => Promise<void>;
   getWorkspace: () => Promise<WorkspaceShape | null>;
 }
 
@@ -59,7 +61,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   init: async () => {
     try {
       const response = await api.get('/auth/me');
-      set({ user: response.data.user, loading: false });
+      const user = response.data.user;
+      const firebaseUser = getClientAuth().currentUser;
+      if (firebaseUser?.photoURL && firebaseUser.photoURL !== user.avatarUrl) {
+        const updatedResponse = await api.put('/auth/profile', { avatarUrl: firebaseUser.photoURL });
+        set({ user: updatedResponse.data.user, loading: false });
+      } else {
+        set({ user, loading: false });
+      }
       await get().getWorkspace();
     } catch {
       try {
@@ -111,6 +120,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return response.data.user;
   },
 
+  syncPhotoUrl: async () => {
+    const firebaseUser = getClientAuth().currentUser;
+    if (!firebaseUser?.photoURL) return;
+    const currentUser = get().user;
+    if (currentUser?.avatarUrl === firebaseUser.photoURL) return;
+    try {
+      const response = await api.put('/auth/profile', { avatarUrl: firebaseUser.photoURL });
+      set({ user: response.data.user });
+    } catch {
+      // silently fail
+    }
+  },
+
   changePassword: async (currentPassword: string, newPassword: string) => {
     await api.post('/auth/change-password', { currentPassword, newPassword });
   },
@@ -127,6 +149,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   getSessions: async () => {
     const response = await api.get('/auth/sessions');
     return response.data.sessions;
+  },
+
+  revokeSession: async (sessionIndex: number) => {
+    await api.post('/auth/sessions/revoke', { sessionIndex });
   },
 
   getWorkspace: async () => {

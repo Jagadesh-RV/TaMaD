@@ -34,9 +34,11 @@ interface TaskState {
   tasks: Task[];
   pagination: { total: number; page: number; limit: number; totalPages: number } | null;
   loading: boolean;
+  error: string | null;
   filters: TaskFilters;
   setFilter: (key: keyof TaskFilters, value: string) => void;
   clearFilters: () => void;
+  clearError: () => void;
   fetchTasks: (workspaceId: string) => Promise<void>;
   createTask: (payload: Partial<Task>) => Promise<Task>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
@@ -51,10 +53,12 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   pagination: null,
   loading: false,
+  error: null,
   filters: { status: '', priority: '', tag: '', search: '', date: '' },
 
   setFilter: (key, value) => set(s => ({ filters: { ...s.filters, [key]: value } })),
   clearFilters: () => set({ filters: { status: '', priority: '', tag: '', search: '', date: '' } }),
+  clearError: () => set({ error: null }),
 
   fetchTasks: async (workspaceId) => {
     if (!workspaceId) return;
@@ -71,9 +75,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
         tasks: data.tasks || data,
         pagination: data.pagination || null,
         loading: false,
+        error: null,
       });
-    } catch {
-      set({ loading: false });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load tasks' });
       toast.error('Failed to load tasks');
     }
   },

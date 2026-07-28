@@ -1,16 +1,21 @@
-name: tamad
-private: true
-scripts: {
-  "dev": "concurrently \"pnpm --filter tamad-frontend dev\" \"pnpm --filter tamad-backend dev\"",
-  "build": "pnpm --filter tamad-frontend build",
-  "dev:backend": "pnpm --filter tamad-backend dev",
-  "build:backend": "pnpm --filter tamad-backend build",
-  "build:all": "pnpm --filter tamad-frontend build && pnpm --filter tamad-backend build",
-  "deploy": "firebase deploy",
-  "deploy:hosting": "firebase deploy --only hosting",
-  "deploy:rules": "firebase deploy --only firestore:rules,storage",
-  "emulators": "firebase emulators:start"
-}
-devDependencies: {
-  "concurrently": "^10.0.3"
+{
+  "name": "tamad",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter tamad-frontend dev\" \"pnpm --filter tamad-backend dev\"",
+    "build": "pnpm --filter tamad-frontend build",
+    "dev:backend": "pnpm --filter tamad-backend dev",
+    "build:backend": "pnpm --filter tamad-backend build",
+    "build:all": "pnpm --filter tamad-frontend build && pnpm --filter tamad-backend build",
+    "test": "pnpm --filter tamad-backend test && pnpm --filter tamad-frontend test",
+    "test:backend": "pnpm --filter tamad-backend test",
+    "test:frontend": "pnpm --filter tamad-frontend test",
+    "deploy": "firebase deploy",
+    "deploy:hosting": "firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules,storage",
+    "emulators": "firebase emulators:start"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
 }

@@ -17,10 +17,12 @@ export interface ITask extends Document {
   parentTaskId?: mongoose.Types.ObjectId;
   dependencies: mongoose.Types.ObjectId[];
   order: number;
-  estimatedTime?: number; // in minutes
-  actualTime?: number; // in minutes
+  estimatedTime?: number;
+  actualTime?: number;
   isArchived: boolean;
   embedding?: number[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const TaskSchema: Schema = new Schema(

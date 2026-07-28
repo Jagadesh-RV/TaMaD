@@ -15,6 +15,8 @@ interface Note {
 interface NoteState {
   notes: Note[];
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   fetchNotes: (workspaceId: string) => Promise<void>;
   createNote: (payload: Partial<Note>) => Promise<Note>;
   updateNote: (id: string, payload: Partial<Note>) => Promise<Note>;
@@ -24,15 +26,17 @@ interface NoteState {
 export const useNoteStore = create<NoteState>((set) => ({
   notes: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
   fetchNotes: async (workspaceId) => {
     if (!workspaceId) return;
     set({ loading: true });
     try {
       const { data } = await api.get('/notes', { params: { workspaceId } });
-      set({ notes: data.notes || data, loading: false });
-    } catch {
-      set({ loading: false });
+      set({ notes: data.notes || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load notes' });
       toast.error('Failed to load notes');
     }
   },

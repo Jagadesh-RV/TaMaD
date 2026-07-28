@@ -2,7 +2,15 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import type { CookieOptions, Request, Response } from 'express';
 import User from '../models/User';
+import Task from '../models/Task';
+import Project from '../models/Project';
+import Note from '../models/Note';
+import Whiteboard from '../models/Whiteboard';
+import Goal from '../models/Goal';
+import Habit from '../models/Habit';
+import Workspace from '../models/Workspace';
 import { getFirebaseAuth } from '../config/firebase';
+import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 const accessCookieName = 'tamad_access_token';
 const refreshCookieName = 'tamad_refresh_token';
@@ -198,6 +206,10 @@ export const logout = async (req: any, res: Response) => {
     );
     await user.save();
   }
+  
+  await cache.del(CACHE_KEYS.USER(req.user._id));
+  await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+  
   res.clearCookie(accessCookieName, accessCookieOptions);
   res.clearCookie(refreshCookieName, refreshCookieOptions);
   res.json({ message: 'Logged out successfully' });
@@ -205,6 +217,10 @@ export const logout = async (req: any, res: Response) => {
 
 export const logoutAll = async (req: any, res: Response) => {
   await User.findByIdAndUpdate(req.user._id, { $set: { sessions: [] } });
+  
+  await cache.del(CACHE_KEYS.USER(req.user._id));
+  await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+  
   res.clearCookie(accessCookieName, accessCookieOptions);
   res.clearCookie(refreshCookieName, refreshCookieOptions);
   res.json({ message: 'Logged out from all devices' });
@@ -252,6 +268,7 @@ export const updateProfile = async (req: any, res: Response) => {
   if (preferences) user.preferences = { ...user.preferences, ...preferences };
 
   await user.save();
+  await cache.del(CACHE_KEYS.USER(req.user._id));
   res.json({ user: buildUserPayload(user) });
 };
 
@@ -301,6 +318,9 @@ export const changePassword = async (req: any, res: Response) => {
     }
     await user.save();
 
+    await cache.del(CACHE_KEYS.USER(req.user._id));
+    await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+
     res.json({ message: 'Password changed successfully. Other sessions have been logged out.' });
   } catch (error: any) {
     if (error.code === 'auth/user-not-found') {
@@ -314,9 +334,53 @@ export const changePassword = async (req: any, res: Response) => {
 
 export const deleteAccount = async (req: any, res: Response) => {
   try {
-    const { password } = req.body;
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Find all workspaces the user belongs to
+    const workspaces = await Workspace.find({ 'members.userId': user._id });
+    const workspaceIds = workspaces.map((w) => w._id);
+
+    // Delete all associated data
+    await Promise.all([
+      Task.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { assignee: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Project.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Note.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Whiteboard.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Goal.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+      Habit.deleteMany({
+        $or: [
+          { createdBy: user._id },
+          { workspaceId: { $in: workspaceIds } },
+        ],
+      }),
+    ]);
 
     // Delete from Firebase Auth
     if (user.firebaseUid) {
@@ -326,6 +390,9 @@ export const deleteAccount = async (req: any, res: Response) => {
     // Delete from MongoDB
     await User.findByIdAndDelete(user._id);
 
+    await cache.del(CACHE_KEYS.USER(req.user._id));
+    await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
+
     // Clear cookies
     res.clearCookie(accessCookieName, accessCookieOptions);
     res.clearCookie(refreshCookieName, refreshCookieOptions);
@@ -334,6 +401,36 @@ export const deleteAccount = async (req: any, res: Response) => {
     res
       .status(500)
       .json({ error: error.message || 'Unable to delete account' });
+  }
+};
+
+export const revokeSession = async (req: any, res: Response) => {
+  try {
+    const { sessionIndex } = req.body;
+    if (typeof sessionIndex !== 'number') {
+      return res.status(400).json({ error: 'sessionIndex (number) is required' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (sessionIndex < 0 || sessionIndex >= user.sessions.length) {
+      return res.status(400).json({ error: 'Invalid session index' });
+    }
+
+    const session = user.sessions[sessionIndex];
+    const currentHash = req.cookies?.[refreshCookieName]
+      ? hashToken(req.cookies[refreshCookieName])
+      : null;
+    if (currentHash && session.tokenHash === currentHash) {
+      return res.status(400).json({ error: 'Cannot revoke your current session. Use logout instead.' });
+    }
+
+    user.sessions.splice(sessionIndex, 1);
+    await user.save();
+    res.json({ message: 'Session revoked' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message || 'Unable to revoke session' });
   }
 };
 
@@ -354,6 +451,12 @@ export const getSessions = async (req: any, res: Response) => {
 
 export const getWorkspace = async (req: any, res: Response) => {
   try {
+    const cacheKey = CACHE_KEYS.WORKSPACE(req.user._id);
+    const cached = await cache.get<any>(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const Workspace = (await import('../models/Workspace')).default;
     let workspace = await Workspace.findOne({
       'members.userId': req.user._id,
@@ -373,14 +476,17 @@ export const getWorkspace = async (req: any, res: Response) => {
       (m: any) => m.userId.toString() === req.user._id.toString(),
     );
 
-    res.json({
+    const result = {
       workspace: {
         _id: workspace._id,
         name: workspace.name,
         description: workspace.description,
         role: memberEntry?.role || 'owner',
       },
-    });
+    };
+
+    await cache.set(cacheKey, result, CACHE_TTL.WORKSPACE);
+    res.json(result);
   } catch (error: any) {
     res
       .status(500)

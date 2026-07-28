@@ -16,6 +16,8 @@ interface Project {
 interface ProjectState {
   projects: Project[];
   loading: boolean;
+  error: string | null;
+  clearError: () => void;
   fetchProjects: (workspaceId: string) => Promise<void>;
   createProject: (payload: Partial<Project>) => Promise<Project>;
   updateProject: (id: string, payload: Partial<Project>) => Promise<Project>;
@@ -25,15 +27,17 @@ interface ProjectState {
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
   loading: false,
+  error: null,
+  clearError: () => set({ error: null }),
 
   fetchProjects: async (workspaceId) => {
     if (!workspaceId) return;
     set({ loading: true });
     try {
       const { data } = await api.get('/projects', { params: { workspaceId } });
-      set({ projects: data.projects || data, loading: false });
-    } catch {
-      set({ loading: false });
+      set({ projects: data.projects || data, loading: false, error: null });
+    } catch (err: any) {
+      set({ loading: false, error: err?.message || 'Failed to load projects' });
       toast.error('Failed to load projects');
     }
   },
