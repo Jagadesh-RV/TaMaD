@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target,
+  TrendingUp, CheckCircle2, ListTodo, Clock, Zap, Target, Download,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -12,6 +12,7 @@ import { useProjectStore } from '../store/projectStore';
 import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
+import toast from 'react-hot-toast';
 
 const cardVariant = {
   hidden: { opacity: 0, y: 12 },
@@ -36,6 +37,35 @@ export default function AnalyticsPage() {
       fetchProjects(workspaceId);
     }
   }, [fetchTasks, fetchProjects, workspaceId]);
+
+  const exportCSV = useCallback(() => {
+    try {
+      const header = 'Title,Status,Priority,Project,Created,Updated,Assignee';
+      const rows = tasks.map((t: any) => {
+        const project = projects.find((p: any) => p._id === t.projectId);
+        return [
+          `"${(t.title || '').replace(/"/g, '""')}"`,
+          t.status || '',
+          t.priority || '',
+          project?.name || '',
+          t.createdAt ? new Date(t.createdAt).toISOString().slice(0, 10) : '',
+          t.updatedAt ? new Date(t.updatedAt).toISOString().slice(0, 10) : '',
+          t.assigneeName || t.assignee || '',
+        ].join(',');
+      });
+      const csv = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tamad-analytics-${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Analytics exported as CSV');
+    } catch {
+      toast.error('Failed to export analytics');
+    }
+  }, [tasks, projects]);
 
   useEffect(() => {
     if (workspaceId) {
