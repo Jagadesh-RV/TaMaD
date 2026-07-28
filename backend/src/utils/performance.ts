@@ -43,7 +43,9 @@ export const explainQuery = async (
   query: Record<string, unknown>
 ) => {
   try {
-    const result = await mongoose.connection.db?.collection(collection).explain(query);
+    const col = mongoose.connection.db?.collection(collection);
+    if (!col) return null;
+    const result = await (col as any).explain(query);
     return result;
   } catch (error) {
     logger.error('Error explaining query:', error);

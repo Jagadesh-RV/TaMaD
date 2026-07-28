@@ -39,8 +39,8 @@ const cleanupOldNotifications = async () => {
 
 const cleanupStaleCache = async () => {
   try {
-    const keys = await cache.redis.keys('*');
-    logger.debug(`Cache contains ${keys.length} keys`);
+    await cache.invalidatePattern('*');
+    logger.debug('Cache cleanup completed');
   } catch (error) {
     logger.error('Error checking cache:', error);
   }
