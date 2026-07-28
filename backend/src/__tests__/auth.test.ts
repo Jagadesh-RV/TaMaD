@@ -6,7 +6,7 @@ vi.mock('../models/User', () => ({
   },
 }));
 
-import { protect } from '../middleware/auth.middleware';
+import { protect } from '../middleware/auth';
 
 function createReq(headers: Record<string, string> = {}, cookies: Record<string, string> = {}) {
   return {

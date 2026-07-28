@@ -11,6 +11,7 @@ import { connectDB } from './config/db';
 import { redis } from './config/redis';
 import logger from './utils/logger';
 import { validateEnv } from './utils/validateEnv';
+import { startBackgroundJobs } from './utils/jobs';
 import 'express-async-errors';
 
 dotenv.config();
@@ -112,6 +113,8 @@ const startServer = async () => {
     if (redis.status === 'ready' || redis.status === 'connecting') {
       logger.info('Redis is connected');
     }
+
+    startBackgroundJobs();
 
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
