@@ -59,11 +59,11 @@ describe('Habit Store', () => {
 
   describe('createHabit', () => {
     it('creates a habit successfully', async () => {
-      const mockHabit = { _id: '1', name: 'New Habit', frequency: 'daily', completions: [] };
+      const mockHabit = { _id: '1', title: 'New Habit', frequency: 'daily', completions: [] };
       mockedApi.post.mockResolvedValue({ data: mockHabit });
 
       await useHabitStore.getState().createHabit({
-        name: 'New Habit',
+        title: 'New Habit',
         frequency: 'daily',
         workspaceId: 'ws1',
       });
@@ -76,7 +76,7 @@ describe('Habit Store', () => {
   describe('deleteHabit', () => {
     it('deletes a habit successfully', async () => {
       useHabitStore.setState({
-        habits: [{ _id: '1', name: 'Habit 1', frequency: 'daily', completions: [] }] as any,
+        habits: [{ _id: '1', title: 'Habit 1', frequency: 'daily', completions: [] }] as any,
       });
       mockedApi.delete.mockResolvedValue({});
 

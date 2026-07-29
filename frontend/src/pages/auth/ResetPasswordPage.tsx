@@ -26,7 +26,7 @@ export default function ResetPasswordPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<Values>({ resolver: zodResolver(schema) as any });
+  } = useForm<Values>({ resolver: zodResolver(schema as any) as any });
 
   const onSubmit = async ({ password }: Values) => {
     const code = params.get('oobCode');
