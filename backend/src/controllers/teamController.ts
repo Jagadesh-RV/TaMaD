@@ -8,6 +8,7 @@ import Workspace from '../models/Workspace';
 import TeamInvitation from '../models/TeamInvitation';
 import { io } from '../index';
 import crypto from 'crypto';
+import { sendMail } from '../utils/mailer';
 
 /**
  * Helper to ensure default roles exist for a team
@@ -177,7 +178,35 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
       expiresAt,
     });
 
-    // In production, send email here if inviteType === 'email'
+    if (inviteType === 'email' || !inviteType) {
+      const team = await Team.findById(teamId);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const inviteLink = `${frontendUrl}/join?token=${token}`;
+      
+      const emailHtml = `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>You've been invited to join a team!</h2>
+          <p>You have been invited by <strong>${req.user?.name || 'a user'}</strong> to join the team <strong>${team?.name || 'TaMaD'}</strong>.</p>
+          <p>Click the button below to accept the invitation:</p>
+          <div style="margin: 30px 0;">
+            <a href="${inviteLink}" style="background-color: #9333ea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Accept Invitation</a>
+          </div>
+          <p style="color: #666; font-size: 12px;">If you did not expect this invitation, you can ignore this email.</p>
+          <p style="color: #666; font-size: 12px;">Or copy and paste this link: ${inviteLink}</p>
+        </div>
+      `;
+
+      const senderName = req.user?.name ? `${req.user.name} (via TaMaD)` : 'TaMaD App';
+      const senderEmail = req.user?.email;
+
+      await sendMail(
+        email, 
+        `Invitation to join ${team?.name || 'a team'} on TaMaD`, 
+        emailHtml,
+        senderName,
+        senderEmail
+      );
+    }
     
     res.status(201).json({ message: 'Invitation created', invite });
   } catch (error: any) {
