@@ -164,6 +164,15 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
   const teamId = req.params.id;
   
   try {
+    let actualRoleId = roleId;
+    if (!mongoose.Types.ObjectId.isValid(roleId)) {
+      const defaultRole = await Role.findOne({ teamId, name: 'Member' });
+      if (!defaultRole) {
+        return res.status(400).json({ error: 'Role not found' });
+      }
+      actualRoleId = defaultRole._id;
+    }
+
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days valid
@@ -171,7 +180,7 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
     const invite = await TeamInvitation.create({
       email,
       teamId,
-      roleId,
+      roleId: actualRoleId,
       invitedBy: req.user?._id,
       inviteType: inviteType || 'email',
       token,
