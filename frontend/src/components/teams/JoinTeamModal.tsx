@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useTeamStore } from '../../../store/teamStore';
-import { useWorkspaceStore } from '../../../store/workspaceStore';
+import { useTeamStore } from '../../store/teamStore';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 import { X, Link as LinkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
