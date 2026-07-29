@@ -16,6 +16,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonTable } from '../components/ui/Skeleton';
 import { staggerContainer, cardVariant } from '../lib/animations';
+import TeamDashboardPage from './TeamDashboardPage';
 import clsx from 'clsx';
 
 const STATUS_TABS = [
@@ -129,6 +130,10 @@ export default function DashboardPage() {
   };
 
   const showEmailBanner = user && user.emailVerified === false && user.authProvider === 'email' && !emailBannerDismissed;
+
+  if (workspace?.type === 'team') {
+    return <TeamDashboardPage />;
+  }
 
   return (
     <div className="page">
