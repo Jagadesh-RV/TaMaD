@@ -222,6 +222,55 @@ export default function IssueDetailModal({
                 />
               </div>
 
+              {/* Dependencies & Subtasks */}
+              <div className="pt-4 border-t mt-4" style={{ borderColor: 'var(--color-border)' }}>
+                <h4 className="text-xs font-semibold text-[color:var(--color-muted)] uppercase tracking-wider mb-3">Links & Dependencies</h4>
+                
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-[color:var(--color-muted)] block mb-1">Parent Task</label>
+                  <div className="text-sm p-2 rounded bg-[color:var(--color-background)] border" style={{ borderColor: 'var(--color-border)' }}>
+                    {formData.parentTaskId ? formData.parentTaskId.title || 'Linked Parent Task' : 'None'}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-[color:var(--color-muted)] block mb-1">Subtasks</label>
+                  <div className="space-y-1">
+                    {formData.subtasks?.map((sub: any) => (
+                      <div key={sub._id || sub} className="text-xs p-1.5 rounded bg-[color:var(--color-background)] border" style={{ borderColor: 'var(--color-border)' }}>
+                        {sub.title || 'Subtask'}
+                      </div>
+                    ))}
+                    <button className="text-[10px] font-medium text-[color:var(--color-accent)] hover:underline mt-1">+ Add Subtask</button>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-[color:var(--color-muted)] block mb-1">Blocks</label>
+                  <div className="space-y-1">
+                    {formData.blocks?.map((b: any) => (
+                      <div key={b._id || b} className="text-xs p-1.5 rounded bg-[color:var(--color-background)] border" style={{ borderColor: 'var(--color-border)' }}>
+                        {b.title || 'Blocked Task'}
+                      </div>
+                    ))}
+                    <button className="text-[10px] font-medium text-[color:var(--color-accent)] hover:underline mt-1">+ Add Blocked Task</button>
+                  </div>
+                </div>
+                
+                <div className="mb-3">
+                  <label className="text-xs font-medium text-[color:var(--color-muted)] block mb-1">Blocked By</label>
+                  <div className="space-y-1">
+                    {formData.blockedBy?.map((b: any) => (
+                      <div key={b._id || b} className="text-xs p-1.5 rounded bg-[color:var(--color-background)] border" style={{ borderColor: 'var(--color-border)' }}>
+                        {b.title || 'Blocking Task'}
+                      </div>
+                    ))}
+                    <button className="text-[10px] font-medium text-[color:var(--color-accent)] hover:underline mt-1">+ Add Blocking Task</button>
+                  </div>
+                </div>
+
+              </div>
+
               {/* Custom Fields */}
               <div className="pt-4 border-t mt-4" style={{ borderColor: 'var(--color-border)' }}>
                 <h4 className="text-xs font-semibold text-[color:var(--color-muted)] uppercase tracking-wider mb-3">Custom Fields</h4>
