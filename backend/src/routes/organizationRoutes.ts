@@ -5,11 +5,11 @@ import {
   getOrganizationById,
   updateOrganization,
 } from '../controllers/organizationController';
-import { verifyToken } from '../middleware/authMiddleware';
+import { protect } from '../middleware/auth';
 
 const router = Router();
 
-router.use(verifyToken);
+router.use(protect);
 
 router.post('/', createOrganization);
 router.get('/', getMyOrganizations);

@@ -1,8 +1,9 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/auth';
 import Organization from '../models/Organization';
 
 // Create a new Organization
-export const createOrganization = async (req: Request, res: Response): Promise<void> => {
+export const createOrganization = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { name, domain, logoUrl } = req.body;
     const userId = req.user?._id;
@@ -36,7 +37,7 @@ export const createOrganization = async (req: Request, res: Response): Promise<v
 };
 
 // Get all Organizations the user belongs to
-export const getMyOrganizations = async (req: Request, res: Response): Promise<void> => {
+export const getMyOrganizations = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?._id;
     if (!userId) {
@@ -57,7 +58,7 @@ export const getMyOrganizations = async (req: Request, res: Response): Promise<v
 };
 
 // Get a specific Organization
-export const getOrganizationById = async (req: Request, res: Response): Promise<void> => {
+export const getOrganizationById = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const userId = req.user?._id;
@@ -89,7 +90,7 @@ export const getOrganizationById = async (req: Request, res: Response): Promise<
 };
 
 // Update Organization
-export const updateOrganization = async (req: Request, res: Response): Promise<void> => {
+export const updateOrganization = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, domain, logoUrl } = req.body;
