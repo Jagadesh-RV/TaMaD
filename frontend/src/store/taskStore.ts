@@ -19,6 +19,17 @@ interface Task {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  taskType?: 'epic' | 'story' | 'task' | 'bug' | 'subtask';
+  epicId?: string;
+  sprintId?: string;
+  milestoneId?: string;
+  storyPoints?: number;
+  estimatedTime?: number;
+  actualTime?: number;
+  watchers?: Array<{ _id: string; name: string; email: string; avatarUrl?: string }>;
+  votes?: string[]; // user ids
+  attachments?: string[];
+  customFields?: Record<string, any>;
   isArchived: boolean;
 }
 
@@ -44,9 +55,11 @@ interface TaskState {
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
   reorderTask: (id: string, status: string, newOrder: number) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
-  toggleStatus: (id: string, currentStatus: string) => Promise<void>;
+  toggleStatus: (id: string, currentStatus: string) => Promise<Task>;
   bulkUpdate: (taskIds: string[], updates: Partial<Task>, workspaceId: string) => Promise<void>;
   bulkDelete: (taskIds: string[], workspaceId: string) => Promise<void>;
+  toggleWatch: (id: string) => Promise<void>;
+  toggleVote: (id: string) => Promise<void>;
 }
 
 export const useTaskStore = create<TaskState>((set, get) => ({
@@ -152,6 +165,24 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       toast.success('Tasks deleted');
     } catch {
       toast.error('Failed to delete tasks');
+    }
+  },
+
+  toggleWatch: async (id) => {
+    try {
+      const { data } = await api.post(`/tasks/${id}/watch`);
+      set(s => ({ tasks: s.tasks.map(t => t._id === id ? data : t) }));
+    } catch {
+      toast.error('Failed to toggle watch');
+    }
+  },
+
+  toggleVote: async (id) => {
+    try {
+      const { data } = await api.post(`/tasks/${id}/vote`);
+      set(s => ({ tasks: s.tasks.map(t => t._id === id ? data : t) }));
+    } catch {
+      toast.error('Failed to toggle vote');
     }
   },
 }));

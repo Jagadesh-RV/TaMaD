@@ -11,6 +11,23 @@ interface Project {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  health?: 'on-track' | 'at-risk' | 'off-track';
+  risks?: Array<{
+    description: string;
+    impact: 'low' | 'medium' | 'high';
+    probability: 'low' | 'medium' | 'high';
+    status: 'open' | 'mitigated' | 'closed';
+  }>;
+  dependencies?: string[];
+  agileSettings?: {
+    methodology: 'scrum' | 'kanban' | 'hybrid';
+    sprintLengthDays: number;
+  };
+  members?: Array<{ userId: any; role: string }>;
+  isArchived?: boolean;
 }
 
 interface ProjectState {
