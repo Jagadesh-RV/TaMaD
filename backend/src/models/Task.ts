@@ -18,7 +18,10 @@ export interface ITask extends Document {
   tags: mongoose.Types.ObjectId[];
   createdBy: mongoose.Types.ObjectId;
   parentTaskId?: mongoose.Types.ObjectId;
+  subtasks: mongoose.Types.ObjectId[];
   dependencies: mongoose.Types.ObjectId[];
+  blockedBy: mongoose.Types.ObjectId[];
+  blocks: mongoose.Types.ObjectId[];
   order: number;
   storyPoints?: number;
   estimatedTime?: number;
@@ -64,7 +67,10 @@ const TaskSchema: Schema = new Schema(
     tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     parentTaskId: { type: Schema.Types.ObjectId, ref: 'Task' },
+    subtasks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
     dependencies: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+    blockedBy: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
+    blocks: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
     order: { type: Number, default: 0 },
     storyPoints: { type: Number },
     estimatedTime: { type: Number },

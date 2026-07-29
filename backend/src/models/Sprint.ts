@@ -9,6 +9,9 @@ export interface ISprint extends Document {
   projectId: mongoose.Types.ObjectId;
   workspaceId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
+  capacity?: number;
+  storyPointTarget?: number;
+  velocityTarget?: number;
 }
 
 const SprintSchema: Schema = new Schema(
@@ -21,6 +24,9 @@ const SprintSchema: Schema = new Schema(
     projectId: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    capacity: { type: Number },
+    storyPointTarget: { type: Number },
+    velocityTarget: { type: Number },
   },
   { timestamps: true }
 );
