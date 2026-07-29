@@ -27,6 +27,7 @@ interface WorkspaceShape {
   name: string;
   description?: string;
   role: string;
+  type?: string;
 }
 
 interface SessionInfo {
