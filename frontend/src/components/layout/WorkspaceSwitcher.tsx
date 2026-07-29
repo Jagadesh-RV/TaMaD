@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useWorkspaceStore } from '../../../store/workspaceStore';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 import { ChevronDown, Check, Plus, Users } from 'lucide-react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
