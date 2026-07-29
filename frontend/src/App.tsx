@@ -36,6 +36,7 @@ import AgileBoardPage from "./pages/AgileBoardPage";
 import SprintPlanningPage from "./pages/SprintPlanningPage";
 import MembersPage from "./pages/teams/MembersPage";
 import TeamSettingsPage from "./pages/teams/TeamSettingsPage";
+import OrganizationDashboardPage from "./pages/OrganizationDashboardPage";
 
 function LoadingSpinner() {
   return (
@@ -104,6 +105,7 @@ export default function App() {
         <Route path="/agile/planning" element={<SprintPlanningPage />} />
         <Route path="/team/members" element={<MembersPage />} />
         <Route path="/team/settings" element={<TeamSettingsPage />} />
+        <Route path="/org/:id" element={<OrganizationDashboardPage />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
