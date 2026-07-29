@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ITeam extends Document {
   name: string;
   slug: string;
+  organizationId?: mongoose.Types.ObjectId;
   description?: string;
   logoUrl?: string;
   color?: string;
@@ -19,6 +20,7 @@ const TeamSchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization' },
     description: { type: String },
     logoUrl: { type: String },
     color: { type: String, default: '#2563eb' },

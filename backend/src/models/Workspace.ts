@@ -4,6 +4,7 @@ export interface IWorkspace extends Document {
   name: string;
   description?: string;
   type: 'personal' | 'team';
+  organizationId?: mongoose.Types.ObjectId;
   teamId?: mongoose.Types.ObjectId;
   ownerId: mongoose.Types.ObjectId;
   members: Array<{
@@ -24,6 +25,7 @@ const WorkspaceSchema: Schema = new Schema(
     name: { type: String, required: true },
     description: { type: String },
     type: { type: String, enum: ['personal', 'team'], default: 'team' },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization' },
     teamId: { type: Schema.Types.ObjectId, ref: 'Team' },
     ownerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     members: [
