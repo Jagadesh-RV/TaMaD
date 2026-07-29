@@ -262,7 +262,7 @@ export default function DashboardPage() {
               <div className="h-64">
                 {tasksLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <LoadingSpinner size="md" />
+                    <LoadingSpinner size={24} />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -384,7 +384,7 @@ export default function DashboardPage() {
               </div>
               {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <LoadingSpinner size="sm" />
+                  <LoadingSpinner size={16} />
                 </div>
               ) : projects.length === 0 ? (
                 <EmptyState
