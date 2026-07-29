@@ -27,7 +27,7 @@ export default function LoginPage() {
     formState: { errors },
     getValues,
   } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginSchema) as any,
     defaultValues: { rememberMe: true },
   });
 

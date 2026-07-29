@@ -32,7 +32,7 @@ export default function ContactPage() {
     })).sort((left, right) => left.name.localeCompare(right.name));
   }, []);
   const { register, handleSubmit, setError, clearErrors, reset, formState: { errors, isSubmitting } } = useForm<ContactFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: { country: 'US' },
   });
 
