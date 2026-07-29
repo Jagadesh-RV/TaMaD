@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate } from '../middleware/authMiddleware';
+import { protect } from '../middleware/auth';
 import { 
   createTeam, getTeams, getTeamById, updateTeam, deleteTeam,
   getMembers, inviteMember, joinTeam, leaveTeam, updateMemberRole, removeMember
@@ -7,7 +7,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate);
+router.use(protect);
 
 router.post('/', createTeam);
 router.get('/', getTeams);

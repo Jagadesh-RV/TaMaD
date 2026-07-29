@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/auth';
 import mongoose from 'mongoose';
 import Team from '../models/Team';
 import TeamMember from '../models/TeamMember';
@@ -23,7 +24,7 @@ async function ensureDefaultRoles(teamId: mongoose.Types.ObjectId) {
   return createdRoles;
 }
 
-export const createTeam = async (req: Request, res: Response) => {
+export const createTeam = async (req: AuthRequest, res: Response) => {
   const { name, slug, description, logoUrl, color, visibility, timeZone, workspaceName } = req.body;
   const userId = req.user?._id;
 
@@ -92,7 +93,7 @@ export const createTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const getTeams = async (req: Request, res: Response) => {
+export const getTeams = async (req: AuthRequest, res: Response) => {
   const userId = req.user?._id;
 
   try {
@@ -105,7 +106,7 @@ export const getTeams = async (req: Request, res: Response) => {
   }
 };
 
-export const getTeamById = async (req: Request, res: Response) => {
+export const getTeamById = async (req: AuthRequest, res: Response) => {
   try {
     const team = await Team.findOne({ _id: req.params.id, isDeleted: false });
     if (!team) return res.status(404).json({ error: 'Team not found' });
@@ -115,7 +116,7 @@ export const getTeamById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateTeam = async (req: Request, res: Response) => {
+export const updateTeam = async (req: AuthRequest, res: Response) => {
   try {
     const team = await Team.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
@@ -131,7 +132,7 @@ export const updateTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteTeam = async (req: Request, res: Response) => {
+export const deleteTeam = async (req: AuthRequest, res: Response) => {
   try {
     const team = await Team.findOneAndUpdate(
       { _id: req.params.id, isDeleted: false },
@@ -146,7 +147,7 @@ export const deleteTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const getMembers = async (req: Request, res: Response) => {
+export const getMembers = async (req: AuthRequest, res: Response) => {
   try {
     const members = await TeamMember.find({ teamId: req.params.id, isDeleted: false })
       .populate('userId', 'name email avatarUrl')
@@ -157,7 +158,7 @@ export const getMembers = async (req: Request, res: Response) => {
   }
 };
 
-export const inviteMember = async (req: Request, res: Response) => {
+export const inviteMember = async (req: AuthRequest, res: Response) => {
   const { email, roleId, inviteType } = req.body;
   const teamId = req.params.id;
   
@@ -184,7 +185,7 @@ export const inviteMember = async (req: Request, res: Response) => {
   }
 };
 
-export const joinTeam = async (req: Request, res: Response) => {
+export const joinTeam = async (req: AuthRequest, res: Response) => {
   const { token } = req.body;
   const userId = req.user?._id;
 
@@ -217,7 +218,7 @@ export const joinTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const leaveTeam = async (req: Request, res: Response) => {
+export const leaveTeam = async (req: AuthRequest, res: Response) => {
   try {
     const member = await TeamMember.findOneAndUpdate(
       { teamId: req.params.id, userId: req.user?._id, isDeleted: false },
@@ -232,7 +233,7 @@ export const leaveTeam = async (req: Request, res: Response) => {
   }
 };
 
-export const updateMemberRole = async (req: Request, res: Response) => {
+export const updateMemberRole = async (req: AuthRequest, res: Response) => {
   try {
     const { roleId } = req.body;
     const member = await TeamMember.findOneAndUpdate(
@@ -250,7 +251,7 @@ export const updateMemberRole = async (req: Request, res: Response) => {
   }
 };
 
-export const removeMember = async (req: Request, res: Response) => {
+export const removeMember = async (req: AuthRequest, res: Response) => {
   try {
     const member = await TeamMember.findOneAndUpdate(
       { teamId: req.params.id, userId: req.params.memberId, isDeleted: false },
