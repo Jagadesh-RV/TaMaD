@@ -6,6 +6,7 @@ import { ChevronDown, Check, Plus, Users, Building2, User, Building } from 'luci
 import clsx from 'clsx';
 import CreateTeamModal from '../teams/CreateTeamModal';
 import JoinTeamModal from '../teams/JoinTeamModal';
+import CreateOrganizationModal from '../teams/CreateOrganizationModal';
 
 export default function WorkspaceSwitcher() {
   const { workspaces, currentWorkspace, setCurrentWorkspace, fetchWorkspaces } = useWorkspaceStore();
@@ -16,6 +17,7 @@ export default function WorkspaceSwitcher() {
   
   const [showCreateTeam, setShowCreateTeam] = useState(false);
   const [showJoinTeam, setShowJoinTeam] = useState(false);
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
 
   useEffect(() => {
     fetchWorkspaces();
@@ -163,7 +165,7 @@ export default function WorkspaceSwitcher() {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  alert('Create Organization Modal Coming Soon!');
+                  setShowCreateOrg(true);
                 }}
                 className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors hover:bg-[var(--color-surface-hover)] text-purple-500 font-medium"
               >
@@ -197,6 +199,7 @@ export default function WorkspaceSwitcher() {
 
       {showCreateTeam && <CreateTeamModal onClose={() => setShowCreateTeam(false)} />}
       {showJoinTeam && <JoinTeamModal onClose={() => setShowJoinTeam(false)} />}
+      {showCreateOrg && <CreateOrganizationModal onClose={() => setShowCreateOrg(false)} />}
     </div>
   );
 }
