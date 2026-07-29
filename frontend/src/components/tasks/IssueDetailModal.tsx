@@ -123,6 +123,14 @@ export default function IssueDetailModal({
               />
             </div>
 
+            <div className="mb-6">
+              <label className="text-sm font-semibold mb-2 block">Attachments</label>
+              <div className="border border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-[color:var(--color-surface-hover)]" style={{ borderColor: 'var(--color-border-light)' }}>
+                <Paperclip size={24} className="text-[color:var(--color-muted)] mb-2" />
+                <p className="text-sm text-[color:var(--color-muted)]">Click or drag files here to attach</p>
+              </div>
+            </div>
+
             {/* Activity Tabs */}
             <div className="mt-8">
               <div className="flex items-center gap-4 border-b mb-4" style={{ borderColor: 'var(--color-border)' }}>
