@@ -35,13 +35,13 @@ export default function IssueDetailModal({
     }
   };
 
-  const isWatching = formData.watchers?.some(w => w._id === user?._id) || false;
-  const isVoting = formData.votes?.includes(user?._id) || false;
+  const isWatching = formData.watchers?.some(w => w._id === user?.id) || false;
+  const isVoting = formData.votes?.includes(user?.id) || false;
 
   const handleToggleWatch = async () => {
     await toggleWatch(initialData._id);
     const newWatchers = isWatching 
-      ? formData.watchers.filter(w => w._id !== user?._id)
+      ? formData.watchers.filter(w => w._id !== user?.id)
       : [...(formData.watchers || []), user];
     setFormData(s => ({ ...s, watchers: newWatchers }));
   };
@@ -49,8 +49,8 @@ export default function IssueDetailModal({
   const handleToggleVote = async () => {
     await toggleVote(initialData._id);
     const newVotes = isVoting
-      ? formData.votes.filter(id => id !== user?._id)
-      : [...(formData.votes || []), user?._id];
+      ? formData.votes.filter(id => id !== user?.id)
+      : [...(formData.votes || []), user?.id];
     setFormData(s => ({ ...s, votes: newVotes }));
   };
 

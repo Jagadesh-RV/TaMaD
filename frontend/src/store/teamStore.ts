@@ -26,6 +26,7 @@ export interface Team {
   logoUrl?: string;
   color: string;
   visibility: 'private' | 'public';
+  organizationId?: string;
   timeZone: string;
   createdAt: string;
   updatedAt: string;

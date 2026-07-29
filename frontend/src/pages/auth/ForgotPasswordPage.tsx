@@ -19,7 +19,7 @@ export default function ForgotPasswordPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Values>({ resolver: zodResolver(schema) as any });
+  } = useForm<Values>({ resolver: zodResolver(schema as any) as any });
 
   const onSubmit = async ({ email }: Values) => {
     setIsLoading(true);
