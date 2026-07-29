@@ -5,7 +5,7 @@ import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
 import TaskModal from '../components/tasks/TaskModal';
 import SprintModal from '../components/tasks/SprintModal';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
@@ -18,10 +18,12 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
     <div 
       ref={setNodeRef}
       style={{ ...style, background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}
-      className="mb-2 cursor-pointer rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
+      className="mb-2 cursor-grab active:cursor-grabbing rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
       onClick={onClick}
+      {...attributes}
+      {...listeners}
     >
-      <div className="mb-2 flex items-center justify-between" {...attributes} {...listeners}>
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>{task.taskType || 'Task'}</span>
         <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{task.storyPoints ? `${task.storyPoints} pts` : '-'}</span>
       </div>
@@ -88,16 +90,28 @@ export default function SprintPlanningPage() {
     if (!over) return;
 
     const taskId = active.id as string;
-    const overId = over.id as string; // Could be 'backlog' or a sprintId
+    const overId = over.id as string;
 
     const task = tasks.find(t => t._id === taskId);
     if (!task) return;
 
-    const currentSprintId = task.sprintId || 'backlog';
-    if (currentSprintId === overId) return; // No change
+    let targetSprintId = overId;
+    if (overId !== 'backlog' && !sprints.some(s => s._id === overId)) {
+      const overTask = tasks.find(t => t._id === overId);
+      if (overTask) {
+        targetSprintId = overTask.sprintId || 'backlog';
+      }
+    }
 
-    // Optimistic UI update
-    const newSprintId = overId === 'backlog' ? undefined : overId;
+    const currentSprintId = task.sprintId || 'backlog';
+    if (currentSprintId === targetSprintId) return; // No change
+
+    // Optimistic UI update to prevent visual snap-back
+    const newSprintId = targetSprintId === 'backlog' ? null : targetSprintId;
+    
+    useTaskStore.setState(s => ({
+      tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: newSprintId } : t)
+    }));
     
     try {
       await updateTask(taskId, { sprintId: newSprintId });
@@ -159,7 +173,7 @@ export default function SprintPlanningPage() {
         </button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
         <div className="flex flex-1 overflow-hidden">
           {/* Sprints Area */}
           <div className="flex-1 overflow-y-auto p-6" style={{ borderRight: '1px solid var(--color-border-light)' }}>
