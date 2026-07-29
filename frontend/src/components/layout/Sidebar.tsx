@@ -58,6 +58,13 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
       ],
     },
+    ...(isTeam ? [{
+      label: 'TEAM',
+      links: [
+        { label: 'Members', path: '/team/members', icon: Users },
+        { label: 'Team Settings', path: '/team/settings', icon: Settings },
+      ]
+    }] : []),
     {
       label: 'ANALYTICS',
       links: [
