@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Activity } from 'lucide-react';
 
 const COLORS = [
@@ -37,8 +38,8 @@ export default function HabitModal({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
       <div className="bg-white w-full max-w-xl rounded-[24px] border border-border shadow-float p-8 relative animate-in fade-in zoom-in-95 duration-200">
         <button
           onClick={onClose}
@@ -121,6 +122,7 @@ export default function HabitModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
