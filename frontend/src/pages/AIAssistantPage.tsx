@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAIStore } from '../store/aiStore';
-import { useAuthStore } from '../store/authStore';
+import { useWorkspaceStore } from '../store/workspaceStore';
 import { useTaskStore } from '../store/taskStore';
 
 const SUGGESTED_PROMPTS = [
@@ -25,8 +25,8 @@ const PARSE_EXAMPLES = [
 ];
 
 export default function AIAssistantPage() {
-  const workspace = useAuthStore(s => s.workspace);
-  const workspaceId = workspace?._id || '';
+  const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
+  const workspaceId = currentWorkspace?._id || '';
   const { createTask } = useTaskStore();
   const {
     parsedTask, parsing, chatMessages, chatLoading,
@@ -149,7 +149,7 @@ export default function AIAssistantPage() {
                     </div>
                     <h3 className="mb-2 text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>AI Workspace Assistant</h3>
                     <p className="mb-8 text-sm text-center max-w-md" style={{ color: 'var(--color-muted)' }}>
-                      Ask questions about your workspace, get insights on tasks, or generate reports.
+                      Ask questions about your {currentWorkspace?.type === 'team' ? 'team workspace' : 'personal workspace'}, get insights on tasks, or generate reports.
                     </p>
                     <div className="grid gap-3 sm:grid-cols-2 max-w-lg w-full">
                       {SUGGESTED_PROMPTS.map((prompt) => {
