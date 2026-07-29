@@ -221,6 +221,40 @@ export default function IssueDetailModal({
                   placeholder="e.g. 4"
                 />
               </div>
+
+              {/* Custom Fields */}
+              <div className="pt-4 border-t mt-4" style={{ borderColor: 'var(--color-border)' }}>
+                <h4 className="text-xs font-semibold text-[color:var(--color-muted)] uppercase tracking-wider mb-3">Custom Fields</h4>
+                {formData.customFields && Object.keys(formData.customFields).map(key => (
+                  <div key={key} className="mb-3">
+                    <label className="text-xs font-medium text-[color:var(--color-muted)] block mb-1">{key}</label>
+                    <input
+                      type="text"
+                      value={formData.customFields[key] || ''}
+                      onChange={(e) => setFormData(s => ({ 
+                        ...s, 
+                        customFields: { ...s.customFields, [key]: e.target.value } 
+                      }))}
+                      onBlur={() => handleChange('customFields', formData.customFields)}
+                      className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none"
+                      style={{ borderColor: 'var(--color-border)' }}
+                    />
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const newField = prompt('Enter custom field name:');
+                    if (newField) {
+                      const updated = { ...formData.customFields, [newField]: '' };
+                      setFormData(s => ({ ...s, customFields: updated }));
+                      handleChange('customFields', updated);
+                    }
+                  }}
+                  className="text-xs font-medium text-[color:var(--color-accent)] hover:underline"
+                >
+                  + Add custom field
+                </button>
+              </div>
             </div>
             
           </div>
