@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifStore } from '../../store/notifStore';
 import { useRealtime } from '../../providers/RealtimeProvider';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 const sections = [
   {
@@ -96,10 +97,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       {!collapsed && (
         <div className="mt-5 mb-1 px-3">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-muted)' }}>Workspace</p>
-          <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-foreground)' }}>
-            <div className="h-2 w-2 rounded-full" style={{ background: 'var(--color-success)' }} />
-            {workspace?.name || 'Personal Workspace'}
-          </div>
+          <WorkspaceSwitcher />
         </div>
       )}
 
