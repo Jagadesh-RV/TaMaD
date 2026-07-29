@@ -1,14 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useWorkspaceStore } from '../store/workspaceStore';
+import { useTaskStore } from '../store/taskStore';
+import IssueDetailModal from '../components/tasks/IssueDetailModal';
 
 export default function SprintPlanningPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
+  const { tasks, fetchTasks, loading } = useTaskStore();
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   useEffect(() => {
-    // Connect to backend API to load backlog tasks, epics and planned sprints
+    if (currentWorkspace?._id) {
+      fetchTasks(currentWorkspace._id);
+    }
   }, [currentWorkspace?._id]);
 
-  if (!currentWorkspace) return <div className="p-8">Loading...</div>;
+  if (!currentWorkspace) return <div className="p-8 text-[color:var(--color-muted)]">Loading workspace...</div>;
+
+  const backlogTasks = tasks.filter(t => t.status !== 'done');
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -47,17 +55,42 @@ export default function SprintPlanningPage() {
             </button>
           </div>
           <div className="space-y-2">
-            {/* Example Issue */}
-            <div className="cursor-pointer rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}>
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>Story</span>
-                <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>3 pts</span>
+            {loading && <p className="text-sm text-[color:var(--color-muted)]">Loading backlog...</p>}
+            {!loading && backlogTasks.map(task => (
+              <div 
+                key={task._id}
+                onClick={() => setSelectedTask(task)}
+                className="cursor-pointer rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
+                style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>{task.taskType || 'Task'}</span>
+                  <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{task.storyPoints ? `${task.storyPoints} pts` : '-'}</span>
+                </div>
+                <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs px-2 py-0.5 rounded bg-[color:var(--color-surface-hover)]" style={{ color: 'var(--color-muted)' }}>{task.status}</span>
+                  {task.assignees && task.assignees.length > 0 && (
+                    <div className="flex -space-x-1">
+                      {task.assignees.map(a => (
+                        <div key={a.email} className="h-5 w-5 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-[10px] font-bold border border-[color:var(--color-surface)]" title={a.name}>
+                          {a.name.charAt(0)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>Implement n8n webhook triggers</p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
+
+      <IssueDetailModal 
+        isOpen={!!selectedTask}
+        onClose={() => setSelectedTask(null)}
+        initialData={selectedTask}
+      />
     </div>
   );
 }

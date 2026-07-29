@@ -1,0 +1,231 @@
+import { useState, useEffect } from 'react';
+import { X, Calendar, Check, Play, Paperclip, Eye, ThumbsUp, Tag, List, Activity, MessageSquare } from 'lucide-react';
+import { Dialog, DialogPanel, DialogTitle } from '../ui/Dialog';
+import { Button } from '../ui/Button';
+import { useTaskStore } from '../../store/taskStore';
+import { useAuthStore } from '../../store/authStore';
+import TaskComments from './TaskComments';
+
+export default function IssueDetailModal({
+  isOpen,
+  onClose,
+  initialData,
+}: any) {
+  const { updateTask, toggleWatch, toggleVote } = useTaskStore();
+  const user = useAuthStore(s => s.user);
+
+  const [formData, setFormData] = useState<any>({});
+  const [activeTab, setActiveTab] = useState<'comments' | 'history'>('comments');
+
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData(initialData);
+    }
+  }, [isOpen, initialData]);
+
+  if (!isOpen || !initialData) return null;
+
+  const handleChange = async (field: string, value: any) => {
+    setFormData(s => ({ ...s, [field]: value }));
+    try {
+      await updateTask(initialData._id, { [field]: value });
+    } catch (e) {
+      // Revert if error
+      setFormData(s => ({ ...s, [field]: initialData[field] }));
+    }
+  };
+
+  const isWatching = formData.watchers?.some(w => w._id === user?._id) || false;
+  const isVoting = formData.votes?.includes(user?._id) || false;
+
+  const handleToggleWatch = async () => {
+    await toggleWatch(initialData._id);
+    const newWatchers = isWatching 
+      ? formData.watchers.filter(w => w._id !== user?._id)
+      : [...(formData.watchers || []), user];
+    setFormData(s => ({ ...s, watchers: newWatchers }));
+  };
+
+  const handleToggleVote = async () => {
+    await toggleVote(initialData._id);
+    const newVotes = isVoting
+      ? formData.votes.filter(id => id !== user?._id)
+      : [...(formData.votes || []), user?._id];
+    setFormData(s => ({ ...s, votes: newVotes }));
+  };
+
+  return (
+    <Dialog open={isOpen} onClose={onClose}>
+      <DialogPanel className="max-w-5xl w-full max-h-[90vh] flex flex-col p-0 overflow-hidden bg-[color:var(--color-surface)]">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b p-4" style={{ borderColor: 'var(--color-border)' }}>
+          <div className="flex items-center gap-3">
+            <select
+              value={formData.taskType || 'task'}
+              onChange={(e) => handleChange('taskType', e.target.value)}
+              className="text-xs font-semibold uppercase tracking-wider bg-transparent outline-none cursor-pointer p-1 rounded hover:bg-[color:var(--color-surface-hover)]"
+              style={{ color: 'var(--color-muted)' }}
+            >
+              <option value="epic">Epic</option>
+              <option value="story">Story</option>
+              <option value="task">Task</option>
+              <option value="bug">Bug</option>
+              <option value="subtask">Subtask</option>
+            </select>
+            <span className="text-[color:var(--color-muted)] text-sm">{initialData._id.slice(-6)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleToggleWatch}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors ${isWatching ? 'bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]' : 'hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-muted)]'}`}
+            >
+              <Eye size={14} />
+              {isWatching ? 'Watching' : 'Watch'} ({formData.watchers?.length || 0})
+            </button>
+            <button
+              onClick={handleToggleVote}
+              className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs transition-colors ${isVoting ? 'bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]' : 'hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-muted)]'}`}
+            >
+              <ThumbsUp size={14} />
+              {isVoting ? 'Voted' : 'Vote'} ({formData.votes?.length || 0})
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-full p-2 hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-muted)]"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Main Content (Left) */}
+          <div className="flex-1 overflow-y-auto p-6 border-r" style={{ borderColor: 'var(--color-border)' }}>
+            <input
+              type="text"
+              value={formData.title || ''}
+              onChange={(e) => setFormData(s => ({ ...s, title: e.target.value }))}
+              onBlur={() => handleChange('title', formData.title)}
+              className="w-full text-2xl font-bold bg-transparent outline-none mb-4"
+              placeholder="Issue title"
+            />
+            
+            <div className="mb-6">
+              <label className="text-sm font-semibold mb-2 block">Description</label>
+              <textarea
+                value={formData.description || ''}
+                onChange={(e) => setFormData(s => ({ ...s, description: e.target.value }))}
+                onBlur={() => handleChange('description', formData.description)}
+                className="w-full min-h-[150px] p-3 rounded-md bg-[color:var(--color-background)] border outline-none text-sm"
+                style={{ borderColor: 'var(--color-border)' }}
+                placeholder="Add a description..."
+              />
+            </div>
+
+            {/* Activity Tabs */}
+            <div className="mt-8">
+              <div className="flex items-center gap-4 border-b mb-4" style={{ borderColor: 'var(--color-border)' }}>
+                <button 
+                  onClick={() => setActiveTab('comments')}
+                  className={`pb-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'comments' ? 'border-[color:var(--color-accent)] text-[color:var(--color-foreground)]' : 'border-transparent text-[color:var(--color-muted)] hover:text-[color:var(--color-foreground)]'}`}
+                >
+                  <span className="flex items-center gap-2"><MessageSquare size={14} /> Comments</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('history')}
+                  className={`pb-2 text-sm font-medium border-b-2 transition-colors ${activeTab === 'history' ? 'border-[color:var(--color-accent)] text-[color:var(--color-foreground)]' : 'border-transparent text-[color:var(--color-muted)] hover:text-[color:var(--color-foreground)]'}`}
+                >
+                  <span className="flex items-center gap-2"><Activity size={14} /> History</span>
+                </button>
+              </div>
+              
+              {activeTab === 'comments' && (
+                <div className="bg-[color:var(--color-background)] rounded-md border" style={{ borderColor: 'var(--color-border)' }}>
+                  <TaskComments taskId={initialData._id} />
+                </div>
+              )}
+              {activeTab === 'history' && (
+                <div className="text-center p-8 text-[color:var(--color-muted)] text-sm">
+                  History timeline coming soon (AuditLogs).
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar (Right) */}
+          <div className="w-[300px] bg-[color:var(--color-surface-hover)] p-6 overflow-y-auto space-y-6">
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Status</label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none cursor-pointer"
+                  style={{ borderColor: 'var(--color-border)' }}
+                >
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="review">In Review</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Priority</label>
+                <select
+                  value={formData.priority}
+                  onChange={(e) => handleChange('priority', e.target.value)}
+                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none cursor-pointer"
+                  style={{ borderColor: 'var(--color-border)' }}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Assignee</label>
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-xs font-bold">
+                    {formData.assignees?.[0]?.name?.charAt(0) || '?'}
+                  </div>
+                  <span className="text-sm">{formData.assignees?.[0]?.name || 'Unassigned'}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Story Points</label>
+                <input
+                  type="number"
+                  value={formData.storyPoints || ''}
+                  onChange={(e) => setFormData(s => ({ ...s, storyPoints: parseInt(e.target.value) || undefined }))}
+                  onBlur={() => handleChange('storyPoints', formData.storyPoints)}
+                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none"
+                  style={{ borderColor: 'var(--color-border)' }}
+                  placeholder="e.g. 5"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Estimated Time (hrs)</label>
+                <input
+                  type="number"
+                  value={formData.estimatedTime || ''}
+                  onChange={(e) => setFormData(s => ({ ...s, estimatedTime: parseFloat(e.target.value) || undefined }))}
+                  onBlur={() => handleChange('estimatedTime', formData.estimatedTime)}
+                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none"
+                  style={{ borderColor: 'var(--color-border)' }}
+                  placeholder="e.g. 4"
+                />
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </DialogPanel>
+    </Dialog>
+  );
+}
