@@ -10,7 +10,7 @@ export default function TeamSettingsPage() {
 
   const currentTeam = teams.find(t => t._id === currentWorkspace?.teamId);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{name: string; description: string; visibility: 'private' | 'public'}>({
     name: '',
     description: '',
     visibility: 'private',

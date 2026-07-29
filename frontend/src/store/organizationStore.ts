@@ -9,6 +9,10 @@ export interface Organization {
   ownerId: string;
   members: any[];
   isActive: boolean;
+  billing?: {
+    plan: string;
+    status: string;
+  };
 }
 
 interface OrganizationState {
