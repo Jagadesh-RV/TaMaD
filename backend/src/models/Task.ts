@@ -23,6 +23,10 @@ export interface ITask extends Document {
   storyPoints?: number;
   estimatedTime?: number;
   actualTime?: number;
+  watchers: mongoose.Types.ObjectId[];
+  votes: mongoose.Types.ObjectId[];
+  attachments: mongoose.Types.ObjectId[];
+  customFields?: Map<string, any>;
   isArchived: boolean;
   embedding?: number[];
   createdAt: Date;
@@ -65,6 +69,10 @@ const TaskSchema: Schema = new Schema(
     storyPoints: { type: Number },
     estimatedTime: { type: Number },
     actualTime: { type: Number, default: 0 },
+    watchers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    votes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    attachments: [{ type: Schema.Types.ObjectId, ref: 'File' }],
+    customFields: { type: Map, of: Schema.Types.Mixed },
     isArchived: { type: Boolean, default: false },
   },
   { timestamps: true }
