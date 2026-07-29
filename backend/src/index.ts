@@ -45,6 +45,7 @@ import analyticsRoutes from './routes/analyticsRoutes';
 import focusSessionRoutes from './routes/focusSessionRoutes';
 import agileRoutes from './routes/agileRoutes';
 import teamRoutes from './routes/teamRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -86,6 +87,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/focus-sessions', focusSessionRoutes);
 app.use('/api/agile', agileRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/dashboards', dashboardRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {
