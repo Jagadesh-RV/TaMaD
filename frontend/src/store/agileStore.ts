@@ -30,7 +30,7 @@ export const useAgileStore = create<AgileState>((set) => ({
   fetchSprints: async (workspaceId, projectId) => {
     set({ loading: true });
     try {
-      const { data } = await api.get('/sprints', { params: { workspaceId, projectId } });
+      const { data } = await api.get('/agile/sprints', { params: { workspaceId, projectId } });
       set({ sprints: data, loading: false });
     } catch {
       set({ loading: false });
@@ -40,7 +40,7 @@ export const useAgileStore = create<AgileState>((set) => ({
 
   createSprint: async (payload) => {
     try {
-      const { data } = await api.post('/sprints', payload);
+      const { data } = await api.post('/agile/sprints', payload);
       set(s => ({ sprints: [data, ...s.sprints] }));
       toast.success('Sprint created');
       return data;
@@ -52,7 +52,7 @@ export const useAgileStore = create<AgileState>((set) => ({
 
   updateSprint: async (id, payload) => {
     try {
-      const { data } = await api.put(`/sprints/${id}`, payload);
+      const { data } = await api.put(`/agile/sprints/${id}`, payload);
       set(s => ({ sprints: s.sprints.map(sp => sp._id === id ? data : sp) }));
       return data;
     } catch {
@@ -63,7 +63,7 @@ export const useAgileStore = create<AgileState>((set) => ({
 
   startSprint: async (id) => {
     try {
-      const { data } = await api.post(`/sprints/${id}/start`);
+      const { data } = await api.post(`/agile/sprints/${id}/start`);
       set(s => ({ sprints: s.sprints.map(sp => sp._id === id ? data : sp) }));
       toast.success('Sprint started successfully!');
       return data;
@@ -75,7 +75,7 @@ export const useAgileStore = create<AgileState>((set) => ({
 
   completeSprint: async (id) => {
     try {
-      const { data } = await api.post(`/sprints/${id}/complete`);
+      const { data } = await api.post(`/agile/sprints/${id}/complete`);
       set(s => ({ sprints: s.sprints.map(sp => sp._id === id ? data : sp) }));
       toast.success('Sprint completed successfully!');
       return data;
