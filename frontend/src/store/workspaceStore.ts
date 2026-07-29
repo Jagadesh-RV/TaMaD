@@ -16,6 +16,7 @@ interface Workspace {
   _id: string;
   name: string;
   description?: string;
+  type: 'personal' | 'team';
   ownerId: string;
   members: WorkspaceMember[];
   isActive: boolean;
@@ -32,6 +33,7 @@ interface WorkspaceState {
   currentWorkspace: Workspace | null;
   loading: boolean;
   error: string | null;
+  setCurrentWorkspace: (workspace: Workspace) => void;
   fetchWorkspaces: () => Promise<void>;
   getWorkspaceById: (id: string) => Promise<void>;
   createWorkspace: (payload: Partial<Workspace>) => Promise<Workspace>;
@@ -48,6 +50,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   currentWorkspace: null,
   loading: false,
   error: null,
+
+  setCurrentWorkspace: (workspace) => set({ currentWorkspace: workspace }),
 
   fetchWorkspaces: async () => {
     set({ loading: true });
