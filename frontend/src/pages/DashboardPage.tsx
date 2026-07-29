@@ -13,7 +13,7 @@ import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { EmptyState } from '../components/ui/EmptyState';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { SkeletonTable } from '../components/ui/Skeleton';
 import { staggerContainer, cardVariant } from '../lib/animations';
 import clsx from 'clsx';
@@ -257,7 +257,7 @@ export default function DashboardPage() {
               <div className="h-64">
                 {tasksLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <LoadingSpinner size={32} />
+                    <LoadingSpinner size="md" />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -379,7 +379,7 @@ export default function DashboardPage() {
               </div>
               {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <LoadingSpinner size={20} />
+                  <LoadingSpinner size="sm" />
                 </div>
               ) : projects.length === 0 ? (
                 <EmptyState

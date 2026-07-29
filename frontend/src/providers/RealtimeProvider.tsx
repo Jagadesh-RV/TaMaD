@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useNotifStore } from '../store/notifStore';
-import { getClientAuth } from '../services/firebase';
+import api from '../utils/api';
 
 interface RealtimeContextType {
   socket: Socket | null;
@@ -45,9 +45,8 @@ export const RealtimeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const getAuthToken = useCallback(async (): Promise<string | null> => {
     try {
-      const currentUser = getClientAuth().currentUser;
-      if (!currentUser) return null;
-      return await currentUser.getIdToken();
+      const { data } = await api.get('/auth/me');
+      return data.user?.id || null;
     } catch {
       return null;
     }

@@ -1,204 +1,179 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { aiService } from '../services/ai';
-import { parseTask as parseTaskAI } from '../services/ai/taskParser';
-import { chatWithAI, buildWorkspaceContext } from '../services/ai/workspaceChat';
-import { generateProjectPlan } from '../services/ai/projectPlanner';
-import { generateDailyPlan } from '../services/ai/dailyPlanner';
-import { generateEmbedding } from '../utils/ai';
+import { parseNaturalLanguageTask, generateEmbedding } from '../utils/ai';
 import Task from '../models/Task';
 import Project from '../models/Project';
+import Note from '../models/Note';
 import Habit from '../models/Habit';
 import Goal from '../models/Goal';
-import Note from '../models/Note';
-import DocumentModel from '../models/Document';
-import CommentModel from '../models/Comment';
-import logger from '../utils/logger';
 
+// @desc    Parse natural language into a structured task
+// @route   POST /api/ai/parse-task
+// @access  Private
 export const parseTask = async (req: AuthRequest, res: Response) => {
   try {
     const { text } = req.body;
+
     if (!text) {
       return res.status(400).json({ error: 'Text input is required' });
     }
 
-    const taskData = await parseTaskAI(text);
+    const taskData = await parseNaturalLanguageTask(text);
     res.json(taskData);
-  } catch (error) {
-    logger.error('AI task parsing failed:', error);
-    res.status(500).json({ error: 'AI parsing failed', details: (error as Error).message });
+  } catch (error: any) {
+    res.status(500).json({ error: 'AI parsing failed', details: error.message });
   }
 };
 
+// @desc    Chat with workspace context
+// @route   POST /api/ai/chat
+// @access  Private
 export const chatWithWorkspace = async (req: AuthRequest, res: Response) => {
   try {
-    const { query, workspaceId, history } = req.body;
+    const { query, workspaceId } = req.body;
+    
     if (!query) return res.status(400).json({ error: 'Query is required' });
-    if (!workspaceId) return res.status(400).json({ error: 'Workspace ID is required' });
 
-    const result = await chatWithAI({
-      query,
-      workspaceId,
-      userId: req.user?._id?.toString(),
-      history,
+    // Fetch workspace context
+    const [tasks, projects, notes, habits, goals] = await Promise.all([
+      Task.find({ workspaceId }).limit(10).select('title status priority dueDate'),
+      Project.find({ workspaceId }).limit(5).select('name status'),
+      Note.find({ workspaceId }).limit(5).select('title content'),
+      Habit.find({ workspaceId }).limit(5).select('name frequency completedDates'),
+      Goal.find({ workspaceId }).limit(5).select('title status progress'),
+    ]);
+
+    // Build context string
+    const context = `
+Workspace Context:
+- ${tasks.length} tasks (${tasks.filter(t => t.status === 'done').length} completed)
+- ${projects.length} projects
+- ${notes.length} notes
+- ${habits.length} habits
+- ${goals.length} goals
+
+Recent Tasks: ${tasks.slice(0, 5).map(t => `${t.title} (${t.status})`).join(', ') || 'None'}
+Projects: ${projects.map(p => `${p.name} (${p.status})`).join(', ') || 'None'}
+Goals: ${goals.map(g => `${g.title} - ${g.progress}% complete`).join(', ') || 'None'}
+    `.trim();
+
+    // Simple response generation based on query keywords
+    let response = '';
+    const lowerQuery = query.toLowerCase();
+
+    if (lowerQuery.includes('summarize') || lowerQuery.includes('summary')) {
+      const completedTasks = tasks.filter(t => t.status === 'done').length;
+      const inProgressTasks = tasks.filter(t => t.status === 'in-progress').length;
+      const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date()).length;
+      
+      response = `Here's your workspace summary:
+
+**Tasks:** ${tasks.length} total, ${completedTasks} completed, ${inProgressTasks} in progress
+**Overdue:** ${overdueTasks} tasks need attention
+**Projects:** ${projects.length} active projects
+**Goals:** ${goals.length} goals with average progress of ${goals.length > 0 ? Math.round(goals.reduce((a, g) => a + (g.progress || 0), 0) / goals.length) : 0}%
+
+${overdueTasks > 0 ? '⚠️ You have overdue tasks that need immediate attention.' : '✅ Great job! No overdue tasks.'}`;
+    } else if (lowerQuery.includes('overdue')) {
+      const overdueTasks = tasks.filter(t => t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done');
+      if (overdueTasks.length === 0) {
+        response = 'Great news! You have no overdue tasks. Keep up the good work! 🎉';
+      } else {
+        response = `You have ${overdueTasks.length} overdue task(s):
+
+${overdueTasks.map(t => `- **${t.title}** (Priority: ${t.priority})`).join('\n')}
+
+I recommend prioritizing these tasks to get back on track.`;
+      }
+    } else if (lowerQuery.includes('productivity') || lowerQuery.includes('tips')) {
+      const completedTasks = tasks.filter(t => t.status === 'done').length;
+      const completionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
+      
+      response = `Based on your workspace data:
+
+**Your Productivity Score:** ${completionRate}%
+**Tasks Completed:** ${completedTasks}/${tasks.length}
+
+**Tips for you:**
+1. ${completionRate > 70 ? 'Great completion rate! Consider tackling more challenging tasks.' : 'Focus on completing smaller tasks first to build momentum.'}
+2. ${tasks.filter(t => t.priority === 'urgent').length > 0 ? 'You have urgent tasks - prioritize these first.' : 'Consider setting priorities for your pending tasks.'}
+3. ${habits.length > 0 ? `Keep up your ${habits.length} habit(s) - consistency is key!` : 'Consider adding habits to build productive routines.'}`;
+    } else if (lowerQuery.includes('report') || lowerQuery.includes('weekly')) {
+      response = `**Weekly Report:**
+
+**Tasks Overview:**
+- Created: ${tasks.length}
+- Completed: ${tasks.filter(t => t.status === 'done').length}
+- In Progress: ${tasks.filter(t => t.status === 'in-progress').length}
+
+**Projects Status:**
+${projects.map(p => `- ${p.name}: ${p.status}`).join('\n') || 'No active projects'}
+
+**Goal Progress:**
+${goals.map(g => `- ${g.title}: ${g.progress || 0}%`).join('\n') || 'No goals set'}
+
+Keep up the great work! 💪`;
+    } else {
+      // Default response
+      response = `I understand you're asking about: "${query}"
+
+Based on your workspace, I can help you with:
+- **Task Management:** View, create, or prioritize tasks
+- **Project Insights:** Track project progress and status
+- **Goal Tracking:** Monitor your goals and milestones
+- **Habit Analytics:** Review your habit streaks and consistency
+- **Productivity Reports:** Generate summaries and reports
+
+Try asking me to "summarize my tasks" or "show overdue items" for specific insights!`;
+    }
+
+    res.json({ 
+      message: response,
+      context: {
+        tasksCount: tasks.length,
+        projectsCount: projects.length,
+        notesCount: notes.length,
+        habitsCount: habits.length,
+        goalsCount: goals.length,
+      }
     });
-
-    res.json(result);
-  } catch (error) {
-    logger.error('AI chat failed:', error);
-    res.status(500).json({ error: 'Chat feature failed', details: (error as Error).message });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Chat feature failed', details: error.message });
   }
 };
 
+// @desc    Generate weekly summary
+// @route   POST /api/ai/weekly-summary
+// @access  Private
 export const generateWeeklySummary = async (req: AuthRequest, res: Response) => {
   try {
     const { workspaceId } = req.body;
-    if (!workspaceId) return res.status(400).json({ error: 'Workspace ID is required' });
-
+    
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
 
     const [tasks, projects] = await Promise.all([
-      Task.find({
-        workspaceId,
-        updatedAt: { $gte: weekAgo },
-      }).select('title status priority dueDate createdAt'),
+      Task.find({ 
+        workspaceId, 
+        updatedAt: { $gte: weekAgo } 
+      }).select('title status priority updatedAt'),
       Project.find({ workspaceId }).select('name status'),
     ]);
 
-    const completedTasks = tasks.filter((t) => t.status === 'done');
-    const newTasks = tasks.filter(
-      (t) => new Date(t.createdAt) >= weekAgo
-    );
+    const completedTasks = tasks.filter(t => t.status === 'done');
+    const newTasks = tasks.filter(t => new Date(t.createdAt) >= weekAgo);
 
     const summary = {
       period: `${weekAgo.toLocaleDateString()} - ${new Date().toLocaleDateString()}`,
       tasksCompleted: completedTasks.length,
       tasksCreated: newTasks.length,
       totalTasks: tasks.length,
-      projects: projects.map((p) => ({ name: p.name, status: p.status })),
-      highlights: completedTasks.slice(0, 5).map((t) => t.title),
+      projects: projects.map(p => ({ name: p.name, status: p.status })),
+      highlights: completedTasks.slice(0, 5).map(t => t.title),
     };
 
     res.json(summary);
-  } catch (error) {
-    logger.error('Weekly summary generation failed:', error);
-    res.status(500).json({ error: 'Failed to generate summary', details: (error as Error).message });
-  }
-};
-
-export const generateProjectPlanHandler = async (req: AuthRequest, res: Response) => {
-  try {
-    const { request, workspaceId } = req.body;
-    if (!request) return res.status(400).json({ error: 'Project request description is required' });
-
-    let workspaceContext: string | undefined;
-    if (workspaceId) {
-      const context = await buildWorkspaceContext(workspaceId, req.user?._id?.toString());
-      workspaceContext = `Tasks: ${context.tasks.total}, Projects: ${context.projects.total}, Goals: ${context.goals.total}`;
-    }
-
-    const plan = await generateProjectPlan(request, workspaceContext);
-    res.json(plan);
-  } catch (error) {
-    logger.error('Project plan generation failed:', error);
-    res.status(500).json({ error: 'Failed to generate project plan', details: (error as Error).message });
-  }
-};
-
-export const generateDailyPlanHandler = async (req: AuthRequest, res: Response) => {
-  try {
-    const { workspaceId, date } = req.body;
-    if (!workspaceId) return res.status(400).json({ error: 'Workspace ID is required' });
-
-    const targetDate = date || new Date().toISOString().split('T')[0];
-    const context = await buildWorkspaceContext(workspaceId, req.user?._id?.toString());
-    const plan = await generateDailyPlan(targetDate, context);
-
-    res.json(plan);
-  } catch (error) {
-    logger.error('Daily plan generation failed:', error);
-    res.status(500).json({ error: 'Failed to generate daily plan', details: (error as Error).message });
-  }
-};
-
-export const generateEmbeddingHandler = async (req: AuthRequest, res: Response) => {
-  try {
-    const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'Text is required' });
-
-    const embedding = await generateEmbedding(text);
-    res.json({ embedding });
-  } catch (error) {
-    logger.error('Embedding generation failed:', error);
-    res.status(500).json({ error: 'Failed to generate embedding', details: (error as Error).message });
-  }
-};
-
-export const searchWithAI = async (req: AuthRequest, res: Response) => {
-  try {
-    const { query, workspaceId } = req.body;
-    if (!query || !workspaceId) {
-      return res.status(400).json({ error: 'Query and workspaceId are required' });
-    }
-
-    const [tasks, projects, notes, documents, goals, habits, comments] = await Promise.all([
-      Task.find({
-        workspaceId,
-        isArchived: false,
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } },
-        ],
-      }).select('title description status priority dueDate').limit(5),
-      Project.find({
-        workspaceId,
-        isArchived: false,
-        $or: [
-          { name: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } },
-        ],
-      }).select('name description status').limit(5),
-      Note.find({
-        workspaceId,
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { content: { $regex: query, $options: 'i' } },
-        ],
-      }).select('title content').limit(5),
-      DocumentModel.find({
-        workspaceId,
-        isArchived: false,
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { content: { $regex: query, $options: 'i' } },
-        ],
-      }).select('title content').limit(5),
-      Goal.find({
-        workspaceId,
-        title: { $regex: query, $options: 'i' },
-      }).select('title status progress').limit(5),
-      Habit.find({
-        workspaceId,
-        name: { $regex: query, $options: 'i' },
-      }).select('name streak frequency').limit(5),
-      CommentModel.find({
-        content: { $regex: query, $options: 'i' },
-      }).select('content').limit(5),
-    ]);
-
-    res.json({
-      tasks,
-      projects,
-      notes,
-      documents,
-      goals,
-      habits,
-      comments,
-      total: tasks.length + projects.length + notes.length + documents.length + goals.length + habits.length + comments.length,
-    });
-  } catch (error) {
-    logger.error('AI search failed:', error);
-    res.status(500).json({ error: 'Search failed', details: (error as Error).message });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to generate summary', details: error.message });
   }
 };
