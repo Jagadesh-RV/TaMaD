@@ -18,6 +18,7 @@ interface Workspace {
   description?: string;
   type: 'personal' | 'team';
   teamId?: string;
+  organizationId?: string;
   ownerId: string;
   members: WorkspaceMember[];
   isActive: boolean;
