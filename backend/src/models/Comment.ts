@@ -5,6 +5,10 @@ export interface IComment extends Document {
   userId: mongoose.Types.ObjectId;
   content: string;
   mentions: mongoose.Types.ObjectId[];
+  reactions: Array<{
+    emoji: string;
+    userId: mongoose.Types.ObjectId;
+  }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,6 +19,12 @@ const CommentSchema: Schema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     content: { type: String, required: true },
     mentions: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    reactions: [
+      {
+        emoji: { type: String, required: true },
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      },
+    ],
   },
   { timestamps: true }
 );
