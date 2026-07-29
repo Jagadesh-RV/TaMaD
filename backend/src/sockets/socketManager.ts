@@ -1,6 +1,6 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
-import { getFirebaseAuth } from '../config/firebase';
+import jwt from 'jsonwebtoken';
 
 let io: Server;
 
@@ -20,15 +20,15 @@ export const initSocket = (server: HttpServer) => {
   });
 
   // Authentication Middleware
-  io.use(async (socket, next) => {
+  io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
       return next(new Error('Authentication error'));
     }
     
     try {
-      const decoded = await getFirebaseAuth().verifyIdToken(token);
-      (socket as any).user = { id: decoded.uid };
+      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+      (socket as any).user = decoded;
       next();
     } catch (err) {
       next(new Error('Authentication error'));
