@@ -43,14 +43,10 @@ import fileRoutes from './routes/fileRoutes';
 import searchRoutes from './routes/searchRoutes';
 import analyticsRoutes from './routes/analyticsRoutes';
 import focusSessionRoutes from './routes/focusSessionRoutes';
-import automationRoutes from './routes/automationRoutes';
-import queueRoutes from './routes/queueRoutes';
-import monitoringRoutes from './routes/monitoringRoutes';
-import seedRoutes from './routes/seedRoutes';
-import { seedDatabase } from './utils/seed';
-import { initSentry } from './utils/monitoring';
-
-initSentry();
+import agileRoutes from './routes/agileRoutes';
+import teamRoutes from './routes/teamRoutes';
+import dashboardRoutes from './routes/dashboardRoutes';
+import organizationRoutes from './routes/organizationRoutes';
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -90,10 +86,10 @@ app.use('/api/files', fileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/focus-sessions', focusSessionRoutes);
-app.use('/api/automation', automationRoutes);
-app.use('/api/queue', queueRoutes);
-app.use('/api/monitoring', monitoringRoutes);
-app.use('/api/admin', seedRoutes);
+app.use('/api/agile', agileRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/dashboards', dashboardRoutes);
+app.use('/api/organizations', organizationRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {

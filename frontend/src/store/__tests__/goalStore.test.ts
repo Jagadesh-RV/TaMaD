@@ -75,7 +75,7 @@ describe('Goal Store', () => {
   describe('deleteGoal', () => {
     it('deletes a goal successfully', async () => {
       useGoalStore.setState({
-        goals: [{ _id: '1', title: 'Goal 1', progress: 0, milestones: [] }],
+        goals: [{ _id: '1', title: 'Goal 1', progress: 0, milestones: [] }] as any,
       });
       mockedApi.delete.mockResolvedValue({});
 

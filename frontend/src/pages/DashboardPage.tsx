@@ -16,6 +16,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonTable } from '../components/ui/Skeleton';
 import { staggerContainer, cardVariant } from '../lib/animations';
+import TeamDashboardPage from './TeamDashboardPage';
 import clsx from 'clsx';
 
 const STATUS_TABS = [
@@ -129,6 +130,10 @@ export default function DashboardPage() {
   };
 
   const showEmailBanner = user && user.emailVerified === false && user.authProvider === 'email' && !emailBannerDismissed;
+
+  if (workspace?.type === 'team') {
+    return <TeamDashboardPage />;
+  }
 
   return (
     <div className="page">
@@ -257,7 +262,7 @@ export default function DashboardPage() {
               <div className="h-64">
                 {tasksLoading ? (
                   <div className="flex h-full items-center justify-center">
-                    <LoadingSpinner size={32} />
+                    <LoadingSpinner size={24} />
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
@@ -379,7 +384,7 @@ export default function DashboardPage() {
               </div>
               {projectsLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <LoadingSpinner size={20} />
+                  <LoadingSpinner size={16} />
                 </div>
               ) : projects.length === 0 ? (
                 <EmptyState

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Calendar, Clock, Tag, Bell, Repeat } from 'lucide-react';
-import { useTaskStore } from '../../store/taskStore';
-import api from '../../utils/api';
+import { useTaskStore } from '../store/taskStore';
+import api from '../utils/api';
 import toast from 'react-hot-toast';
 
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];

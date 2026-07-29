@@ -12,6 +12,7 @@
   "dependencies": {
     "@google/genai": "^2.12.0",
     "@types/cookie-parser": "^1.4.10",
+    "axios": "^1.18.1",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.81.2",
     "cookie-parser": "^1.4.7",
@@ -40,6 +41,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.14.2",
+    "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.2",
     "@types/supertest": "^7.2.1",
     "@types/uuid": "^10.0.0",

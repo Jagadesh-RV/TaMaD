@@ -73,7 +73,11 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
 // @route   POST /api/tasks
 // @access  Private
 export const createTask = async (req: AuthRequest, res: Response) => {
-  const { title, description, status, priority, workspaceId, dueDate, categoryId, tags, assignees, dependencies, parentTaskId } = req.body;
+  const { 
+    title, description, status, priority, workspaceId, dueDate, 
+    categoryId, tags, assignees, dependencies, parentTaskId,
+    watchers, customFields, attachments, storyPoints, estimatedTime
+  } = req.body;
 
   if (!workspaceId) {
     return res.status(400).json({ error: 'workspaceId is required' });
@@ -95,6 +99,11 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     assignees: assignees || [],
     dependencies: dependencies || [],
     parentTaskId,
+    watchers: watchers || [],
+    customFields: customFields || {},
+    attachments: attachments || [],
+    storyPoints,
+    estimatedTime,
     createdBy: req.user._id,
     order,
   });
@@ -144,6 +153,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     { new: true, runValidators: true }
   )
     .populate('assignees', 'name email avatarUrl')
+    .populate('watchers', 'name email avatarUrl')
     .populate('tags', 'name color')
     .populate('categoryId', 'name color')
     .populate('dependencies', 'title status')
@@ -259,4 +269,50 @@ export const bulkDeleteTasks = async (req: AuthRequest, res: Response) => {
   await cache.invalidatePattern(CACHE_KEYS.TASKS(workspaceId, '*'));
 
   res.json({ message: 'Tasks deleted successfully' });
+};
+
+// @desc    Toggle watch on a task
+// @route   POST /api/tasks/:id/watch
+// @access  Private
+export const toggleWatchTask = async (req: AuthRequest, res: Response) => {
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
+
+  const userId = req.user._id;
+  const watcherIndex = task.watchers.indexOf(userId);
+
+  if (watcherIndex === -1) {
+    task.watchers.push(userId);
+  } else {
+    task.watchers.splice(watcherIndex, 1);
+  }
+
+  await task.save();
+  const populatedTask = await Task.findById(task._id)
+    .populate('assignees watchers', 'name email avatarUrl');
+
+  getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', populatedTask);
+  res.json(populatedTask);
+};
+
+// @desc    Toggle vote on a task
+// @route   POST /api/tasks/:id/vote
+// @access  Private
+export const toggleVoteTask = async (req: AuthRequest, res: Response) => {
+  const task = await Task.findById(req.params.id);
+  if (!task) return res.status(404).json({ error: 'Task not found' });
+
+  const userId = req.user._id;
+  const voteIndex = task.votes.indexOf(userId);
+
+  if (voteIndex === -1) {
+    task.votes.push(userId);
+  } else {
+    task.votes.splice(voteIndex, 1);
+  }
+
+  await task.save();
+  
+  getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', task);
+  res.json(task);
 };

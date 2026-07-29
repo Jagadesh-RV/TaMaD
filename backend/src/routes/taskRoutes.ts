@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, createTask, updateTask, deleteTask, reorderTask, bulkUpdateTasks, bulkDeleteTasks } from '../controllers/taskController';
+import { getTasks, createTask, updateTask, deleteTask, reorderTask, bulkUpdateTasks, bulkDeleteTasks, toggleWatchTask, toggleVoteTask } from '../controllers/taskController';
 import { getComments, addComment } from '../controllers/commentController';
 import { protect } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -22,6 +22,8 @@ router.route('/:id')
   .delete(deleteTask);
 
 router.put('/:id/reorder', reorderTask);
+router.post('/:id/watch', toggleWatchTask);
+router.post('/:id/vote', toggleVoteTask);
 
 router.route('/:taskId/comments')
   .get(getComments)

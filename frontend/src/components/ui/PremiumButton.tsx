@@ -5,6 +5,11 @@ export default function PremiumButton({
   onClick,
   className = "",
   type = "button",
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  type?: "button" | "submit" | "reset";
 }) {
   return (
     <motion.button

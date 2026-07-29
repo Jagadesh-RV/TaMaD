@@ -10,51 +10,8 @@ import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifStore } from '../../store/notifStore';
 import { useRealtime } from '../../providers/RealtimeProvider';
-
-const sections = [
-  {
-    label: 'MAIN',
-    links: [
-      { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-      { label: 'Tasks', path: '/tasks', icon: CheckSquare },
-      { label: 'Calendar', path: '/calendar', icon: CalendarDays },
-      { label: 'Projects', path: '/projects', icon: FolderKanban },
-      { label: 'Roadmap', path: '/roadmap', icon: Map },
-      { label: 'Focus', path: '/focus', icon: Zap },
-      { label: 'Planner', path: '/planner', icon: Target },
-    ],
-  },
-  {
-    label: 'CREATIVE',
-    links: [
-      { label: 'Notes', path: '/notes', icon: FileText },
-      { label: 'Documents', path: '/documents', icon: FileText },
-      { label: 'Files', path: '/files', icon: HardDrive },
-      { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
-    ],
-  },
-  {
-    label: 'ANALYTICS',
-    links: [
-      { label: 'Analytics', path: '/analytics', icon: BarChart3 },
-      { label: 'Reports', path: '/reports', icon: TrendingUp },
-    ],
-  },
-  {
-    label: 'AI & TOOLS',
-    links: [
-      { label: 'AI Assistant', path: '/ai', icon: Brain },
-      { label: 'Templates', path: '/templates', icon: FileText },
-    ],
-  },
-  {
-    label: 'GENERAL',
-    links: [
-      { label: 'Notifications', path: '/notifications', icon: Bell },
-      { label: 'Settings', path: '/settings', icon: Settings },
-    ],
-  },
-];
+import WorkspaceSwitcher from './WorkspaceSwitcher';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -66,11 +23,70 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile, isOpen, onClose }: SidebarProps) {
   const user = useAuthStore(s => s.user);
-  const workspace = useAuthStore(s => s.workspace);
+  const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const logout = useAuthStore(s => s.logout);
   const unread = useNotifStore(s => s.unread);
   const { onlineUsers } = useRealtime();
   const navigate = useNavigate();
+
+  const isTeam = currentWorkspace?.type === 'team';
+
+  const sections = [
+    {
+      label: 'MAIN',
+      links: [
+        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { label: 'Tasks', path: '/tasks', icon: CheckSquare },
+        { label: 'Calendar', path: '/calendar', icon: CalendarDays },
+        { label: 'Projects', path: '/projects', icon: FolderKanban },
+        { label: 'Roadmap', path: '/roadmap', icon: Map },
+        ...(isTeam ? [
+          { label: 'Active Sprint', path: '/agile/board', icon: Target },
+          { label: 'Backlog', path: '/agile/planning', icon: Map },
+        ] : [
+          { label: 'Focus', path: '/focus', icon: Zap },
+          { label: 'Planner', path: '/planner', icon: Target },
+        ]),
+      ],
+    },
+    {
+      label: 'CREATIVE',
+      links: [
+        { label: 'Notes', path: '/notes', icon: FileText },
+        { label: 'Documents', path: '/documents', icon: FileText },
+        { label: 'Files', path: '/files', icon: HardDrive },
+        { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
+      ],
+    },
+    ...(isTeam ? [{
+      label: 'TEAM',
+      links: [
+        { label: 'Members', path: '/team/members', icon: Users },
+        { label: 'Team Settings', path: '/team/settings', icon: Settings },
+      ]
+    }] : []),
+    {
+      label: 'ANALYTICS',
+      links: [
+        { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+        { label: 'Reports', path: '/reports', icon: TrendingUp },
+      ],
+    },
+    {
+      label: 'AI & TOOLS',
+      links: [
+        { label: 'AI Assistant', path: '/ai', icon: Brain },
+        { label: 'Templates', path: '/templates', icon: FileText },
+      ],
+    },
+    {
+      label: 'GENERAL',
+      links: [
+        { label: 'Notifications', path: '/notifications', icon: Bell },
+        { label: 'Settings', path: '/settings', icon: Settings },
+      ],
+    },
+  ];
 
   const handleLogout = async () => {
     await logout();
@@ -96,10 +112,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       {!collapsed && (
         <div className="mt-5 mb-1 px-3">
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-muted)' }}>Workspace</p>
-          <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium" style={{ background: 'var(--color-surface-hover)', color: 'var(--color-foreground)' }}>
-            <div className="h-2 w-2 rounded-full" style={{ background: 'var(--color-success)' }} />
-            {workspace?.name || 'Personal Workspace'}
-          </div>
+          <WorkspaceSwitcher />
         </div>
       )}
 
