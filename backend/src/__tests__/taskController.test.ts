@@ -7,6 +7,7 @@ vi.mock('../models/Task', () => ({
     findById: vi.fn(),
     create: vi.fn(),
     countDocuments: vi.fn(),
+    findOne: vi.fn(),
     updateMany: vi.fn(),
     deleteMany: vi.fn(),
   },
@@ -103,7 +104,7 @@ describe('Task Controller', () => {
 
     it('creates a task successfully', async () => {
       const mockTask = createMockTask();
-      vi.mocked(Task.findOne).mockResolvedValue(null);
+      vi.mocked(Task.findOne).mockReturnValue({ sort: vi.fn().mockResolvedValue(null) } as any);
       vi.mocked(Task.create).mockResolvedValue(mockTask as any);
       vi.mocked(Task.findById).mockReturnValue({
         populate: vi.fn().mockReturnThis(),

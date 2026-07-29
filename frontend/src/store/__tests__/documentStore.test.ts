@@ -75,7 +75,7 @@ describe('Document Store', () => {
   describe('deleteDocument', () => {
     it('deletes a document successfully', async () => {
       useDocumentStore.setState({
-        documents: [{ _id: '1', title: 'Doc 1', content: '', workspaceId: 'ws1' }],
+        documents: [{ _id: '1', title: 'Doc 1', content: '', workspaceId: 'ws1' }] as any,
       });
       mockedApi.delete.mockResolvedValue({});
 

@@ -99,7 +99,7 @@ export default function TaskComments({ taskId }: { taskId: string }) {
                   </span>
                 </div>
                 <p className="text-sm text-[color:var(--color-foreground)]">{comment.content}</p>
-                {user?._id === comment.userId._id && (
+                {user?.id === comment.userId._id && (
                   <button 
                     onClick={() => handleDelete(comment._id)}
                     className="mt-2 text-[10px] text-red-500 hover:underline"

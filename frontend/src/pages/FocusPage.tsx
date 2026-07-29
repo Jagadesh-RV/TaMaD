@@ -18,7 +18,7 @@ export default function FocusPage() {
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
   const [completed, setCompleted] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
   const sessionRef = useRef<string | null>(null);
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';

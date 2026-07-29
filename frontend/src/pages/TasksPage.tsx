@@ -451,7 +451,7 @@ export default function TasksPage() {
   }, [fetchTasks, workspaceId]);
 
   useEffect(() => {
-    setLocalTasks(tasks as Task[]);
+    setLocalTasks(tasks as unknown as Task[]);
   }, [tasks]);
 
   const sensors = useSensors(

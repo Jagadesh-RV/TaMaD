@@ -17,6 +17,9 @@ interface UserShape {
     language?: string;
     timezone?: string;
   };
+  createdAt?: string;
+  updatedAt?: string;
+  lastLogin?: string;
 }
 
 interface WorkspaceShape {
@@ -24,6 +27,8 @@ interface WorkspaceShape {
   name: string;
   description?: string;
   role: string;
+  type?: string;
+  organizationId?: string;
 }
 
 interface SessionInfo {

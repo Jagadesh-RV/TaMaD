@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 // Badge Component Variants
-export function Badge({ children, variant = 'default', size = 'md', ...props }) {
+interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  children: ReactNode;
+  variant?: 'default' | 'solid' | 'outline' | 'success' | 'error' | 'warning' | 'info';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export function Badge({ children, variant = 'default', size = 'md', ...props }: BadgeProps) {
   const baseClass = 'inline-flex items-center gap-1 font-semibold text-center whitespace-nowrap';
 
   const sizeClass = {
@@ -28,7 +34,13 @@ export function Badge({ children, variant = 'default', size = 'md', ...props }) 
 }
 
 // Card Component with Variants
-export function Card({ children, variant = 'glass', className = '', ...props }) {
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
+  variant?: 'glass' | 'default' | 'gradient' | 'neon' | 'minimal';
+  className?: string;
+}
+
+export function Card({ children, variant = 'glass', className = '', ...props }: CardProps) {
   const variantClass = {
     glass: 'card-glass',
     default: 'card',
@@ -45,7 +57,14 @@ export function Card({ children, variant = 'glass', className = '', ...props }) 
 }
 
 // Button Component with Variants
-export function Button({ children, variant = 'primary', size = 'md', className = '', ...props }) {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline' | 'text';
+  size?: 'sm' | 'md' | 'lg';
+  className?: string;
+}
+
+export function Button({ children, variant = 'primary', size = 'md', className = '', ...props }: ButtonProps) {
   const baseClass = 'inline-flex items-center justify-center gap-2 font-semibold transition-all';
 
   const sizeClass = {
@@ -70,7 +89,13 @@ export function Button({ children, variant = 'primary', size = 'md', className =
 }
 
 // Color Swatch Component
-export function ColorSwatch({ color, label, code }) {
+interface ColorSwatchProps {
+  color: string;
+  label?: string;
+  code?: string;
+}
+
+export function ColorSwatch({ color, label, code }: ColorSwatchProps) {
   return (
     <div className="flex items-center gap-3">
       <div
@@ -86,7 +111,13 @@ export function ColorSwatch({ color, label, code }) {
 }
 
 // Grid Layout Component
-export function DesignGrid({ children, columns = 3, gap = 'md' }) {
+interface DesignGridProps {
+  children: ReactNode;
+  columns?: number;
+  gap?: 'sm' | 'md' | 'lg' | 'xl';
+}
+
+export function DesignGrid({ children, columns = 3, gap = 'md' }: DesignGridProps) {
   const gapClass = {
     sm: 'gap-2',
     md: 'gap-4',
@@ -102,7 +133,12 @@ export function DesignGrid({ children, columns = 3, gap = 'md' }) {
 }
 
 // Status Badge Component
-export function StatusBadge({ status, icon: Icon }) {
+interface StatusBadgeProps {
+  status: 'done' | 'in_progress' | 'todo' | 'cancelled';
+  icon?: React.ElementType;
+}
+
+export function StatusBadge({ status, icon: Icon }: StatusBadgeProps) {
   const statusClass = {
     done: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
     'in_progress': 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
@@ -119,16 +155,23 @@ export function StatusBadge({ status, icon: Icon }) {
 }
 
 // Priority Badge Component
-export function PriorityBadge({ priority, icon: Icon }) {
-  const priorityClass = {
+interface PriorityBadgeProps {
+  priority: string;
+  icon?: React.ElementType;
+}
+
+export function PriorityBadge({ priority, icon: Icon }: PriorityBadgeProps) {
+  const priorityClass: Record<string, string> = {
     low: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
     medium: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
     high: 'bg-orange-500/20 text-orange-300 border border-orange-500/30',
     urgent: 'bg-red-500/20 text-red-300 border border-red-500/30',
-  }[priority?.toLowerCase()] || 'bg-slate-500/20 text-slate-300';
+  };
+
+  const pClass = priorityClass[priority?.toLowerCase()] || 'bg-slate-500/20 text-slate-300';
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${priorityClass}`}>
+    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${pClass}`}>
       {Icon && <Icon size={14} />}
       <span className="capitalize">{priority}</span>
     </div>
@@ -136,7 +179,13 @@ export function PriorityBadge({ priority, icon: Icon }) {
 }
 
 // Section Header Component
-export function SectionHeader({ title, subtitle, action }) {
+interface SectionHeaderProps {
+  title: string;
+  subtitle?: string;
+  action?: ReactNode;
+}
+
+export function SectionHeader({ title, subtitle, action }: SectionHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
@@ -149,7 +198,15 @@ export function SectionHeader({ title, subtitle, action }) {
 }
 
 // Stat Card Component
-export function StatCard({ label, value, icon: Icon, color = 'brand', sub }) {
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon?: React.ElementType;
+  color?: 'brand' | 'emerald' | 'red' | 'amber' | 'blue';
+  sub?: string;
+}
+
+export function StatCard({ label, value, icon: Icon, color = 'brand', sub }: StatCardProps) {
   const colorClass = {
     brand: 'bg-brand',
     emerald: 'bg-emerald-500',
@@ -173,17 +230,27 @@ export function StatCard({ label, value, icon: Icon, color = 'brand', sub }) {
 }
 
 // Gradient Text Component
-export function GradientText({ children, variant = 'primary' }) {
+interface GradientTextProps {
+  children: ReactNode;
+  variant?: 'primary' | 'secondary';
+  className?: string;
+}
+
+export function GradientText({ children, variant = 'primary', className = '' }: GradientTextProps) {
   const variantClass = {
     primary: 'gradient-text',
     secondary: 'gradient-text-secondary',
   }[variant];
 
-  return <span className={variantClass}>{children}</span>;
+  return <span className={`${variantClass} ${className}`}>{children}</span>;
 }
 
 // Divider Component
-export function Divider({ text }) {
+interface DividerProps {
+  text?: string;
+}
+
+export function Divider({ text }: DividerProps) {
   if (text) {
     return (
       <div className="flex items-center gap-4 my-6">
@@ -197,7 +264,13 @@ export function Divider({ text }) {
 }
 
 // Info Box Component
-export function InfoBox({ title, children, type = 'info' }) {
+interface InfoBoxProps {
+  title?: string;
+  children: ReactNode;
+  type?: 'info' | 'success' | 'warning' | 'error';
+}
+
+export function InfoBox({ title, children, type = 'info' }: InfoBoxProps) {
   const typeClass = {
     info: 'bg-blue-500/10 border-blue-500/30 text-blue-300',
     success: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
@@ -214,7 +287,12 @@ export function InfoBox({ title, children, type = 'info' }) {
 }
 
 // Layout Wrapper Component
-export function Container({ children, size = 'lg' }) {
+interface ContainerProps {
+  children: ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+}
+
+export function Container({ children, size = 'lg' }: ContainerProps) {
   const sizeClass = {
     sm: 'max-w-2xl',
     md: 'max-w-4xl',

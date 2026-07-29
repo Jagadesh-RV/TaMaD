@@ -17,6 +17,6 @@ export function useSocket(token) {
       console.log('Notification', payload);
     });
 
-    return () => socket.disconnect();
+    return () => { socket.disconnect(); };
   }, [token]);
 }

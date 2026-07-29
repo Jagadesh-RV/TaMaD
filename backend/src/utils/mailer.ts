@@ -6,7 +6,13 @@ const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const smtpFrom = process.env.SMTP_FROM || 'no-reply@tamad.app';
 
-export const sendMail = async (to: string, subject: string, html: string) => {
+export const sendMail = async (
+  to: string, 
+  subject: string, 
+  html: string,
+  fromName?: string,
+  replyTo?: string
+) => {
   if (!smtpHost || !smtpUser || !smtpPass) {
     return { ok: false, skipped: true };
   }
@@ -21,5 +27,13 @@ export const sendMail = async (to: string, subject: string, html: string) => {
     },
   });
 
-  return transporter.sendMail({ from: smtpFrom, to, subject, html });
+  const fromHeader = fromName ? `"${fromName}" <${smtpFrom}>` : smtpFrom;
+
+  return transporter.sendMail({ 
+    from: fromHeader, 
+    to, 
+    subject, 
+    html,
+    replyTo 
+  });
 };
