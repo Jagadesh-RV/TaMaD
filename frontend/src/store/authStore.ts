@@ -17,6 +17,9 @@ interface UserShape {
     language?: string;
     timezone?: string;
   };
+  createdAt?: string;
+  updatedAt?: string;
+  lastLogin?: string;
 }
 
 interface WorkspaceShape {

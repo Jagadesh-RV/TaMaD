@@ -55,7 +55,7 @@ interface TaskState {
   updateTask: (id: string, updates: Partial<Task>) => Promise<Task>;
   reorderTask: (id: string, status: string, newOrder: number) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
-  toggleStatus: (id: string, currentStatus: string) => Promise<Task>;
+  toggleStatus: (id: string, currentStatus: string) => Promise<void>;
   bulkUpdate: (taskIds: string[], updates: Partial<Task>, workspaceId: string) => Promise<void>;
   bulkDelete: (taskIds: string[], workspaceId: string) => Promise<void>;
   toggleWatch: (id: string) => Promise<void>;
@@ -141,7 +141,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   toggleStatus: async (id, currentStatus) => {
     const next = currentStatus === 'done' ? 'todo' : 'done';
-    return get().updateTask(id, { status: next });
+    await get().updateTask(id, { status: next });
   },
 
   bulkUpdate: async (taskIds, updates, workspaceId) => {

@@ -76,7 +76,7 @@ describe('Habit Store', () => {
   describe('deleteHabit', () => {
     it('deletes a habit successfully', async () => {
       useHabitStore.setState({
-        habits: [{ _id: '1', name: 'Habit 1', frequency: 'daily', completions: [] }],
+        habits: [{ _id: '1', name: 'Habit 1', frequency: 'daily', completions: [] }] as any,
       });
       mockedApi.delete.mockResolvedValue({});
 
