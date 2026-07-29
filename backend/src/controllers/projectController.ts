@@ -32,7 +32,7 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
 // @route   POST /api/projects
 // @access  Private
 export const createProject = async (req: AuthRequest, res: Response) => {
-  const { name, description, workspaceId, portfolioId, startDate, endDate } = req.body;
+  const { name, description, workspaceId, portfolioId, startDate, endDate, health, risks, dependencies, agileSettings } = req.body;
 
   if (!workspaceId) {
     return res.status(400).json({ error: 'workspaceId is required' });
@@ -45,6 +45,10 @@ export const createProject = async (req: AuthRequest, res: Response) => {
     portfolioId,
     startDate,
     endDate,
+    health: health || 'on-track',
+    risks: risks || [],
+    dependencies: dependencies || [],
+    agileSettings: agileSettings || { methodology: 'scrum', sprintLengthDays: 14 },
     createdBy: req.user._id,
     members: [{ userId: req.user._id, role: 'manager' }],
   });
