@@ -12,6 +12,18 @@ export interface IProject extends Document {
     userId: mongoose.Types.ObjectId;
     role: 'manager' | 'member' | 'viewer';
   }>;
+  health: 'on-track' | 'at-risk' | 'off-track';
+  risks: Array<{
+    description: string;
+    impact: 'low' | 'medium' | 'high';
+    probability: 'low' | 'medium' | 'high';
+    status: 'open' | 'mitigated' | 'closed';
+  }>;
+  dependencies: mongoose.Types.ObjectId[];
+  agileSettings: {
+    methodology: 'scrum' | 'kanban' | 'hybrid';
+    sprintLengthDays: number;
+  };
   createdBy: mongoose.Types.ObjectId;
   isArchived: boolean;
 }
@@ -35,6 +47,24 @@ const ProjectSchema: Schema = new Schema(
         role: { type: String, enum: ['manager', 'member', 'viewer'], default: 'member' },
       },
     ],
+    health: {
+      type: String,
+      enum: ['on-track', 'at-risk', 'off-track'],
+      default: 'on-track',
+    },
+    risks: [
+      {
+        description: { type: String, required: true },
+        impact: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
+        probability: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
+        status: { type: String, enum: ['open', 'mitigated', 'closed'], default: 'open' },
+      }
+    ],
+    dependencies: [{ type: Schema.Types.ObjectId, ref: 'Project' }],
+    agileSettings: {
+      methodology: { type: String, enum: ['scrum', 'kanban', 'hybrid'], default: 'scrum' },
+      sprintLengthDays: { type: Number, default: 14 },
+    },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     isArchived: { type: Boolean, default: false },
   },
