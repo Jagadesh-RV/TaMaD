@@ -97,9 +97,29 @@ services:
     networks:
       - tamad_dev_network
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: tamad_n8n_dev
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_SECURE_COOKIE=false
+      - DB_TYPE=sqlite
+      - DB_SQLITE_DATABASE=/home/node/.n8n/database.sqlite
+    volumes:
+      - tamad_n8n_dev_data:/home/node/.n8n
+    networks:
+      - tamad_dev_network
+
 volumes:
   tamad_mongo_dev_data:
   tamad_redis_dev_data:
+  tamad_n8n_dev_data:
 
 networks:
   tamad_dev_network:

@@ -35,8 +35,7 @@ const strictAuthLimiter = rateLimit({
 });
 
 // Public
-router.use(authLimiter);
-router.post('/firebase/session', createFirebaseSession);
+router.post('/firebase/session', authLimiter, createFirebaseSession);
 router.post('/refresh', refresh);
 
 // Protected

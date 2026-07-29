@@ -124,6 +124,10 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
+
+    if (process.env.NODE_ENV !== 'production') {
+      seedDatabase().catch((err) => logger.error('Seed failed:', err));
+    }
   } catch (error) {
     logger.error('Failed to start server', error);
     process.exit(1);
