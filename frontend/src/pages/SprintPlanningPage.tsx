@@ -4,6 +4,7 @@ import { useTaskStore } from '../store/taskStore';
 import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
 import TaskModal from '../components/tasks/TaskModal';
+import SprintModal from '../components/tasks/SprintModal';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -66,6 +67,7 @@ export default function SprintPlanningPage() {
   const { sprints, fetchSprints, startSprint, createSprint } = useAgileStore();
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace?._id) {
@@ -121,6 +123,19 @@ export default function SprintPlanningPage() {
     }
   };
 
+  const handleCreateSprint = async (data: any) => {
+    if (!currentWorkspace) return;
+    try {
+      await createSprint({
+        ...data,
+        workspaceId: currentWorkspace._id,
+      });
+      setIsSprintModalOpen(false);
+    } catch (e) {
+      // Error handled by store
+    }
+  };
+
   const activeSprint = sprints.find(s => s.status === 'active');
   const plannedSprints = sprints.filter(s => s.status === 'planned');
   
@@ -137,7 +152,7 @@ export default function SprintPlanningPage() {
           </p>
         </div>
         <button 
-          onClick={() => createSprint({ name: `Sprint ${sprints.length + 1}`, workspaceId: currentWorkspace._id, startDate: new Date().toISOString(), endDate: new Date(Date.now() + 14*24*60*60*1000).toISOString() })}
+          onClick={() => setIsSprintModalOpen(true)}
           className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90 text-white" 
           style={{ background: 'var(--color-accent)' }}>
           Create Sprint
@@ -229,6 +244,12 @@ export default function SprintPlanningPage() {
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
         onSave={handleCreateTask}
+      />
+      <SprintModal
+        isOpen={isSprintModalOpen}
+        onClose={() => setIsSprintModalOpen(false)}
+        onSave={handleCreateSprint}
+        initialData={{ name: `Sprint ${sprints.length + 1}` }}
       />
     </div>
   );
