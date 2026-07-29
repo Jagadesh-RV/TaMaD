@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface ITask extends Document {
   title: string;
   description?: string;
+  taskType: 'epic' | 'story' | 'task' | 'bug' | 'subtask';
   status: 'todo' | 'in-progress' | 'review' | 'done';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   dueDate?: Date;
@@ -10,6 +11,8 @@ export interface ITask extends Document {
   assignees: mongoose.Types.ObjectId[];
   workspaceId: mongoose.Types.ObjectId;
   projectId?: mongoose.Types.ObjectId;
+  epicId?: mongoose.Types.ObjectId;
+  sprintId?: mongoose.Types.ObjectId;
   milestoneId?: mongoose.Types.ObjectId;
   categoryId?: mongoose.Types.ObjectId;
   tags: mongoose.Types.ObjectId[];
@@ -17,6 +20,7 @@ export interface ITask extends Document {
   parentTaskId?: mongoose.Types.ObjectId;
   dependencies: mongoose.Types.ObjectId[];
   order: number;
+  storyPoints?: number;
   estimatedTime?: number;
   actualTime?: number;
   isArchived: boolean;
@@ -29,6 +33,11 @@ const TaskSchema: Schema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String },
+    taskType: {
+      type: String,
+      enum: ['epic', 'story', 'task', 'bug', 'subtask'],
+      default: 'task',
+    },
     status: {
       type: String,
       enum: ['todo', 'in-progress', 'review', 'done'],
@@ -44,6 +53,8 @@ const TaskSchema: Schema = new Schema(
     assignees: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
+    epicId: { type: Schema.Types.ObjectId, ref: 'Epic' },
+    sprintId: { type: Schema.Types.ObjectId, ref: 'Sprint' },
     milestoneId: { type: Schema.Types.ObjectId, ref: 'Milestone' },
     categoryId: { type: Schema.Types.ObjectId, ref: 'Category' },
     tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
@@ -51,6 +62,7 @@ const TaskSchema: Schema = new Schema(
     parentTaskId: { type: Schema.Types.ObjectId, ref: 'Task' },
     dependencies: [{ type: Schema.Types.ObjectId, ref: 'Task' }],
     order: { type: Number, default: 0 },
+    storyPoints: { type: Number },
     estimatedTime: { type: Number },
     actualTime: { type: Number, default: 0 },
     isArchived: { type: Boolean, default: false },
@@ -62,6 +74,8 @@ const TaskSchema: Schema = new Schema(
 TaskSchema.index({ workspaceId: 1, status: 1, order: 1 });
 // Indexes for efficient querying
 TaskSchema.index({ workspaceId: 1, projectId: 1 });
+TaskSchema.index({ workspaceId: 1, sprintId: 1 });
+TaskSchema.index({ epicId: 1 });
 TaskSchema.index({ assignees: 1, status: 1 });
 TaskSchema.index({ dueDate: 1 });
 
