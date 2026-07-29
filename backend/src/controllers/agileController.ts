@@ -60,3 +60,40 @@ export const deleteSprint = async (req: AuthRequest, res: Response) => {
   if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_deleted', sprint._id);
   res.json({ message: 'Sprint deleted' });
 };
+
+export const startSprint = async (req: AuthRequest, res: Response) => {
+  const sprint = await Sprint.findById(req.params.id);
+  if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
+  
+  // Check if another sprint is already active for this project
+  const activeSprint = await Sprint.findOne({ projectId: sprint.projectId, status: 'active' });
+  if (activeSprint) return res.status(400).json({ error: 'Another sprint is already active for this project.' });
+
+  sprint.status = 'active';
+  await sprint.save();
+  getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
+  res.json(sprint);
+};
+
+export const completeSprint = async (req: AuthRequest, res: Response) => {
+  const sprint = await Sprint.findById(req.params.id);
+  if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
+  
+  sprint.status = 'completed';
+  await sprint.save();
+  
+  // Optionally, move unfinished tasks to backlog or next sprint
+  const unfinishedTasks = await Task.find({ sprintId: sprint._id, status: { $ne: 'done' } });
+  // Move to backlog
+  await Task.updateMany(
+    { sprintId: sprint._id, status: { $ne: 'done' } },
+    { $unset: { sprintId: 1 } }
+  );
+
+  unfinishedTasks.forEach(task => {
+    getIO().to(`workspace_${sprint.workspaceId}`).emit('task_updated', { ...task.toObject(), sprintId: null });
+  });
+
+  getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
+  res.json(sprint);
+};

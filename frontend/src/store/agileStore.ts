@@ -19,6 +19,8 @@ interface AgileState {
   fetchSprints: (workspaceId: string, projectId: string) => Promise<void>;
   createSprint: (payload: Partial<Sprint>) => Promise<Sprint>;
   updateSprint: (id: string, payload: Partial<Sprint>) => Promise<Sprint>;
+  startSprint: (id: string) => Promise<Sprint>;
+  completeSprint: (id: string) => Promise<Sprint>;
 }
 
 export const useAgileStore = create<AgileState>((set) => ({
@@ -56,6 +58,30 @@ export const useAgileStore = create<AgileState>((set) => ({
     } catch {
       toast.error('Failed to update sprint');
       throw new Error('Failed to update sprint');
+    }
+  },
+
+  startSprint: async (id) => {
+    try {
+      const { data } = await api.post(`/sprints/${id}/start`);
+      set(s => ({ sprints: s.sprints.map(sp => sp._id === id ? data : sp) }));
+      toast.success('Sprint started successfully!');
+      return data;
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to start sprint');
+      throw err;
+    }
+  },
+
+  completeSprint: async (id) => {
+    try {
+      const { data } = await api.post(`/sprints/${id}/complete`);
+      set(s => ({ sprints: s.sprints.map(sp => sp._id === id ? data : sp) }));
+      toast.success('Sprint completed successfully!');
+      return data;
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to complete sprint');
+      throw err;
     }
   }
 }));

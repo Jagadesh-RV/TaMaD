@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import {
   getEpics, createEpic, updateEpic, deleteEpic,
-  getSprints, createSprint, updateSprint, deleteSprint
+  getSprints, createSprint, updateSprint, deleteSprint,
+  startSprint, completeSprint
 } from '../controllers/agileController';
 import { protect } from '../middleware/auth';
 
@@ -21,5 +22,8 @@ router.route('/sprints')
 router.route('/sprints/:id')
   .put(updateSprint)
   .delete(deleteSprint);
+
+router.post('/sprints/:id/start', startSprint);
+router.post('/sprints/:id/complete', completeSprint);
 
 export default router;
