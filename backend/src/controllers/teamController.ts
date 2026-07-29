@@ -166,9 +166,14 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
   try {
     let actualRoleId = roleId;
     if (!mongoose.Types.ObjectId.isValid(roleId)) {
-      const defaultRole = await Role.findOne({ teamId, name: 'Member' });
+      let defaultRole = await Role.findOne({ teamId, name: 'Member' });
       if (!defaultRole) {
-        return res.status(400).json({ error: 'Role not found' });
+        // If team was created before roles existed, create default roles now
+        await ensureDefaultRoles(new mongoose.Types.ObjectId(teamId));
+        defaultRole = await Role.findOne({ teamId, name: 'Member' });
+        if (!defaultRole) {
+          return res.status(400).json({ error: 'Role not found and failed to create defaults' });
+        }
       }
       actualRoleId = defaultRole._id;
     }
