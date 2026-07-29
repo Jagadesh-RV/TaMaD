@@ -13,7 +13,7 @@ import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { EmptyState } from '../components/ui/EmptyState';
-import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonTable } from '../components/ui/Skeleton';
 import { staggerContainer, cardVariant } from '../lib/animations';
 import clsx from 'clsx';
