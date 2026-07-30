@@ -14,20 +14,24 @@ export default function TaskModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [status, setStatus] = useState('todo');
 
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
       setDueDate(initialData?.dueDate || initialData?.initialDate || '');
+      setPriority(initialData?.priority || 'medium');
+      setStatus(initialData?.status || 'todo');
     }
   }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ title, description, dueDate });
+    onSave({ title, description, dueDate, priority, status });
     onClose();
   };
 
@@ -67,12 +71,43 @@ export default function TaskModal({
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Priority</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">In Review</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium text-[color:var(--color-foreground)]">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[110px] w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-[color:var(--color-foreground)] outline-none transition-all focus:border-[color:var(--color-accent)] focus:ring-2 focus:ring-[color:var(--color-accent)]/15"
+              className="min-h-[110px] w-full rounded-xl border border-border bg-[color:var(--color-background)] px-3.5 py-2.5 text-sm text-[color:var(--color-foreground)] outline-none transition-all focus:border-[color:var(--color-accent)] focus:ring-2 focus:ring-[color:var(--color-accent)]/15"
               placeholder="Add notes, context, or subtasks…"
             />
           </div>
