@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Calendar, Check, Play, Paperclip, Eye, ThumbsUp, Tag, List, Activity, MessageSquare } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle } from '../ui/Dialog';
 import { Button } from '../ui/Button';
+import { SelectDropdown } from '../ui/SelectDropdown';
 import { useTaskStore } from '../../store/taskStore';
 import { useAuthStore } from '../../store/authStore';
+import { useWorkspaceStore } from '../../store/workspaceStore';
 import TaskComments from './TaskComments';
 
 export default function IssueDetailModal({
@@ -13,15 +15,26 @@ export default function IssueDetailModal({
 }: any) {
   const { updateTask, toggleWatch, toggleVote } = useTaskStore();
   const user = useAuthStore(s => s.user);
+  const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
+
+  const assigneeOptions = [
+    { value: '', label: 'Unassigned' },
+    ...(currentWorkspace?.members?.map(m => ({
+      value: m.userId._id,
+      label: m.userId.name
+    })) || [])
+  ];
 
   const [formData, setFormData] = useState<any>({});
   const [activeTab, setActiveTab] = useState<'comments' | 'history'>('comments');
 
-  useEffect(() => {
+  const prevIsOpen = React.useRef(isOpen);
+  if (isOpen !== prevIsOpen.current) {
+    prevIsOpen.current = isOpen;
     if (isOpen && initialData) {
       setFormData(initialData);
     }
-  }, [isOpen, initialData]);
+  }
 
   if (!isOpen || !initialData) return null;
 
@@ -60,18 +73,18 @@ export default function IssueDetailModal({
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4" style={{ borderColor: 'var(--color-border)' }}>
           <div className="flex items-center gap-3">
-            <select
+            <SelectDropdown
               value={formData.taskType || 'task'}
-              onChange={(e) => handleChange('taskType', e.target.value)}
-              className="text-xs font-semibold uppercase tracking-wider bg-transparent outline-none cursor-pointer p-1 rounded hover:bg-[color:var(--color-surface-hover)]"
-              style={{ color: 'var(--color-muted)' }}
-            >
-              <option value="epic">Epic</option>
-              <option value="story">Story</option>
-              <option value="task">Task</option>
-              <option value="bug">Bug</option>
-              <option value="subtask">Subtask</option>
-            </select>
+              onChange={(val) => handleChange('taskType', val)}
+              options={[
+                { value: 'epic', label: 'Epic' },
+                { value: 'story', label: 'Story' },
+                { value: 'task', label: 'Task' },
+                { value: 'bug', label: 'Bug' },
+                { value: 'subtask', label: 'Subtask' }
+              ]}
+              buttonClassName="border-none shadow-none font-semibold uppercase tracking-wider text-xs h-8 px-2 min-w-[100px]"
+            />
             <span className="text-[color:var(--color-muted)] text-sm">{initialData._id.slice(-6)}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -158,42 +171,39 @@ export default function IssueDetailModal({
             <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
-                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none cursor-pointer"
-                  style={{ borderColor: 'var(--color-border)' }}
-                >
-                  <option value="todo">To Do</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="review">In Review</option>
-                  <option value="done">Done</option>
-                </select>
+                <SelectDropdown
+                  value={formData.status || 'todo'}
+                  onChange={(val) => handleChange('status', val)}
+                  options={[
+                    { value: 'todo', label: 'To Do' },
+                    { value: 'in-progress', label: 'In Progress' },
+                    { value: 'review', label: 'In Review' },
+                    { value: 'done', label: 'Done' }
+                  ]}
+                />
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Priority</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) => handleChange('priority', e.target.value)}
-                  className="w-full p-2 text-sm rounded bg-[color:var(--color-background)] border outline-none cursor-pointer"
-                  style={{ borderColor: 'var(--color-border)' }}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                  <option value="urgent">Urgent</option>
-                </select>
+                <SelectDropdown
+                  value={formData.priority || 'medium'}
+                  onChange={(val) => handleChange('priority', val)}
+                  options={[
+                    { value: 'low', label: 'Low' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'high', label: 'High' },
+                    { value: 'urgent', label: 'Urgent' }
+                  ]}
+                />
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Assignee</label>
-                <div className="flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-xs font-bold">
-                    {formData.assignees?.[0]?.name?.charAt(0) || '?'}
-                  </div>
-                  <span className="text-sm">{formData.assignees?.[0]?.name || 'Unassigned'}</span>
-                </div>
+                <SelectDropdown
+                  value={formData.assignees?.[0]?._id || formData.assignees?.[0] || ''}
+                  onChange={(val) => handleChange('assignees', val ? [val] : [])}
+                  options={assigneeOptions}
+                />
               </div>
 
               <div>
