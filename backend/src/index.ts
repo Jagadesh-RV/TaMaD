@@ -48,6 +48,7 @@ import teamRoutes from './routes/teamRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import organizationRoutes from './routes/organizationRoutes';
 import meetingRoutes from './routes/meetingRoutes';
+import tamadMeetRoutes from './routes/tamadMeetRoutes';
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -92,6 +93,7 @@ app.use('/api/teams', teamRoutes);
 app.use('/api/dashboards', dashboardRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/meetings', meetingRoutes);
+app.use('/api/tamad-meet', tamadMeetRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {
