@@ -24,7 +24,9 @@ import clsx from 'clsx';
 import { DndContext, DragOverlay, useDraggable, useDroppable, PointerSensor, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
+import { useMeetingStore } from '../store/meetingStore';
 import { useAuthStore } from '../store/authStore';
+import { useTeamStore } from '../store/teamStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
 import toast from 'react-hot-toast';
@@ -93,10 +95,29 @@ function DraggableTaskChip({ task, onDragStart }: { task: any; onDragStart: (tas
   );
 }
 
+function MeetingChip({ meeting, onClick }: { meeting: any; onClick: () => void }) {
+  return (
+    <div
+      onClick={onClick}
+      className={clsx(
+        'flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] font-medium transition-colors truncate cursor-pointer',
+      )}
+      style={{
+        background: 'var(--color-primary-light, #e0f2fe)',
+        color: 'var(--color-primary-800, #075985)',
+      }}
+      title={`${meeting.title} - ${format(new Date(meeting.startTime), 'h:mm a')}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full shrink-0 bg-blue-500" />
+      <span className="truncate flex-1">{meeting.title}</span>
+    </div>
+  );
+}
+
 function DroppableDayCell({
-  day, currentDate, dayTasks, inMonth, today, selected, onSelect, isOver,
+  day, currentDate, dayTasks, dayMeetings, inMonth, today, selected, onSelect, isOver,
 }: {
-  day: Date; currentDate: Date; dayTasks: any[]; inMonth: boolean; today: boolean;
+  day: Date; currentDate: Date; dayTasks: any[]; dayMeetings: any[]; inMonth: boolean; today: boolean;
   selected: boolean; onSelect: () => void; isOver: boolean;
 }) {
   const { setNodeRef } = useDroppable({ id: format(day, 'yyyy-MM-dd') });
@@ -131,12 +152,15 @@ function DroppableDayCell({
       </div>
 
       <div className="flex flex-1 flex-col gap-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+        {dayMeetings.slice(0, 2).map((meeting: any) => (
+          <MeetingChip key={meeting._id} meeting={meeting} onClick={onSelect} />
+        ))}
         {dayTasks.slice(0, 3).map((task: any) => (
           <DraggableTaskChip key={task._id} task={task} onDragStart={() => {}} />
         ))}
-        {dayTasks.length > 3 && (
+        {(dayTasks.length + dayMeetings.length) > 5 && (
           <span className="text-[9px] font-bold px-1" style={{ color: 'var(--color-muted)' }}>
-            +{dayTasks.length - 3} more
+            +{(dayTasks.length + dayMeetings.length) - 5} more
           </span>
         )}
       </div>
@@ -155,10 +179,12 @@ export default function CalendarPage() {
 
   const { tasks, fetchTasks, updateTask, loading: tasksLoading, error: tasksError } = useTaskStore();
   const { projects, fetchProjects, loading: projectsLoading, error: projectsError } = useProjectStore();
+  const { meetings, fetchMeetings, loading: meetingsLoading } = useMeetingStore();
+  const { currentTeam } = useTeamStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
 
-  const isLoading = tasksLoading || projectsLoading;
+  const isLoading = tasksLoading || projectsLoading || meetingsLoading;
   const error = tasksError || projectsError;
 
   const sensors = useSensors(
@@ -170,14 +196,20 @@ export default function CalendarPage() {
       fetchTasks(workspaceId);
       fetchProjects(workspaceId);
     }
-  }, [fetchTasks, fetchProjects, workspaceId]);
+    if (currentTeam?._id) {
+      fetchMeetings(currentTeam._id);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId, fetchMeetings, currentTeam]);
 
   useEffect(() => {
     if (workspaceId) {
       fetchTasks(workspaceId);
       fetchProjects(workspaceId);
     }
-  }, [fetchTasks, fetchProjects, workspaceId]);
+    if (currentTeam?._id) {
+      fetchMeetings(currentTeam._id);
+    }
+  }, [fetchTasks, fetchProjects, workspaceId, fetchMeetings, currentTeam]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -203,6 +235,19 @@ export default function CalendarPage() {
     });
     return map;
   }, [filteredTasks]);
+
+  const meetingsByDate = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    meetings.forEach((m: any) => {
+      if (!m.startTime) return;
+      try {
+        const key = format(parseISO(m.startTime), 'yyyy-MM-dd');
+        if (!map[key]) map[key] = [];
+        map[key].push(m);
+      } catch {}
+    });
+    return map;
+  }, [meetings]);
 
   const upcomingTasks = useMemo(() => {
     const now = new Date();
@@ -335,6 +380,7 @@ export default function CalendarPage() {
                 {days.map((day, i) => {
                   const dateKey = format(day, 'yyyy-MM-dd');
                   const dayTasks = tasksByDate[dateKey] || [];
+                  const dayMeetings = meetingsByDate[dateKey] || [];
                   const inMonth = isSameMonth(day, currentDate);
                   const today = isToday(day);
                   const selected = selectedDay && isSameDay(day, selectedDay);
@@ -345,6 +391,7 @@ export default function CalendarPage() {
                       day={day}
                       currentDate={currentDate}
                       dayTasks={dayTasks}
+                      dayMeetings={dayMeetings}
                       inMonth={inMonth}
                       today={today}
                       selected={selected}
