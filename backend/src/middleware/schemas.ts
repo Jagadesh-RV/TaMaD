@@ -10,6 +10,11 @@ export const taskCreateSchema = z.object({
   workspaceId: z.string(),
   dueDate: z.string().optional(),
   description: z.string().optional(),
+  sprintId: z.string().nullable().optional(),
+  projectId: z.string().nullable().optional(),
+  taskType: z.string().optional(),
+  storyPoints: z.number().optional(),
+  assignees: z.array(z.string()).optional(),
 });
 
 export const taskUpdateSchema = taskCreateSchema.partial();

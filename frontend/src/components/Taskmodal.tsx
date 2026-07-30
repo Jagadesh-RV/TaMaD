@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Plus, Calendar, Clock, Tag, Bell, Repeat } from 'lucide-react';
 import { useTaskStore } from '../store/taskStore';
 import api from '../utils/api';
@@ -59,8 +60,8 @@ export default function TaskModal({ task = null, onClose, initialDate = null }) 
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg card p-6 shadow-2xl shadow-black/50 animate-fade-up max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
@@ -142,6 +143,7 @@ export default function TaskModal({ task = null, onClose, initialDate = null }) 
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -1,6 +1,7 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { handleMeetingSockets } from './meetingSocket';
 
 let io: Server;
 
@@ -21,7 +22,22 @@ export const initSocket = (server: HttpServer) => {
 
   // Authentication Middleware
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    let token = socket.handshake.auth.token;
+
+    // The client cannot read the HttpOnly token, so it might pass user ID or undefined.
+    // Let's check cookies if the provided token isn't a valid JWT (or is missing)
+    if ((!token || token.split('.').length !== 3) && socket.request.headers.cookie) {
+      const cookieStr = socket.request.headers.cookie;
+      const cookies = cookieStr.split(';').reduce((acc, str) => {
+        const parts = str.split('=');
+        if (parts.length >= 2) {
+          acc[parts[0].trim()] = decodeURIComponent(parts[1].trim());
+        }
+        return acc;
+      }, {} as Record<string, string>);
+      token = cookies.tamad_access_token || token;
+    }
+
     if (!token) {
       return next(new Error('Authentication error'));
     }
@@ -38,6 +54,8 @@ export const initSocket = (server: HttpServer) => {
   io.on('connection', (socket: Socket) => {
     const userId = (socket as any).user.id;
     console.log(`User connected: ${userId}`);
+
+    handleMeetingSockets(io, socket);
 
     socket.join(`user_${userId}`);
 

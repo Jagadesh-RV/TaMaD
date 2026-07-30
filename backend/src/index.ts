@@ -47,6 +47,7 @@ import agileRoutes from './routes/agileRoutes';
 import teamRoutes from './routes/teamRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import organizationRoutes from './routes/organizationRoutes';
+import meetingRoutes from './routes/meetingRoutes';
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -90,6 +91,7 @@ app.use('/api/agile', agileRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/dashboards', dashboardRoutes);
 app.use('/api/organizations', organizationRoutes);
+app.use('/api/meetings', meetingRoutes);
 
 app.get('/api/ready', async (_req, res) => {
   try {

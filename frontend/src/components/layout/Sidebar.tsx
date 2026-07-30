@@ -4,7 +4,7 @@ import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
   FileText, PenTool, BarChart3, Bell, Settings, User, ChevronLeft,
   ChevronRight, LogOut, Sparkles, TrendingUp, FolderKanban, Users,
-  Brain, HardDrive,
+  Brain, HardDrive, Video
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuthStore } from '../../store/authStore';
@@ -62,6 +62,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       label: 'TEAM',
       links: [
         { label: 'Members', path: '/team/members', icon: Users },
+        { label: 'Meetings', path: `/team/${currentWorkspace?.teamId}/meetings`, icon: Video },
         { label: 'Team Settings', path: '/team/settings', icon: Settings },
       ]
     }] : []),

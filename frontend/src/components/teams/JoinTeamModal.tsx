@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useTeamStore } from '../../store/teamStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { X, Link as LinkIcon } from 'lucide-react';
@@ -45,8 +46,8 @@ export default function JoinTeamModal({ onClose }: JoinTeamModalProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
       <div 
         className="w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)' }}
@@ -97,6 +98,7 @@ export default function JoinTeamModal({ onClose }: JoinTeamModalProps) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
