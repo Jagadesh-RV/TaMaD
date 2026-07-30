@@ -79,8 +79,8 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl mx-auto flex items-center justify-center mb-8 shadow-md">
-            <span className="text-white text-4xl font-bold tracking-tighter">TM</span>
+          <div className="w-20 h-20 mx-auto mb-8">
+            <img src="/tamadmainlogo.png" alt="TaMaD Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="auth-card-title">Welcome Back</h1>
           <p className="auth-card-subtitle">Sign in to organize your universe</p>
