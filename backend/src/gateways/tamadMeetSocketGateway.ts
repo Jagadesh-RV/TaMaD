@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
-import { updateParticipantSocket } from '../../services/tamad-meet/meetingRoomService';
-import logger from '../../utils/logger';
+import { updateParticipantSocket } from '../services/tamad-meet/meetingRoomService';
+import logger from '../utils/logger';
 
 export const initTamadMeetSocket = (io: Server) => {
   const namespace = io.of('/socket/tamad-meet');

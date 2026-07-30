@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthRequest } from '../../../middleware/auth';
+import { AuthRequest } from '../../middleware/auth';
 import { createEngineMeeting, getMeetingsByTeam, getMeetingDetails } from '../../services/tamad-meet/meetingEngineService';
 import { verifyRoomAccess } from '../../services/tamad-meet/meetingRoomService';
 
