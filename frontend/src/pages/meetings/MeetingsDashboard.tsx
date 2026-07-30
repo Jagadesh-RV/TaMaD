@@ -3,7 +3,10 @@ import { useMeetingStore } from '../../store/meetingStore';
 import { useTeamStore } from '../../store/teamStore';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { MoreVertical, Edit2, Copy, XCircle, Trash2, UserPlus } from 'lucide-react';
 import MeetingScheduler from './MeetingScheduler';
+import MeetingEditModal from './MeetingEditModal';
+import MeetingInviteModal from './MeetingInviteModal';
 
 const MeetingsDashboard: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
@@ -11,6 +14,10 @@ const MeetingsDashboard: React.FC = () => {
   const { currentTeam } = useTeamStore();
   const navigate = useNavigate();
   const [showScheduler, setShowScheduler] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<any>(null);
+  const [invitingToMeeting, setInvitingToMeeting] = useState<any>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { deleteMeeting, cancelMeeting, duplicateMeeting } = useMeetingStore();
 
   useEffect(() => {
     if (teamId) {
@@ -24,6 +31,12 @@ const MeetingsDashboard: React.FC = () => {
       navigate(`/team/${teamId}/meetings/${id}/room`);
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this meeting?')) {
+      await deleteMeeting(id);
     }
   };
 
@@ -49,15 +62,45 @@ const MeetingsDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {meetings.map((meeting) => (
           <div key={meeting._id} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-4 relative">
               <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{meeting.title}</h3>
-              <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                meeting.status === 'active' ? 'bg-green-100 text-green-800' :
-                meeting.status === 'ended' ? 'bg-gray-100 text-gray-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
-                {meeting.status}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  meeting.status === 'active' ? 'bg-green-100 text-green-800' :
+                  meeting.status === 'ended' ? 'bg-gray-100 text-gray-800' :
+                  meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                  'bg-blue-100 text-blue-800'
+                }`}>
+                  {meeting.status}
+                </span>
+                <button
+                  onClick={() => setActiveDropdown(activeDropdown === meeting._id ? null : meeting._id)}
+                  className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
+                >
+                  <MoreVertical size={16} />
+                </button>
+                {activeDropdown === meeting._id && (
+                  <div className="absolute top-8 right-0 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10 py-1">
+                    <button onClick={() => { setEditingMeeting(meeting); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <Edit2 size={14} /> Edit
+                    </button>
+                    <button onClick={() => { setInvitingToMeeting(meeting); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <UserPlus size={14} /> Invite Members
+                    </button>
+                    <button onClick={() => { duplicateMeeting(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <Copy size={14} /> Duplicate
+                    </button>
+                    {meeting.status !== 'cancelled' && (
+                      <button onClick={() => { cancelMeeting(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                        <XCircle size={14} /> Cancel
+                      </button>
+                    )}
+                    <button onClick={() => { handleDelete(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                      <Trash2 size={14} /> Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
             
             <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
@@ -96,6 +139,12 @@ const MeetingsDashboard: React.FC = () => {
 
       {showScheduler && (
         <MeetingScheduler onClose={() => setShowScheduler(false)} teamId={teamId!} />
+      )}
+      {editingMeeting && (
+        <MeetingEditModal meeting={editingMeeting} onClose={() => setEditingMeeting(null)} />
+      )}
+      {invitingToMeeting && (
+        <MeetingInviteModal meeting={invitingToMeeting} onClose={() => setInvitingToMeeting(null)} />
       )}
     </div>
   );
