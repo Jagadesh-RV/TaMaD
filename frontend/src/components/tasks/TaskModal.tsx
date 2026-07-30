@@ -14,6 +14,8 @@ export default function TaskModal({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('medium');
+  const [status, setStatus] = useState('todo');
 
   // Reset state when modal opens
   const prevIsOpen = React.useRef(isOpen);
@@ -23,6 +25,8 @@ export default function TaskModal({
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
       setDueDate(initialData?.dueDate || initialData?.initialDate || '');
+      setPriority(initialData?.priority || 'medium');
+      setStatus(initialData?.status || 'todo');
     }
   }
 
@@ -30,7 +34,7 @@ export default function TaskModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ title, description, dueDate });
+    onSave({ title, description, dueDate, priority, status });
     onClose();
   };
 
@@ -67,6 +71,37 @@ export default function TaskModal({
             <div className="relative">
               <Calendar size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
               <Input type="date" value={dueDate} onChange={(e: any) => setDueDate(e.target.value)} className="pl-10" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Priority</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="review">In Review</option>
+                <option value="done">Done</option>
+              </select>
             </div>
           </div>
 

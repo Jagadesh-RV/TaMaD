@@ -47,59 +47,80 @@ export const getSprints = async (req: AuthRequest, res: Response) => {
 };
 
 export const createSprint = async (req: AuthRequest, res: Response) => {
-  const { name, goal, startDate, endDate, projectId, workspaceId } = req.body;
-  const sprint = await Sprint.create({
-    name, goal, startDate, endDate, projectId, workspaceId, createdBy: req.user._id
-  });
-  getIO().to(`workspace_${workspaceId}`).emit('sprint_created', sprint);
-  res.status(201).json(sprint);
+  try {
+    const { name, goal, startDate, endDate, projectId, workspaceId } = req.body;
+
+    const sprint = await Sprint.create({
+      name, goal, startDate, endDate, projectId, workspaceId, createdBy: req.user._id
+    });
+    getIO().to(`workspace_${workspaceId}`).emit('sprint_created', sprint);
+    res.status(201).json(sprint);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to create sprint', details: error.message });
+  }
 };
 
 export const updateSprint = async (req: AuthRequest, res: Response) => {
-  const sprint = await Sprint.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
-  res.json(sprint);
+  try {
+    const sprint = await Sprint.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
+    res.json(sprint);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to update sprint' });
+  }
 };
 
 export const deleteSprint = async (req: AuthRequest, res: Response) => {
-  const sprint = await Sprint.findByIdAndDelete(req.params.id);
-  if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_deleted', sprint._id);
-  res.json({ message: 'Sprint deleted' });
+  try {
+    const sprint = await Sprint.findByIdAndDelete(req.params.id);
+    if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_deleted', sprint._id);
+    res.json({ message: 'Sprint deleted' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to delete sprint' });
+  }
 };
 
 export const startSprint = async (req: AuthRequest, res: Response) => {
-  const sprint = await Sprint.findById(req.params.id);
-  if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
-  
-  // Check if another sprint is already active for this project
-  const activeSprint = await Sprint.findOne({ projectId: sprint.projectId, status: 'active' });
-  if (activeSprint) return res.status(400).json({ error: 'Another sprint is already active for this project.' });
+  try {
+    const sprint = await Sprint.findById(req.params.id);
+    if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
+    
+    // Check if another sprint is already active for this project
+    const activeSprint = await Sprint.findOne({ projectId: sprint.projectId, status: 'active' });
+    if (activeSprint) return res.status(400).json({ error: 'Another sprint is already active for this project.' });
 
-  sprint.status = 'active';
-  await sprint.save();
-  getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
-  res.json(sprint);
+    sprint.status = 'active';
+    await sprint.save();
+    getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
+    res.json(sprint);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to start sprint' });
+  }
 };
 
 export const completeSprint = async (req: AuthRequest, res: Response) => {
-  const sprint = await Sprint.findById(req.params.id);
-  if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
-  
-  sprint.status = 'completed';
-  await sprint.save();
-  
-  // Optionally, move unfinished tasks to backlog or next sprint
-  const unfinishedTasks = await Task.find({ sprintId: sprint._id, status: { $ne: 'done' } });
-  // Move to backlog
-  await Task.updateMany(
-    { sprintId: sprint._id, status: { $ne: 'done' } },
-    { $unset: { sprintId: 1 } }
-  );
+  try {
+    const sprint = await Sprint.findById(req.params.id);
+    if (!sprint) return res.status(404).json({ error: 'Sprint not found' });
+    
+    sprint.status = 'completed';
+    await sprint.save();
+    
+    // Optionally, move unfinished tasks to backlog or next sprint
+    const unfinishedTasks = await Task.find({ sprintId: sprint._id, status: { $ne: 'done' } });
+    // Move to backlog
+    await Task.updateMany(
+      { sprintId: sprint._id, status: { $ne: 'done' } },
+      { $unset: { sprintId: 1 } }
+    );
 
-  unfinishedTasks.forEach(task => {
-    getIO().to(`workspace_${sprint.workspaceId}`).emit('task_updated', { ...task.toObject(), sprintId: null });
-  });
+    unfinishedTasks.forEach(task => {
+      getIO().to(`workspace_${sprint.workspaceId}`).emit('task_updated', { ...task.toObject(), sprintId: null });
+    });
 
-  getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
-  res.json(sprint);
+    getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
+    res.json(sprint);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to complete sprint' });
+  }
 };

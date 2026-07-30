@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
 import TaskModal from '../components/tasks/TaskModal';
 import { DndContext, closestCenter, pointerWithin, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import SprintModal from '../components/tasks/SprintModal';
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
@@ -32,7 +34,7 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
     <div 
       ref={setNodeRef}
       style={{ ...style, background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}
-      className="mb-2 cursor-pointer rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
+      className="mb-2 cursor-grab active:cursor-grabbing rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
       onClick={onClick}
       {...attributes} 
       {...listeners}
@@ -54,6 +56,25 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function DroppableContainer({ id, children, emptyText }: { id: string, children: React.ReactNode, emptyText?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  
+  return (
+    <div 
+      ref={setNodeRef} 
+      id={id} 
+      className={`min-h-[100px] transition-colors rounded-lg ${isOver ? 'bg-[var(--color-surface-hover)] border-2 border-dashed border-[var(--color-accent)]' : ''}`}
+    >
+      {children}
+      {React.Children.count(children) === 0 && emptyText && (
+        <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>{emptyText}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -130,6 +151,35 @@ export default function SprintPlanningPage() {
     }
   };
 
+  const handleCreateTask = async (data: any) => {
+    if (!currentWorkspace) return;
+    try {
+      await useTaskStore.getState().createTask({
+        ...data,
+        workspaceId: currentWorkspace._id,
+        status: 'todo',
+        priority: 'medium',
+        order: tasks.length,
+      });
+      setIsTaskModalOpen(false);
+    } catch (e) {
+      // Error handled by store
+    }
+  };
+
+  const handleCreateSprint = async (data: any) => {
+    if (!currentWorkspace) return;
+    try {
+      await createSprint({
+        ...data,
+        workspaceId: currentWorkspace._id,
+      });
+      setIsSprintModalOpen(false);
+    } catch (e) {
+      // Error handled by store
+    }
+  };
+
   const activeSprint = sprints.find(s => s.status === 'active');
   const plannedSprints = sprints.filter(s => s.status === 'planned');
   
@@ -146,7 +196,7 @@ export default function SprintPlanningPage() {
           </p>
         </div>
         <button 
-          onClick={() => createSprint({ name: `Sprint ${sprints.length + 1}`, workspaceId: currentWorkspace._id, startDate: new Date().toISOString(), endDate: new Date(Date.now() + 14*24*60*60*1000).toISOString() })}
+          onClick={() => setIsSprintModalOpen(true)}
           className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90 text-white" 
           style={{ background: 'var(--color-accent)' }}>
           Create Sprint

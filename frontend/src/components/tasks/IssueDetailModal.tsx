@@ -135,6 +135,14 @@ export default function IssueDetailModal({
               />
             </div>
 
+            <div className="mb-6">
+              <label className="text-sm font-semibold mb-2 block">Attachments</label>
+              <div className="border border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-[color:var(--color-surface-hover)]" style={{ borderColor: 'var(--color-border-light)' }}>
+                <Paperclip size={24} className="text-[color:var(--color-muted)] mb-2" />
+                <p className="text-sm text-[color:var(--color-muted)]">Click or drag files here to attach</p>
+              </div>
+            </div>
+
             {/* Activity Tabs */}
             <div className="mt-8">
               <div className="flex items-center gap-4 border-b mb-4" style={{ borderColor: 'var(--color-border)' }}>
@@ -204,6 +212,19 @@ export default function IssueDetailModal({
                   onChange={(val) => handleChange('assignees', val ? [val] : [])}
                   options={assigneeOptions}
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Due Date</label>
+                <div className="relative">
+                  <Calendar size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
+                  <Input 
+                    type="date" 
+                    value={formData.dueDate ? formData.dueDate.split('T')[0] : ''} 
+                    onChange={(e) => handleChange('dueDate', e.target.value ? new Date(e.target.value).toISOString() : '')} 
+                    className="pl-9 h-9 text-sm" 
+                  />
+                </div>
               </div>
 
               <div>

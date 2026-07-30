@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useOrganizationStore } from '../../store/organizationStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 import { X, Building } from 'lucide-react';
@@ -28,8 +29,8 @@ export default function CreateOrganizationModal({ onClose }: { onClose: () => vo
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
       <div 
         className="w-full max-w-md rounded-xl border p-6 shadow-xl"
         style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
@@ -106,6 +107,7 @@ export default function CreateOrganizationModal({ onClose }: { onClose: () => vo
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
