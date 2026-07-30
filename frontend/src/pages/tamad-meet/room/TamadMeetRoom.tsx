@@ -10,7 +10,18 @@ export default function TamadMeetRoom() {
   const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
   const { currentRoom, currentParticipant, joinRoom, leaveRoom } = useTamadMeetStore();
-  const { localStream, remoteStreams, startLocalStream, stopLocalStream } = useWebRTC(roomId, currentParticipant?._id);
+  const { 
+    localStream, 
+    remoteStreams, 
+    startLocalStream, 
+    stopLocalStream,
+    toggleAudio,
+    toggleVideo,
+    toggleScreenShare,
+    isAudioEnabled,
+    isVideoEnabled,
+    isScreenSharing
+  } = useWebRTC(roomId, currentParticipant?._id);
 
   useEffect(() => {
     if (roomId) {
@@ -64,9 +75,24 @@ export default function TamadMeetRoom() {
       </main>
 
       <footer className="p-4 border-t border-gray-800 flex justify-center gap-4">
-        <button className="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><Mic size={20} /></button>
-        <button className="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><Video size={20} /></button>
-        <button className="p-3 rounded-full bg-gray-800 hover:bg-gray-700"><MonitorUp size={20} /></button>
+        <button 
+          onClick={toggleAudio}
+          className={`p-3 rounded-full hover:bg-gray-700 ${isAudioEnabled ? 'bg-gray-800' : 'bg-red-600 hover:bg-red-700'}`}
+        >
+          {isAudioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
+        </button>
+        <button 
+          onClick={toggleVideo}
+          className={`p-3 rounded-full hover:bg-gray-700 ${isVideoEnabled ? 'bg-gray-800' : 'bg-red-600 hover:bg-red-700'}`}
+        >
+          {isVideoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
+        </button>
+        <button 
+          onClick={toggleScreenShare}
+          className={`p-3 rounded-full hover:bg-gray-700 ${isScreenSharing ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800'}`}
+        >
+          <MonitorUp size={20} />
+        </button>
         <button onClick={() => navigate('/team/tamad-meet')} className="p-3 rounded-full bg-red-600 hover:bg-red-700"><PhoneOff size={20} /></button>
       </footer>
     </div>

@@ -3,9 +3,19 @@ import { io, Socket } from 'socket.io-client';
 
 export const useWebRTC = (roomId: string | undefined, participantId: string | undefined) => {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<Record<string, MediaStream>>({});
   const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
   const socketRef = useRef<Socket | null>(null);
+
+  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
+  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
+
+  // Sync state to ref
+  useEffect(() => {
+    localStreamRef.current = localStream;
+  }, [localStream]);
 
   useEffect(() => {
     if (!roomId || !participantId) return;
@@ -27,8 +37,8 @@ export const useWebRTC = (roomId: string | undefined, participantId: string | un
       const pc = createPeerConnection(newParticipantId, socketId);
       peerConnections.current[newParticipantId] = pc;
       
-      if (localStream) {
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(track => pc.addTrack(track, localStreamRef.current!));
       }
 
       const offer = await pc.createOffer();
@@ -40,8 +50,8 @@ export const useWebRTC = (roomId: string | undefined, participantId: string | un
       const pc = createPeerConnection(callerId, callerSocketId);
       peerConnections.current[callerId] = pc;
       
-      if (localStream) {
-        localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach(track => pc.addTrack(track, localStreamRef.current!));
       }
 
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
@@ -69,7 +79,7 @@ export const useWebRTC = (roomId: string | undefined, participantId: string | un
       Object.values(peerConnections.current).forEach(pc => pc.close());
       peerConnections.current = {};
     };
-  }, [roomId, participantId, localStream]);
+  }, [roomId, participantId]);
 
   const createPeerConnection = (remoteId: string, remoteSocketId: string) => {
     const pc = new RTCPeerConnection({
@@ -118,5 +128,104 @@ export const useWebRTC = (roomId: string | undefined, participantId: string | un
     }
   };
 
-  return { localStream, remoteStreams, startLocalStream, stopLocalStream };
+  const toggleAudio = () => {
+    if (localStream) {
+      const audioTrack = localStream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        setIsAudioEnabled(audioTrack.enabled);
+      }
+    }
+  };
+
+  const toggleVideo = () => {
+    if (localStream) {
+      const videoTrack = localStream.getVideoTracks()[0];
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        setIsVideoEnabled(videoTrack.enabled);
+      }
+    }
+  };
+
+  const toggleScreenShare = async () => {
+    try {
+      if (!isScreenSharing) {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenTrack = screenStream.getVideoTracks()[0];
+
+        screenTrack.onended = () => {
+          stopScreenSharing(screenTrack);
+        };
+
+        // Replace video track in peer connections
+        Object.values(peerConnections.current).forEach(pc => {
+          const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+          if (sender) {
+            sender.replaceTrack(screenTrack);
+          }
+        });
+
+        // Replace track in local stream for UI
+        if (localStream) {
+          const oldVideoTrack = localStream.getVideoTracks()[0];
+          localStream.removeTrack(oldVideoTrack);
+          localStream.addTrack(screenTrack);
+          setLocalStream(new MediaStream(localStream.getTracks()));
+        }
+        
+        setIsScreenSharing(true);
+      } else {
+        if (localStream) {
+          const screenTrack = localStream.getVideoTracks()[0];
+          await stopScreenSharing(screenTrack);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to share screen", err);
+    }
+  };
+
+  const stopScreenSharing = async (screenTrack: MediaStreamTrack) => {
+    screenTrack.stop();
+    try {
+      // Revert back to camera
+      const cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const cameraTrack = cameraStream.getVideoTracks()[0];
+      
+      // Keep track enabled state synced with isVideoEnabled
+      cameraTrack.enabled = isVideoEnabled;
+
+      // Replace video track in peer connections
+      Object.values(peerConnections.current).forEach(pc => {
+        const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+        if (sender) {
+          sender.replaceTrack(cameraTrack);
+        }
+      });
+
+      if (localStreamRef.current) {
+         localStreamRef.current.removeTrack(screenTrack);
+         localStreamRef.current.addTrack(cameraTrack);
+         setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+      }
+
+      setIsScreenSharing(false);
+    } catch (err) {
+      console.error("Failed to revert to camera", err);
+    }
+  };
+
+  return { 
+    localStream, 
+    remoteStreams, 
+    startLocalStream, 
+    stopLocalStream,
+    toggleAudio,
+    toggleVideo,
+    toggleScreenShare,
+    isAudioEnabled,
+    isVideoEnabled,
+    isScreenSharing
+  };
 };
