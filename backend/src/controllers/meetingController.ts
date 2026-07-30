@@ -128,7 +128,7 @@ export const joinMeeting = async (req: AuthRequest, res: Response) => {
       io.to(`team_${meeting.teamId}`).emit('meeting_started', meeting);
     }
 
-    const token = generateParticipantToken(
+    const token = await generateParticipantToken(
       meeting.roomName, 
       req.user?.name || 'User', 
       req.user?._id?.toString() || 'anonymous', 

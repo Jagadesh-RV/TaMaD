@@ -17,7 +17,7 @@ export const createMeetingRoom = async (roomName: string, meetingId: string) => 
   return room;
 };
 
-export const generateParticipantToken = (roomName: string, participantName: string, participantId: string, role: string) => {
+export const generateParticipantToken = async (roomName: string, participantName: string, participantId: string, role: string) => {
   const at = new AccessToken(apiKey, apiSecret, {
     identity: participantId,
     name: participantName,
@@ -34,7 +34,7 @@ export const generateParticipantToken = (roomName: string, participantName: stri
     canPublishData,
   });
 
-  return at.toJwt();
+  return await at.toJwt();
 };
 
 export const listRooms = async () => {
