@@ -39,6 +39,8 @@ import TeamSettingsPage from "./pages/teams/TeamSettingsPage";
 import OrganizationDashboardPage from "./pages/OrganizationDashboardPage";
 import MeetingsDashboard from "./pages/meetings/MeetingsDashboard";
 import MeetingRoom from "./pages/meetings/MeetingRoom";
+import TamadMeetDashboard from "./pages/tamad-meet/TamadMeetDashboard";
+import TamadMeetRoom from "./pages/tamad-meet/room/TamadMeetRoom";
 
 function LoadingSpinner() {
   return (
@@ -109,6 +111,8 @@ export default function App() {
         <Route path="/team/settings" element={<TeamSettingsPage />} />
         <Route path="/team/:teamId/meetings" element={<MeetingsDashboard />} />
         <Route path="/team/:teamId/meetings/:meetingId/room" element={<MeetingRoom />} />
+        <Route path="/team/tamad-meet" element={<TamadMeetDashboard />} />
+        <Route path="/team/tamad-meet/room/:roomId" element={<TamadMeetRoom />} />
         <Route path="/org/:id" element={<OrganizationDashboardPage />} />
       </Route>
 

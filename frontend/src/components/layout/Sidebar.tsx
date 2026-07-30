@@ -63,6 +63,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       links: [
         { label: 'Members', path: '/team/members', icon: Users },
         { label: 'Meetings', path: `/team/${currentWorkspace?.teamId}/meetings`, icon: Video },
+        { label: 'TaMaD Meet', path: '/team/tamad-meet', icon: Video },
         { label: 'Team Settings', path: '/team/settings', icon: Settings },
       ]
     }] : []),
@@ -98,8 +99,8 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     <div className="flex h-full flex-col">
       {/* Brand */}
       <div className={clsx('flex items-center', collapsed ? 'justify-center px-2' : 'gap-3 px-2')}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
-          <Sparkles size={18} />
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center">
+          <img src="/tamadmainlogo.png" alt="TaMaD Logo" className="w-full h-full object-contain" />
         </div>
         {!collapsed && (
           <div className="min-w-0">

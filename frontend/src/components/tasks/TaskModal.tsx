@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Calendar, Check } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle, DialogDescription } from '../ui/Dialog';
 import { Button } from '../ui/Button';
@@ -17,7 +17,10 @@ export default function TaskModal({
   const [priority, setPriority] = useState('medium');
   const [status, setStatus] = useState('todo');
 
-  useEffect(() => {
+  // Reset state when modal opens
+  const prevIsOpen = React.useRef(isOpen);
+  if (isOpen !== prevIsOpen.current) {
+    prevIsOpen.current = isOpen;
     if (isOpen) {
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
@@ -25,7 +28,7 @@ export default function TaskModal({
       setPriority(initialData?.priority || 'medium');
       setStatus(initialData?.status || 'todo');
     }
-  }, [isOpen, initialData]);
+  }
 
   if (!isOpen) return null;
 
@@ -59,15 +62,15 @@ export default function TaskModal({
         <div className={initialData?._id ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
           <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-[color:var(--color-foreground)]">Title</label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Finalize presentation slides" required autoFocus />
+            <label className="text-sm font-semibold text-[color:var(--color-foreground)]">Title</label>
+            <Input value={title} onChange={(e: any) => setTitle(e.target.value)} placeholder="Finalize presentation slides" required autoFocus />
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-[color:var(--color-foreground)]">Due date</label>
             <div className="relative">
               <Calendar size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
-              <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="pl-10" />
+              <Input type="date" value={dueDate} onChange={(e: any) => setDueDate(e.target.value)} className="pl-10" />
             </div>
           </div>
 
@@ -106,8 +109,8 @@ export default function TaskModal({
             <label className="text-sm font-medium text-[color:var(--color-foreground)]">Description</label>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[110px] w-full rounded-xl border border-border bg-[color:var(--color-background)] px-3.5 py-2.5 text-sm text-[color:var(--color-foreground)] outline-none transition-all focus:border-[color:var(--color-accent)] focus:ring-2 focus:ring-[color:var(--color-accent)]/15"
+              onChange={(e: any) => setDescription(e.target.value)}
+              className="min-h-[110px] w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-[color:var(--color-foreground)] outline-none transition-all focus:border-[color:var(--color-accent)] focus:ring-2 focus:ring-[color:var(--color-accent)]/15"
               placeholder="Add notes, context, or subtasks…"
             />
           </div>

@@ -9,7 +9,7 @@ interface Sprint {
   startDate: string;
   endDate: string;
   status: 'planned' | 'active' | 'completed';
-  projectId: string;
+  projectId?: string;
   workspaceId: string;
 }
 

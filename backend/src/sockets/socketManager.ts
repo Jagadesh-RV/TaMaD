@@ -2,6 +2,7 @@ import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { handleMeetingSockets } from './meetingSocket';
+import { initTamadMeetSocket } from '../gateways/tamadMeetSocketGateway';
 
 let io: Server;
 
@@ -132,6 +133,8 @@ export const initSocket = (server: HttpServer) => {
       }
     });
   });
+
+  initTamadMeetSocket(io);
 
   return io;
 };
