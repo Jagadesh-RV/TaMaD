@@ -500,6 +500,71 @@
     box-shadow: var(--shadow-float);
     animation: scaleIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
+
+  /* Auth Layout */
+  .auth-page {
+    @apply flex min-h-screen items-center justify-center p-4;
+    background: var(--color-background-secondary);
+  }
+
+  .auth-card {
+    @apply w-full max-w-md rounded-2xl border p-8;
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .auth-card-title {
+    @apply mt-6 text-2xl font-bold tracking-tight;
+    color: var(--color-foreground);
+  }
+
+  .auth-card-subtitle {
+    @apply mt-2 text-sm;
+    color: var(--color-muted);
+  }
+
+  .auth-provider-button {
+    @apply w-full mb-4 flex justify-center py-2.5;
+  }
+
+  .auth-google-mark {
+    @apply mr-2 font-bold text-lg;
+    color: var(--color-accent);
+  }
+
+  .auth-phone-link {
+    @apply block text-center text-sm font-semibold transition-colors mb-6;
+    color: var(--color-accent);
+  }
+  .auth-phone-link:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .auth-divider {
+    @apply relative mb-6 text-center text-sm;
+  }
+  .auth-divider::before {
+    content: "";
+    @apply absolute left-0 top-1/2 w-full border-t;
+    border-color: var(--color-border-light);
+  }
+  .auth-divider span {
+    @apply relative px-2;
+    background: var(--color-surface);
+    color: var(--color-muted);
+  }
+
+  .input-field {
+    @apply w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition-all;
+    background: var(--color-background);
+    border-color: var(--color-border);
+    color: var(--color-foreground);
+  }
+  .input-field:focus {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-glow);
+  }
 }
 
 @media (max-width: 768px) {
