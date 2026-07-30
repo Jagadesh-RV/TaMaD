@@ -10,7 +10,6 @@ export default function TamadMeetDashboard() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { meetings, loading, fetchMeetings, createMeeting, joinRoom } = useTamadMeetStore();
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'Instant' | 'Scheduled'>('Instant');
