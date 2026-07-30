@@ -1,9 +1,11 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import TaskModal from '../components/tasks/TaskModal';
+import SprintModal from '../components/tasks/SprintModal';
+import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
@@ -16,10 +18,12 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
     <div 
       ref={setNodeRef}
       style={{ ...style, background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}
-      className="mb-2 cursor-pointer rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
+      className="mb-2 cursor-grab active:cursor-grabbing rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
       onClick={onClick}
+      {...attributes}
+      {...listeners}
     >
-      <div className="mb-2 flex items-center justify-between" {...attributes} {...listeners}>
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>{task.taskType || 'Task'}</span>
         <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{task.storyPoints ? `${task.storyPoints} pts` : '-'}</span>
       </div>
@@ -40,11 +44,32 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
   );
 }
 
+function DroppableContainer({ id, children, emptyText }: { id: string, children: React.ReactNode, emptyText?: string }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  
+  return (
+    <div 
+      ref={setNodeRef} 
+      id={id} 
+      className={`min-h-[100px] transition-colors rounded-lg ${isOver ? 'bg-[var(--color-surface-hover)] border-2 border-dashed border-[var(--color-accent)]' : ''}`}
+    >
+      {children}
+      {React.Children.count(children) === 0 && emptyText && (
+        <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>{emptyText}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SprintPlanningPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { tasks, fetchTasks, loading: tasksLoading, updateTask } = useTaskStore();
   const { sprints, fetchSprints, startSprint, createSprint } = useAgileStore();
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace?._id) {
@@ -65,22 +90,63 @@ export default function SprintPlanningPage() {
     if (!over) return;
 
     const taskId = active.id as string;
-    const overId = over.id as string; // Could be 'backlog' or a sprintId
+    const overId = over.id as string;
 
     const task = tasks.find(t => t._id === taskId);
     if (!task) return;
 
-    const currentSprintId = task.sprintId || 'backlog';
-    if (currentSprintId === overId) return; // No change
+    let targetSprintId = overId;
+    if (overId !== 'backlog' && !sprints.some(s => s._id === overId)) {
+      const overTask = tasks.find(t => t._id === overId);
+      if (overTask) {
+        targetSprintId = overTask.sprintId || 'backlog';
+      }
+    }
 
-    // Optimistic UI update
-    const newSprintId = overId === 'backlog' ? undefined : overId;
+    const currentSprintId = task.sprintId || 'backlog';
+    if (currentSprintId === targetSprintId) return; // No change
+
+    // Optimistic UI update to prevent visual snap-back
+    const newSprintId = targetSprintId === 'backlog' ? null : targetSprintId;
+    
+    useTaskStore.setState(s => ({
+      tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: newSprintId } : t)
+    }));
     
     try {
       await updateTask(taskId, { sprintId: newSprintId });
       toast.success('Task moved');
     } catch {
       fetchTasks(currentWorkspace._id); // Revert on failure
+    }
+  };
+
+  const handleCreateTask = async (data: any) => {
+    if (!currentWorkspace) return;
+    try {
+      await useTaskStore.getState().createTask({
+        ...data,
+        workspaceId: currentWorkspace._id,
+        status: 'todo',
+        priority: 'medium',
+        order: tasks.length,
+      });
+      setIsTaskModalOpen(false);
+    } catch (e) {
+      // Error handled by store
+    }
+  };
+
+  const handleCreateSprint = async (data: any) => {
+    if (!currentWorkspace) return;
+    try {
+      await createSprint({
+        ...data,
+        workspaceId: currentWorkspace._id,
+      });
+      setIsSprintModalOpen(false);
+    } catch (e) {
+      // Error handled by store
     }
   };
 
@@ -100,14 +166,14 @@ export default function SprintPlanningPage() {
           </p>
         </div>
         <button 
-          onClick={() => createSprint({ name: `Sprint ${sprints.length + 1}`, workspaceId: currentWorkspace._id, startDate: new Date().toISOString(), endDate: new Date(Date.now() + 14*24*60*60*1000).toISOString() })}
+          onClick={() => setIsSprintModalOpen(true)}
           className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90 text-white" 
           style={{ background: 'var(--color-accent)' }}>
           Create Sprint
         </button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCorners} onDragEnd={handleDragEnd}>
         <div className="flex flex-1 overflow-hidden">
           {/* Sprints Area */}
           <div className="flex-1 overflow-y-auto p-6" style={{ borderRight: '1px solid var(--color-border-light)' }}>
@@ -122,16 +188,11 @@ export default function SprintPlanningPage() {
                   <button className="text-sm rounded border px-3 py-1 text-[var(--color-muted)] hover:bg-[var(--color-surface-hover)] border-[var(--color-border-light)]">Complete Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === activeSprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <div className="min-h-[100px]" id={activeSprint._id}>
+                  <DroppableContainer id={activeSprint._id} emptyText="Drag issues here">
                     {tasks.filter(t => t.sprintId === activeSprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
-                    {tasks.filter(t => t.sprintId === activeSprint._id).length === 0 && (
-                      <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
-                        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Drag issues here</p>
-                      </div>
-                    )}
-                  </div>
+                  </DroppableContainer>
                 </SortableContext>
               </div>
             )}
@@ -145,16 +206,11 @@ export default function SprintPlanningPage() {
                     className="text-sm rounded border px-3 py-1 bg-[var(--color-accent)] text-white hover:opacity-90 border-[var(--color-accent)]">Start Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === sprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <div className="min-h-[100px]" id={sprint._id}>
+                  <DroppableContainer id={sprint._id} emptyText="Plan your sprint here">
                     {tasks.filter(t => t.sprintId === sprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
-                    {tasks.filter(t => t.sprintId === sprint._id).length === 0 && (
-                      <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
-                        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Plan your sprint here</p>
-                      </div>
-                    )}
-                  </div>
+                  </DroppableContainer>
                 </SortableContext>
               </div>
             ))}
@@ -171,18 +227,22 @@ export default function SprintPlanningPage() {
           <div className="w-96 overflow-y-auto p-6" style={{ background: 'var(--color-surface-hover)' }}>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Backlog</h2>
-              <button className="text-sm font-medium transition-colors hover:opacity-80" style={{ color: 'var(--color-accent)' }}>
+              <button 
+                onClick={() => setIsTaskModalOpen(true)}
+                className="text-sm font-medium transition-colors hover:opacity-80" 
+                style={{ color: 'var(--color-accent)' }}
+              >
                 + Create Issue
               </button>
             </div>
             <div className="space-y-2">
               {tasksLoading && <p className="text-sm text-[color:var(--color-muted)]">Loading backlog...</p>}
               <SortableContext items={backlogTasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
-                <div className="min-h-[200px]" id="backlog">
+                <DroppableContainer id="backlog" emptyText={tasksLoading ? "" : "No tasks in backlog"}>
                   {!tasksLoading && backlogTasks.map(task => (
                     <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                   ))}
-                </div>
+                </DroppableContainer>
               </SortableContext>
             </div>
           </div>
@@ -193,6 +253,17 @@ export default function SprintPlanningPage() {
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
         initialData={selectedTask}
+      />
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSave={handleCreateTask}
+      />
+      <SprintModal
+        isOpen={isSprintModalOpen}
+        onClose={() => setIsSprintModalOpen(false)}
+        onSave={handleCreateSprint}
+        initialData={{ name: `Sprint ${sprints.length + 1}` }}
       />
     </div>
   );

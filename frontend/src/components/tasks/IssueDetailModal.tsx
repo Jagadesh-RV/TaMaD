@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, Calendar, Check, Play, Paperclip, Eye, ThumbsUp, Tag, List, Activity, MessageSquare } from 'lucide-react';
 import { Dialog, DialogPanel, DialogTitle } from '../ui/Dialog';
 import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import { useTaskStore } from '../../store/taskStore';
 import { useAuthStore } from '../../store/authStore';
 import TaskComments from './TaskComments';
@@ -122,6 +123,14 @@ export default function IssueDetailModal({
               />
             </div>
 
+            <div className="mb-6">
+              <label className="text-sm font-semibold mb-2 block">Attachments</label>
+              <div className="border border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-[color:var(--color-surface-hover)]" style={{ borderColor: 'var(--color-border-light)' }}>
+                <Paperclip size={24} className="text-[color:var(--color-muted)] mb-2" />
+                <p className="text-sm text-[color:var(--color-muted)]">Click or drag files here to attach</p>
+              </div>
+            </div>
+
             {/* Activity Tabs */}
             <div className="mt-8">
               <div className="flex items-center gap-4 border-b mb-4" style={{ borderColor: 'var(--color-border)' }}>
@@ -193,6 +202,19 @@ export default function IssueDetailModal({
                     {formData.assignees?.[0]?.name?.charAt(0) || '?'}
                   </div>
                   <span className="text-sm">{formData.assignees?.[0]?.name || 'Unassigned'}</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Due Date</label>
+                <div className="relative">
+                  <Calendar size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
+                  <Input 
+                    type="date" 
+                    value={formData.dueDate ? formData.dueDate.split('T')[0] : ''} 
+                    onChange={(e) => handleChange('dueDate', e.target.value ? new Date(e.target.value).toISOString() : '')} 
+                    className="pl-9 h-9 text-sm" 
+                  />
                 </div>
               </div>
 
