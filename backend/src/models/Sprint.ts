@@ -6,7 +6,7 @@ export interface ISprint extends Document {
   startDate: Date;
   endDate: Date;
   status: 'planned' | 'active' | 'completed';
-  projectId: mongoose.Types.ObjectId;
+  projectId?: mongoose.Types.ObjectId;
   workspaceId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   capacity?: number;

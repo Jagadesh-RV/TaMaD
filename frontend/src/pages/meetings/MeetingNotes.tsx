@@ -24,7 +24,7 @@ const MeetingNotes: React.FC<Props> = ({ meetingId }) => {
     
     setSocket(newSocket);
     
-    newSocket.emit('meeting_join', { meetingId, userId: user?._id });
+    newSocket.emit('meeting_join', { meetingId, userId: user?.id });
     
     newSocket.on('meeting_notes_updated', (data: { content: string }) => {
       setContent(data.content);
@@ -39,7 +39,7 @@ const MeetingNotes: React.FC<Props> = ({ meetingId }) => {
     });
 
     return () => {
-      newSocket.emit('meeting_leave', { meetingId, userId: user?._id });
+      newSocket.emit('meeting_leave', { meetingId, userId: user?.id });
       newSocket.disconnect();
     };
   }, [meetingId, user]);
@@ -56,7 +56,7 @@ const MeetingNotes: React.FC<Props> = ({ meetingId }) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
     
-    socket.emit('meeting_chat', { meetingId, senderId: user?._id, message: newMessage });
+    socket.emit('meeting_chat', { meetingId, senderId: user?.id, message: newMessage });
     setNewMessage('');
   };
 
@@ -98,8 +98,8 @@ const MeetingNotes: React.FC<Props> = ({ meetingId }) => {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {chatMessages.map((msg, idx) => (
-              <div key={idx} className={`flex flex-col ${msg.senderId === user?._id ? 'items-end' : 'items-start'}`}>
-                <div className={`px-4 py-2 rounded-2xl max-w-[85%] ${msg.senderId === user?._id ? 'bg-primary-600 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none'}`}>
+              <div key={idx} className={`flex flex-col ${msg.senderId === user?.id ? 'items-end' : 'items-start'}`}>
+                <div className={`px-4 py-2 rounded-2xl max-w-[85%] ${msg.senderId === user?.id ? 'bg-primary-600 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-bl-none'}`}>
                   {msg.message}
                 </div>
               </div>

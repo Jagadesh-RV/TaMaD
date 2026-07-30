@@ -17,7 +17,7 @@ const ENV_VARS: EnvVar[] = [
   { name: 'FIREBASE_PROJECT_ID', required: true, category: 'firebase' },
   { name: 'FIREBASE_CLIENT_EMAIL', required: true, category: 'firebase' },
   { name: 'FIREBASE_PRIVATE_KEY', required: true, category: 'firebase' },
-  { name: 'GEMINI_API_KEY', required: false, category: 'ai' },
+  { name: 'OPENAI_API_KEY', required: false, category: 'ai' },
   { name: 'CORS_ORIGIN', required: false, default: 'http://localhost:5173,http://localhost:3000', category: 'server' },
   { name: 'FRONTEND_URL', required: false, default: 'http://localhost:5173', category: 'server' },
 ];

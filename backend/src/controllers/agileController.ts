@@ -8,7 +8,10 @@ import { getIO } from '../sockets/socketManager';
 // Epics
 export const getEpics = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
-  const epics = await Epic.find({ workspaceId, projectId }).sort({ createdAt: -1 });
+  const query: any = {};
+  if (workspaceId) query.workspaceId = workspaceId;
+  if (projectId) query.projectId = projectId;
+  const epics = await Epic.find(query).sort({ createdAt: -1 });
   res.json(epics);
 };
 
@@ -35,20 +38,12 @@ export const deleteEpic = async (req: AuthRequest, res: Response) => {
 
 // Sprints
 export const getSprints = async (req: AuthRequest, res: Response) => {
-  try {
-    const { workspaceId, projectId } = req.query;
-    const query: any = { workspaceId };
-    
-    // Only add projectId to query if it's a valid string/ObjectId
-    if (projectId && typeof projectId === 'string' && projectId.length === 24) {
-      query.projectId = projectId;
-    }
-    
-    const sprints = await Sprint.find(query).sort({ startDate: -1 });
-    res.json(sprints);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Failed to fetch sprints' });
-  }
+  const { workspaceId, projectId } = req.query;
+  const query: any = {};
+  if (workspaceId) query.workspaceId = workspaceId;
+  if (projectId) query.projectId = projectId;
+  const sprints = await Sprint.find(query).sort({ startDate: -1 });
+  res.json(sprints);
 };
 
 export const createSprint = async (req: AuthRequest, res: Response) => {

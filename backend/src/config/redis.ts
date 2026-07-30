@@ -9,7 +9,6 @@ export const redis = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
   enableReadyCheck: true,
   retryStrategy: (times: number) => {
-    if (times > 10) return null;
     return Math.min(times * 50, 2000);
   },
 });
