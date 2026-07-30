@@ -63,6 +63,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       links: [
         { label: 'Members', path: '/team/members', icon: Users },
         { label: 'Meetings', path: `/team/${currentWorkspace?.teamId}/meetings`, icon: Video },
+        { label: 'TaMaD Meet', path: '/team/tamad-meet', icon: Video },
         { label: 'Team Settings', path: '/team/settings', icon: Settings },
       ]
     }] : []),
