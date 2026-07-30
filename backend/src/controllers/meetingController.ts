@@ -175,3 +175,119 @@ export const endMeeting = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: 'Failed to end meeting' });
   }
 };
+
+export const updateMeeting = async (req: AuthRequest, res: Response) => {
+  try {
+    const meeting = await Meeting.findOneAndUpdate(
+      { _id: req.params.id, hostId: req.user?._id },
+      { $set: req.body },
+      { new: true }
+    );
+    if (!meeting) return res.status(404).json({ error: 'Meeting not found or unauthorized' });
+    io.to(`team_${meeting.teamId}`).emit('meeting_updated', meeting);
+    res.json({ meeting });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to update meeting' });
+  }
+};
+
+export const deleteMeeting = async (req: AuthRequest, res: Response) => {
+  try {
+    const meeting = await Meeting.findOneAndDelete({ _id: req.params.id, hostId: req.user?._id });
+    if (!meeting) return res.status(404).json({ error: 'Meeting not found or unauthorized' });
+    
+    await MeetingParticipant.deleteMany({ meetingId: meeting._id });
+    io.to(`team_${meeting.teamId}`).emit('meeting_deleted', { meetingId: meeting._id });
+    res.json({ message: 'Meeting deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to delete meeting' });
+  }
+};
+
+export const cancelMeeting = async (req: AuthRequest, res: Response) => {
+  try {
+    const meeting = await Meeting.findOneAndUpdate(
+      { _id: req.params.id, hostId: req.user?._id },
+      { $set: { status: 'cancelled' } },
+      { new: true }
+    );
+    if (!meeting) return res.status(404).json({ error: 'Meeting not found or unauthorized' });
+    io.to(`team_${meeting.teamId}`).emit('meeting_updated', meeting);
+    res.json({ meeting });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to cancel meeting' });
+  }
+};
+
+export const duplicateMeeting = async (req: AuthRequest, res: Response) => {
+  try {
+    const original = await Meeting.findById(req.params.id);
+    if (!original) return res.status(404).json({ error: 'Original meeting not found' });
+
+    const roomName = `room-${crypto.randomBytes(8).toString('hex')}`;
+    const duplicated = await Meeting.create({
+      title: `${original.title} (Copy)`,
+      description: original.description,
+      teamId: original.teamId,
+      workspaceId: original.workspaceId,
+      hostId: req.user?._id,
+      roomName,
+      startTime: original.startTime, // the user can edit this later
+      duration: original.duration,
+      meetingType: original.meetingType,
+      createdBy: req.user?._id,
+      status: 'scheduled'
+    });
+
+    await MeetingParticipant.create({
+      meetingId: duplicated._id,
+      userId: req.user?._id,
+      role: 'host',
+      status: 'accepted'
+    });
+
+    io.to(`team_${duplicated.teamId}`).emit('meeting_created', duplicated);
+    res.status(201).json({ meeting: duplicated });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to duplicate meeting' });
+  }
+};
+
+export const inviteMember = async (req: AuthRequest, res: Response) => {
+  const { userId } = req.body;
+  try {
+    const meeting = await Meeting.findById(req.params.id);
+    if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
+    if (meeting.hostId.toString() !== req.user?._id?.toString()) return res.status(403).json({ error: 'Unauthorized' });
+
+    const existing = await MeetingParticipant.findOne({ meetingId: meeting._id, userId });
+    if (existing) return res.status(400).json({ error: 'User is already invited' });
+
+    const participant = await MeetingParticipant.create({
+      meetingId: meeting._id,
+      userId,
+      role: 'participant',
+      status: 'invited',
+      invitedBy: req.user?._id
+    });
+    
+    res.json({ message: 'User invited successfully', participant });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to invite member' });
+  }
+};
+
+export const respondToInvitation = async (req: AuthRequest, res: Response) => {
+  const { status } = req.body; // 'accepted' | 'declined' | 'maybe'
+  try {
+    const participant = await MeetingParticipant.findOneAndUpdate(
+      { meetingId: req.params.id, userId: req.user?._id },
+      { $set: { status } },
+      { new: true }
+    );
+    if (!participant) return res.status(404).json({ error: 'Invitation not found' });
+    res.json({ participant });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to respond to invitation' });
+  }
+};
