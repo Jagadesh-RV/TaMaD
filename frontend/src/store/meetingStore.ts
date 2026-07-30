@@ -29,6 +29,12 @@ interface MeetingState {
   endMeeting: (id: string) => Promise<void>;
   setCurrentMeeting: (meeting: Meeting | null) => void;
   clearActiveMeeting: () => void;
+  updateMeeting: (id: string, payload: any) => Promise<void>;
+  deleteMeeting: (id: string) => Promise<void>;
+  cancelMeeting: (id: string) => Promise<void>;
+  duplicateMeeting: (id: string) => Promise<Meeting>;
+  inviteMember: (id: string, userId: string) => Promise<void>;
+  respondToInvitation: (id: string, status: string) => Promise<void>;
 }
 
 export const useMeetingStore = create<MeetingState>((set, get) => ({
@@ -89,6 +95,77 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
       toast.success('Meeting ended');
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to end meeting');
+    }
+  },
+
+  updateMeeting: async (id, payload) => {
+    try {
+      const { data } = await api.patch(`/meetings/${id}`, payload);
+      set((s) => ({
+        meetings: s.meetings.map(m => (m._id === id ? data.meeting : m))
+      }));
+      toast.success('Meeting updated');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to update meeting');
+      throw err;
+    }
+  },
+
+  deleteMeeting: async (id) => {
+    try {
+      await api.delete(`/meetings/${id}`);
+      set((s) => ({
+        meetings: s.meetings.filter(m => m._id !== id)
+      }));
+      toast.success('Meeting deleted');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to delete meeting');
+      throw err;
+    }
+  },
+
+  cancelMeeting: async (id) => {
+    try {
+      const { data } = await api.post(`/meetings/${id}/cancel`);
+      set((s) => ({
+        meetings: s.meetings.map(m => (m._id === id ? data.meeting : m))
+      }));
+      toast.success('Meeting cancelled');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to cancel meeting');
+      throw err;
+    }
+  },
+
+  duplicateMeeting: async (id) => {
+    try {
+      const { data } = await api.post(`/meetings/${id}/duplicate`);
+      set((s) => ({ meetings: [data.meeting, ...s.meetings] }));
+      toast.success('Meeting duplicated');
+      return data.meeting;
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to duplicate meeting');
+      throw err;
+    }
+  },
+
+  inviteMember: async (id, userId) => {
+    try {
+      await api.post(`/meetings/${id}/invite`, { userId });
+      toast.success('Member invited successfully');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to invite member');
+      throw err;
+    }
+  },
+
+  respondToInvitation: async (id, status) => {
+    try {
+      await api.post(`/meetings/${id}/respond`, { status });
+      toast.success(`Invitation ${status}`);
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to respond to invitation');
+      throw err;
     }
   }
 }));

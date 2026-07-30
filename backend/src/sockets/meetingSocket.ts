@@ -2,13 +2,30 @@ import { Server, Socket } from 'socket.io';
 import MeetingChat from '../models/MeetingChat';
 import MeetingReaction from '../models/MeetingReaction';
 
+const meetingPresence = new Map<string, Set<string>>(); // meetingId -> Set of userIds
+
 export const handleMeetingSockets = (io: Server, socket: Socket) => {
-  socket.on('meeting_join', (meetingId: string) => {
+  socket.on('meeting_join', (data: { meetingId: string, userId: string }) => {
+    const { meetingId, userId } = data;
     socket.join(`meeting_${meetingId}`);
+    
+    if (!meetingPresence.has(meetingId)) {
+      meetingPresence.set(meetingId, new Set());
+    }
+    meetingPresence.get(meetingId)!.add(userId);
+    
+    // Broadcast updated presence list
+    io.to(`meeting_${meetingId}`).emit('meeting_presence_update', Array.from(meetingPresence.get(meetingId)!));
   });
 
-  socket.on('meeting_leave', (meetingId: string) => {
+  socket.on('meeting_leave', (data: { meetingId: string, userId: string }) => {
+    const { meetingId, userId } = data;
     socket.leave(`meeting_${meetingId}`);
+    
+    if (meetingPresence.has(meetingId)) {
+      meetingPresence.get(meetingId)!.delete(userId);
+      io.to(`meeting_${meetingId}`).emit('meeting_presence_update', Array.from(meetingPresence.get(meetingId)!));
+    }
   });
 
   socket.on('meeting_chat', async (data: { meetingId: string, senderId: string, message: string }) => {
