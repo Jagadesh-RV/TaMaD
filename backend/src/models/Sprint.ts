@@ -6,7 +6,7 @@ export interface ISprint extends Document {
   startDate: Date;
   endDate: Date;
   status: 'planned' | 'active' | 'completed';
-  projectId: mongoose.Types.ObjectId;
+  projectId?: mongoose.Types.ObjectId;
   workspaceId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
   capacity?: number;
@@ -21,7 +21,7 @@ const SprintSchema: Schema = new Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     status: { type: String, enum: ['planned', 'active', 'completed'], default: 'planned' },
-    projectId: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     capacity: { type: Number },

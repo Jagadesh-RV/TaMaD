@@ -4,7 +4,7 @@ export interface IEpic extends Document {
   name: string;
   description?: string;
   status: 'todo' | 'in-progress' | 'done';
-  projectId: mongoose.Types.ObjectId;
+  projectId?: mongoose.Types.ObjectId;
   workspaceId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
 }
@@ -14,7 +14,7 @@ const EpicSchema: Schema = new Schema(
     name: { type: String, required: true },
     description: { type: String },
     status: { type: String, enum: ['todo', 'in-progress', 'done'], default: 'todo' },
-    projectId: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
+    projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
     workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },

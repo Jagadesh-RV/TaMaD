@@ -8,7 +8,10 @@ import { getIO } from '../sockets/socketManager';
 // Epics
 export const getEpics = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
-  const epics = await Epic.find({ workspaceId, projectId }).sort({ createdAt: -1 });
+  const query: any = {};
+  if (workspaceId) query.workspaceId = workspaceId;
+  if (projectId) query.projectId = projectId;
+  const epics = await Epic.find(query).sort({ createdAt: -1 });
   res.json(epics);
 };
 
@@ -36,7 +39,10 @@ export const deleteEpic = async (req: AuthRequest, res: Response) => {
 // Sprints
 export const getSprints = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
-  const sprints = await Sprint.find({ workspaceId, projectId }).sort({ startDate: -1 });
+  const query: any = {};
+  if (workspaceId) query.workspaceId = workspaceId;
+  if (projectId) query.projectId = projectId;
+  const sprints = await Sprint.find(query).sort({ startDate: -1 });
   res.json(sprints);
 };
 
