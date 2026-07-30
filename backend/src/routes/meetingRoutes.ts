@@ -1,5 +1,5 @@
 import express from 'express';
-import { authenticate } from '../middleware/auth';
+import { protect } from '../middleware/auth';
 import {
   createMeeting,
   getMeetings,
@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.use(authenticate);
+router.use(protect);
 
 router.post('/', createMeeting);
 router.get('/', getMeetings);
