@@ -4,12 +4,16 @@ import { useWorkspaceStore } from '../../store/workspaceStore';
 import { useTamadMeetStore } from '../../store/tamadMeetStore';
 import { Video, Plus, Calendar, Settings, Play } from 'lucide-react';
 import toast from 'react-hot-toast';
+import MeetingModal from './MeetingModal';
 
 export default function TamadMeetDashboard() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { meetings, loading, fetchMeetings, createMeeting, joinRoom } = useTamadMeetStore();
   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [isCreating, setIsCreating] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<'Instant' | 'Scheduled'>('Instant');
 
   useEffect(() => {
     if (currentWorkspace?.teamId) {
@@ -17,22 +21,28 @@ export default function TamadMeetDashboard() {
     }
   }, [currentWorkspace]);
 
-  const handleStartInstant = async () => {
+  const handleOpenModal = (type: 'Instant' | 'Scheduled') => {
+    setModalType(type);
+    setIsModalOpen(true);
+  };
+
+  const handleMeetingSubmit = async (payload: any) => {
     if (!currentWorkspace?.teamId) return;
     setIsCreating(true);
     try {
       const meeting = await createMeeting({
-        title: 'Instant Meet',
+        ...payload,
         teamId: currentWorkspace.teamId,
         workspaceId: currentWorkspace._id,
-        startTime: new Date().toISOString(),
-        meetingType: 'Instant',
-        duration: 30
       });
-      // Assuming meeting backend logic returns a roomId immediately (or wait for it)
-      // Actually we just get meeting, we need room details. Let's just say for MVP, we navigate to waiting room or load room.
-      toast.success('Meeting created!');
+      
+      toast.success(payload.meetingType === 'Instant' ? 'Meeting started!' : 'Meeting scheduled!');
+      setIsModalOpen(false);
       fetchMeetings(currentWorkspace.teamId);
+      
+      if (payload.meetingType === 'Instant') {
+        navigate(`/team/tamad-meet/room/${meeting._id}`);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -48,10 +58,10 @@ export default function TamadMeetDashboard() {
           <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>Enterprise WebRTC Communications</p>
         </div>
         <div className="flex gap-3">
-          <button onClick={handleStartInstant} disabled={isCreating} className="btn btn-primary flex items-center gap-2">
-            <Video size={16} /> {isCreating ? 'Starting...' : 'Instant Meet'}
+          <button onClick={() => handleOpenModal('Instant')} disabled={isCreating} className="btn btn-primary flex items-center gap-2">
+            <Video size={16} /> Instant Meet
           </button>
-          <button className="btn btn-secondary flex items-center gap-2">
+          <button onClick={() => handleOpenModal('Scheduled')} className="btn btn-secondary flex items-center gap-2">
             <Plus size={16} /> Schedule
           </button>
         </div>
@@ -80,6 +90,15 @@ export default function TamadMeetDashboard() {
           </div>
         )}
       </div>
+      
+      <MeetingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        type={modalType}
+        onSubmit={handleMeetingSubmit}
+        isCreating={isCreating}
+        teamId={currentWorkspace?.teamId || ''}
+      />
     </div>
   );
 }

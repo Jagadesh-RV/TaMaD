@@ -16,7 +16,8 @@ export const createEngineMeeting = async (payload: any, hostId: mongoose.Types.O
     meetingType: payload.meetingType,
     createdBy: hostId,
     updatedBy: hostId,
-    status: 'scheduled'
+    status: 'scheduled',
+    participants: payload.participants || []
   });
 
   const roomId = `tm-${crypto.randomBytes(6).toString('hex')}`;
@@ -36,6 +37,18 @@ export const createEngineMeeting = async (payload: any, hostId: mongoose.Types.O
     role: 'host',
     status: 'accepted'
   });
+
+  if (payload.participants && Array.isArray(payload.participants)) {
+    const participantDocs = payload.participants.map((userId: string) => ({
+      meetingId: meeting._id,
+      userId: new mongoose.Types.ObjectId(userId),
+      role: 'member',
+      status: 'pending' // pending until they join or accept
+    }));
+    if (participantDocs.length > 0) {
+      await TamadMeetParticipant.insertMany(participantDocs);
+    }
+  }
 
   return meeting;
 };

@@ -6,6 +6,7 @@ export interface ITamadMeetMeeting extends Document {
   teamId: mongoose.Types.ObjectId;
   workspaceId: mongoose.Types.ObjectId;
   hostId: mongoose.Types.ObjectId;
+  participants: mongoose.Types.ObjectId[];
   status: 'scheduled' | 'active' | 'ended' | 'cancelled';
   startTime: Date;
   endTime?: Date;
@@ -22,6 +23,7 @@ const TamadMeetMeetingSchema = new Schema({
   teamId: { type: Schema.Types.ObjectId, ref: 'Team', required: true },
   workspaceId: { type: Schema.Types.ObjectId, ref: 'Workspace', required: true },
   hostId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  participants: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   status: { type: String, enum: ['scheduled', 'active', 'ended', 'cancelled'], default: 'scheduled' },
   startTime: { type: Date, required: true },
   endTime: { type: Date },
