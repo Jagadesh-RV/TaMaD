@@ -1,6 +1,7 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import { handleMeetingSockets } from './meetingSocket';
 
 let io: Server;
 
@@ -38,6 +39,8 @@ export const initSocket = (server: HttpServer) => {
   io.on('connection', (socket: Socket) => {
     const userId = (socket as any).user.id;
     console.log(`User connected: ${userId}`);
+
+    handleMeetingSockets(io, socket);
 
     socket.join(`user_${userId}`);
 
