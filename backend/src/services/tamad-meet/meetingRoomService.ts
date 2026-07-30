@@ -6,8 +6,12 @@ export const getRoomByMeetingId = async (meetingId: mongoose.Types.ObjectId) => 
   return await TamadMeetRoom.findOne({ meetingId });
 };
 
-export const verifyRoomAccess = async (roomId: string, userId: mongoose.Types.ObjectId) => {
-  const room = await TamadMeetRoom.findOne({ roomId });
+export const verifyRoomAccess = async (meetingIdOrRoomId: string, userId: mongoose.Types.ObjectId) => {
+  const query = mongoose.Types.ObjectId.isValid(meetingIdOrRoomId) 
+    ? { meetingId: meetingIdOrRoomId } 
+    : { roomId: meetingIdOrRoomId };
+
+  const room = await TamadMeetRoom.findOne(query);
   if (!room) {
     throw new Error('Room not found');
   }
