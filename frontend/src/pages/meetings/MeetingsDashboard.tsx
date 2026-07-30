@@ -40,20 +40,20 @@ const MeetingsDashboard: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="p-6">Loading meetings...</div>;
+  if (loading) return <div className="p-6" style={{ color: 'var(--color-muted)' }}>Loading meetings...</div>;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-6 max-w-7xl mx-auto page">
+      <div className="page-header flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Meetings</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
+          <h1 className="page-title">Meetings</h1>
+          <p className="page-subtitle">
             Manage team meetings, recordings, and insights for {currentTeam?.name}
           </p>
         </div>
         <button
           onClick={() => setShowScheduler(true)}
-          className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          className="btn btn-primary"
         >
           Schedule Meeting
         </button>
@@ -61,78 +61,78 @@ const MeetingsDashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {meetings.map((meeting) => (
-          <div key={meeting._id} className="bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-800 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4 relative">
-              <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{meeting.title}</h3>
+          <div key={meeting._id} className="card p-5 flex flex-col h-full">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="font-semibold text-lg" style={{ color: 'var(--color-foreground)' }}>{meeting.title}</h3>
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  meeting.status === 'active' ? 'bg-green-100 text-green-800' :
-                  meeting.status === 'ended' ? 'bg-gray-100 text-gray-800' :
-                  meeting.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                  'bg-blue-100 text-blue-800'
+                <span className={`badge ${
+                  meeting.status === 'active' ? 'badge-success' :
+                  meeting.status === 'ended' ? 'badge-neutral' :
+                  meeting.status === 'cancelled' ? 'badge-danger' :
+                  'badge-info'
                 }`}>
                   {meeting.status}
                 </span>
-                <button
-                  onClick={() => setActiveDropdown(activeDropdown === meeting._id ? null : meeting._id)}
-                  className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
-                >
-                  <MoreVertical size={16} />
-                </button>
-                {activeDropdown === meeting._id && (
-                  <div className="absolute top-8 right-0 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-10 py-1">
-                    <button onClick={() => { setEditingMeeting(meeting); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                      <Edit2 size={14} /> Edit
-                    </button>
-                    <button onClick={() => { setInvitingToMeeting(meeting); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                      <UserPlus size={14} /> Invite Members
-                    </button>
-                    <button onClick={() => { duplicateMeeting(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                      <Copy size={14} /> Duplicate
-                    </button>
-                    {meeting.status !== 'cancelled' && (
-                      <button onClick={() => { cancelMeeting(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                        <XCircle size={14} /> Cancel
-                      </button>
-                    )}
-                    <button onClick={() => { handleDelete(meeting._id); setActiveDropdown(null); }} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                      <Trash2 size={14} /> Delete
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
             
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+            <p className="text-sm mb-4 line-clamp-2" style={{ color: 'var(--color-muted)' }}>
               {meeting.description || 'No description provided'}
             </p>
 
-            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-6">
+            <div className="flex items-center text-sm mb-6" style={{ color: 'var(--color-muted)' }}>
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               {format(new Date(meeting.startTime), 'MMM d, yyyy h:mm a')}
             </div>
 
-            {meeting.status !== 'ended' && meeting.status !== 'cancelled' && (
-              <button
-                onClick={() => handleJoin(meeting._id)}
-                className="w-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/50 py-2 rounded-lg font-medium transition-colors"
-              >
-                Join Meeting
-              </button>
-            )}
-            
-            {meeting.status === 'ended' && meeting.aiSummary && (
-              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">AI Summary</h4>
-                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">{meeting.aiSummary}</p>
+            <div className="mt-auto">
+              <div className="flex flex-wrap gap-2 mb-4 pt-4 border-t" style={{ borderColor: 'var(--color-border-light)' }}>
+                <button onClick={() => setEditingMeeting(meeting)} className="btn btn-secondary flex-1 px-2 py-1.5 text-xs">
+                  <Edit2 size={12} /> Edit
+                </button>
+                <button onClick={() => setInvitingToMeeting(meeting)} className="btn btn-secondary flex-1 px-2 py-1.5 text-xs">
+                  <UserPlus size={12} /> Invite
+                </button>
+                <button onClick={() => duplicateMeeting(meeting._id)} className="btn btn-secondary flex-1 px-2 py-1.5 text-xs">
+                  <Copy size={12} /> Copy
+                </button>
+                {meeting.status !== 'cancelled' && meeting.status !== 'ended' && (
+                  <button onClick={() => cancelMeeting(meeting._id)} className="btn flex-1 px-2 py-1.5 text-xs" style={{ background: 'var(--color-warning-light)', color: 'var(--color-warning)' }}>
+                    <XCircle size={12} /> Cancel
+                  </button>
+                )}
+                <button onClick={() => handleDelete(meeting._id)} className="btn flex-1 px-2 py-1.5 text-xs" style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)' }}>
+                  <Trash2 size={12} /> Delete
+                </button>
               </div>
-            )}
+
+              {meeting.status !== 'ended' && meeting.status !== 'cancelled' && (
+                <button
+                  onClick={() => handleJoin(meeting._id)}
+                  className="btn w-full justify-center"
+                  style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}
+                >
+                  Join Meeting
+                </button>
+              )}
+              
+              {meeting.status === 'ended' && meeting.aiSummary && (
+                <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--color-border-light)' }}>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--color-muted)' }}>AI Summary</h4>
+                  <p className="text-sm line-clamp-3" style={{ color: 'var(--color-foreground)' }}>{meeting.aiSummary}</p>
+                </div>
+              )}
+            </div>
           </div>
         ))}
         
         {meetings.length === 0 && (
-          <div className="col-span-full py-12 text-center bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-            <p className="text-gray-500 dark:text-gray-400">No meetings found. Schedule one to get started.</p>
+          <div className="col-span-full empty-state border border-dashed rounded-xl" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="empty-state-icon">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </div>
+            <h3 className="empty-state-title">No meetings found</h3>
+            <p className="empty-state-description">Schedule your first team meeting to collaborate and take live notes.</p>
           </div>
         )}
       </div>
