@@ -35,7 +35,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     {
       label: 'MAIN',
       links: [
-        { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { label: 'Tasks', path: '/tasks', icon: CheckSquare },
         { label: 'Calendar', path: '/calendar', icon: CalendarDays },
         { label: 'Projects', path: '/projects', icon: FolderKanban },
