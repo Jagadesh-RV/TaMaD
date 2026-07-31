@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Eye, EyeOff, Loader2, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, ShieldCheck } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { resetFirebasePassword } from '../../services/firebase';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { AuthHeading, PasswordField, SubmitButton } from '../../components/auth/AuthFields';
 
 const schema = z
   .object({
@@ -21,7 +23,6 @@ type Values = z.infer<typeof schema>;
 export default function ResetPasswordPage() {
   const [params] = useSearchParams();
   const [complete, setComplete] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
@@ -41,83 +42,60 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-100 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-sm">
-            <Lock className="text-blue-600" size={32} />
+    <AuthLayout>
+      <AuthHeading title="Set a new password" subtitle="Choose a strong password to secure your account." />
+
+      {complete ? (
+        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.06] p-8 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+            <ShieldCheck size={30} />
           </div>
-          <h1 className="auth-card-title">Reset Password</h1>
-          <p className="auth-card-subtitle">Choose a new, strong password for your account.</p>
-        </div>
-
-        {complete ? (
-          <div className="auth-confirmation">
-            <p>Your password has been updated.</p>
-            <Link to="/login" className="auth-text-button">
-              Sign in
-            </Link>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                New Password
-              </label>
-              <div className="relative">
-                <input
-                  {...register('password')}
-                  type={showPassword ? 'text' : 'password'}
-                  className="input-field pr-12"
-                  autoComplete="new-password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-3 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-500 font-medium">{errors.password.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                Confirm Password
-              </label>
-              <input
-                {...register('confirmPassword')}
-                type={showPassword ? 'text' : 'password'}
-                className="input-field"
-                autoComplete="new-password"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-500 font-medium">{errors.confirmPassword.message}</p>
-              )}
-            </div>
-
-            <button
-              disabled={isSubmitting}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : null}
-              {isSubmitting ? 'Updating...' : 'Update Password'}
-            </button>
-          </form>
-        )}
-
-        <div className="mt-8 text-center">
+          <h2 className="text-lg font-extrabold text-navy-950 dark:text-white">Password updated</h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            Your password has been reset. Sign in with your new credentials.
+          </p>
           <Link
             to="/login"
-            className="inline-flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+            className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-brand-600 px-6 text-sm font-bold text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] transition-all hover:-translate-y-0.5 hover:bg-brand-500"
           >
-            Back to Login
+            Sign in
           </Link>
         </div>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="relative">
+            <Lock size={18} className="pointer-events-none absolute left-4 top-[38px] -translate-y-1/2 text-slate-400" />
+            <PasswordField
+              id="password"
+              label="New Password"
+              placeholder="••••••••"
+              autoComplete="new-password"
+              className="pl-11"
+              error={errors.password?.message}
+              {...register('password')}
+            />
+          </div>
+          <PasswordField
+            id="confirmPassword"
+            label="Confirm Password"
+            placeholder="Re-enter your new password"
+            autoComplete="new-password"
+            error={errors.confirmPassword?.message}
+            {...register('confirmPassword')}
+          />
+          <SubmitButton loading={isSubmitting}>{isSubmitting ? 'Updating...' : 'Update password'}</SubmitButton>
+        </form>
+      )}
+
+      <div className="mt-8 text-center">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-navy-900 dark:text-slate-400 dark:hover:text-white"
+        >
+          <ArrowLeft size={16} />
+          Back to login
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

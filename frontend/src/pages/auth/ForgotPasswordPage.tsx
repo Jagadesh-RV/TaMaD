@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ArrowLeft, Loader2, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, MailCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { sendResetEmail } from '../../services/firebase';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { AuthHeading, TextField, SubmitButton } from '../../components/auth/AuthFields';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -35,69 +37,54 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-100 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-sm">
-            <Mail className="text-blue-600" size={32} />
+    <AuthLayout>
+      <AuthHeading title="Forgot your password?" subtitle="No problem — we'll send you a secure reset link." />
+
+      {isSent ? (
+        <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/[0.06] p-8 text-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+            <MailCheck size={30} />
           </div>
-          <h1 className="auth-card-title">Forgot Password</h1>
-          <p className="auth-card-subtitle">
-            Enter your email and we'll send a secure reset link.
+          <h2 className="text-lg font-extrabold text-navy-950 dark:text-white">Check your inbox</h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            We've sent a password reset link. If it doesn't arrive within a few minutes, check your spam folder.
           </p>
-        </div>
-
-        {isSent ? (
-          <div className="auth-confirmation">
-            <p className="text-sm leading-relaxed">
-              Check your inbox and spam folder for your password reset link.
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsSent(false)}
-              className="auth-text-button"
-            >
-              Try a different email
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
-                Email
-              </label>
-              <input
-                {...register('email')}
-                type="email"
-                className="input-field"
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-500 font-medium">{errors.email.message}</p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary flex items-center justify-center gap-2"
-            >
-              {isLoading ? <Loader2 className="animate-spin" size={20} /> : null}
-              {isLoading ? 'Sending...' : 'Send Reset Link'}
-            </button>
-          </form>
-        )}
-
-        <div className="mt-8 text-center">
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-1 font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+          <button
+            type="button"
+            onClick={() => setIsSent(false)}
+            className="mt-6 text-sm font-bold text-brand-600 transition-colors hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200"
           >
-            <ArrowLeft size={16} />
-            Back to Login
-          </Link>
+            Try a different email
+          </button>
         </div>
+      ) : (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="relative">
+            <Mail size={18} className="pointer-events-none absolute left-4 top-[38px] -translate-y-1/2 text-slate-400" />
+            <TextField
+              id="email"
+              label="Email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              className="pl-11"
+              error={errors.email?.message}
+              {...register('email')}
+            />
+          </div>
+          <SubmitButton loading={isLoading}>{isLoading ? 'Sending...' : 'Send reset link'}</SubmitButton>
+        </form>
+      )}
+
+      <div className="mt-8 text-center">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-navy-900 dark:text-slate-400 dark:hover:text-white"
+        >
+          <ArrowLeft size={16} />
+          Back to login
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 }
