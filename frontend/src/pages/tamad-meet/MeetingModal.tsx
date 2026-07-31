@@ -58,7 +58,7 @@ export default function MeetingModal({ isOpen, onClose, type, onSubmit, isCreati
   };
 
   // Filter out current user from members to invite
-  const inviteableMembers = members.filter(m => m.userId._id !== currentUser?._id);
+  const inviteableMembers = members.filter(m => m.userId._id !== currentUser?.id);
 
   return (
     <div className="modal-overlay">
