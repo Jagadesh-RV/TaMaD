@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Logo } from './Logo';
 import { useLandingTheme } from './theme';
 import { Button } from './Button';
+import { scrollToSection } from './scrollTo';
 import { useAuthStore } from '../../store/authStore';
 
 interface NavItem {
@@ -21,11 +22,6 @@ const navItems: NavItem[] = [
   { label: 'Pricing', id: 'pricing' },
   { label: 'About', id: 'about' },
 ];
-
-function scrollToSection(id: string) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
 export function PublicNavbar() {
   const navigate = useNavigate();

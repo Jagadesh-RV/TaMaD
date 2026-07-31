@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
@@ -25,7 +25,7 @@ interface ButtonAsButton extends BaseProps, Omit<ButtonHTMLAttributes<HTMLButton
   href?: undefined;
 }
 
-interface ButtonAsLink extends BaseProps {
+interface ButtonAsLink extends BaseProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'className' | 'children'> {
   to: string;
 }
 
