@@ -5,6 +5,8 @@ import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TasksPage } from '../pages/tasks/TasksPage';
 import { ProjectsPage } from '../pages/projects/ProjectsPage';
+import { AgileBoardPage } from '../pages/agile/AgileBoardPage';
+import { TeamsPage } from '../pages/teams/TeamsPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -13,6 +15,8 @@ type MyFixtures = {
   settingsPage: SettingsPage;
   tasksPage: TasksPage;
   projectsPage: ProjectsPage;
+  agilePage: AgileBoardPage;
+  teamsPage: TeamsPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -33,6 +37,12 @@ export const test = base.extend<MyFixtures>({
   },
   projectsPage: async ({ page }, use) => {
     await use(new ProjectsPage(page));
+  },
+  agilePage: async ({ page }, use) => {
+    await use(new AgileBoardPage(page));
+  },
+  teamsPage: async ({ page }, use) => {
+    await use(new TeamsPage(page));
   },
 });
 
