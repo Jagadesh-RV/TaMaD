@@ -14,7 +14,7 @@ import { useAuthStore } from '../../store/authStore';
 import api from '../../utils/api';
 
 const pageActions = [
-  { label: 'Dashboard', href: '/', icon: LayoutDashboard, category: 'Pages' },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, category: 'Pages' },
   { label: 'Tasks', href: '/tasks', icon: CheckSquare, category: 'Pages' },
   { label: 'Calendar', href: '/calendar', icon: CalendarDays, category: 'Pages' },
   { label: 'Projects', href: '/projects', icon: FolderKanban, category: 'Pages' },

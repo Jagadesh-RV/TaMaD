@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Loader2, Mail, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, CheckCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getClientAuth, resendVerificationEmail } from '../../services/firebase';
 import { useAuthStore } from '../../store/authStore';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { AuthHeading } from '../../components/auth/AuthFields';
 
 const AUTO_CHECK_INTERVAL = 10;
 
@@ -25,7 +27,7 @@ export default function VerifyEmailPage() {
         return;
       }
       toast.success('Email verified!');
-      navigate('/');
+      navigate('/onboarding');
     } catch (error: any) {
       toast.error(error.message || 'Unable to check verification status.');
     } finally {
@@ -62,54 +64,46 @@ export default function VerifyEmailPage() {
   }, [checkVerification]);
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-100 rounded-2xl mx-auto flex items-center justify-center mb-6 shadow-sm">
-            <Mail className="text-blue-600" size={32} />
-          </div>
-          <h1 className="auth-card-title">Verify your email</h1>
-          <p className="auth-card-subtitle">
-            We sent a verification link to your inbox. Click it, then come back and press the button below.
-          </p>
-        </div>
+    <AuthLayout>
+      <AuthHeading title="Verify your email" subtitle="One last step before you can organize your universe." />
 
-        <div className="space-y-4">
+      <div className="rounded-3xl border border-brand-500/20 bg-brand-500/[0.05] p-8 text-center">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-[0_10px_30px_rgba(37,99,235,0.35)]">
+          <Mail size={30} />
+        </div>
+        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          We sent a verification link to your inbox. Click it, then come back — we'll check automatically every{' '}
+          <strong className="font-bold text-navy-950 dark:text-white">{countdown}s</strong>.
+        </p>
+
+        <div className="mt-6 space-y-3">
           <button
             type="button"
             onClick={checkVerification}
             disabled={isChecking}
-            className="btn-primary flex items-center justify-center gap-2"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-bold text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isChecking ? (
-              <Loader2 className="animate-spin" size={20} />
-            ) : (
-              <CheckCircle size={20} />
-            )}
+            {isChecking ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
             {isChecking ? 'Checking...' : "I've verified my email"}
           </button>
-
-          <div className="text-center text-xs" style={{ color: 'var(--color-muted)' }}>
-            Auto-checking in {countdown}s
-          </div>
 
           <button
             type="button"
             onClick={resend}
             disabled={isSending}
-            className="auth-text-button flex items-center justify-center gap-2"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-brand-600 transition-colors hover:bg-brand-500/[0.06] disabled:cursor-not-allowed disabled:opacity-60 dark:text-brand-300"
           >
-            {isSending ? <Loader2 className="animate-spin" size={16} /> : null}
+            {isSending ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
             {isSending ? 'Sending...' : 'Resend verification email'}
           </button>
         </div>
-
-        <div className="mt-8 text-center">
-          <Link to="/login" className="font-semibold text-gray-600 hover:text-gray-900 transition-colors">
-            Back to Login
-          </Link>
-        </div>
       </div>
-    </div>
+
+      <div className="mt-8 text-center">
+        <Link to="/login" className="text-sm font-semibold text-slate-500 transition-colors hover:text-navy-900 dark:text-slate-400 dark:hover:text-white">
+          Back to login
+        </Link>
+      </div>
+    </AuthLayout>
   );
 }

@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ArrowRight, Phone, Check } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { signInWithEmail, signInWithGoogle } from '../../services/firebase';
 import { useAuthStore } from '../../store/authStore';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { AuthHeading, TextField, PasswordField, GoogleButton, AuthDivider, SubmitButton } from '../../components/auth/AuthFields';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -19,13 +21,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const navigate = useNavigate();
   const completeFirebaseSignIn = useAuthStore((state) => state.completeFirebaseSignIn);
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
-    formState: { errors },
     getValues,
+    formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema as any) as any,
     defaultValues: { rememberMe: true },
@@ -34,7 +35,7 @@ export default function LoginPage() {
   const finishSignIn = async (rememberMe: boolean) => {
     const user = await completeFirebaseSignIn(rememberMe);
     toast.success('Welcome back!');
-    navigate(user.authProvider === 'email' && !user.emailVerified ? '/verify-email' : '/');
+    navigate(user.authProvider === 'email' && !user.emailVerified ? '/verify-email' : '/dashboard');
   };
 
   const onSubmit = async ({ email, password, rememberMe }: LoginFormValues) => {
@@ -76,105 +77,71 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 mx-auto mb-8">
-            <img src="/tamadmainlogo.png" alt="TaMaD Logo" className="w-full h-full object-contain" />
-          </div>
-          <h1 className="auth-card-title">Welcome Back</h1>
-          <p className="auth-card-subtitle">Sign in to organize your universe</p>
-        </div>
+    <AuthLayout>
+      <AuthHeading title="Welcome back" subtitle="Sign in to organize your universe." />
 
-        <button
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={isLoading}
-          className="btn-secondary auth-provider-button"
-        >
-          <span className="auth-google-mark">G</span> Continue with Google
-        </button>
+      <GoogleButton onClick={() => void handleGoogleSignIn()} disabled={isLoading} />
 
-        <Link to="/phone-login" className="auth-phone-link">
-          Use your phone number instead
-        </Link>
+      <Link
+        to="/phone-login"
+        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-navy-900/[0.04] hover:text-navy-900 dark:text-slate-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+      >
+        <Phone size={16} /> Use your phone number instead
+      </Link>
 
-        <div className="auth-divider"><span>or continue with email</span></div>
+      <AuthDivider />
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Email</label>
-            <input
-              {...register('email')}
-              type="email"
-              className="input-field"
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
-            {errors.email && <p className="mt-1 text-sm text-red-500 font-medium">{errors.email.message}</p>}
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <TextField
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={errors.email?.message}
+          {...register('email')}
+        />
 
-          <div>
-            <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Password</label>
-            <div className="relative">
+        <div>
+          <PasswordField
+            id="password"
+            label="Password"
+            placeholder="••••••••"
+            autoComplete="current-password"
+            error={errors.password?.message}
+            {...register('password')}
+          />
+          <div className="mt-3 flex items-center justify-between">
+            <label className="inline-flex cursor-pointer select-none items-center gap-2 text-[13px] font-medium text-slate-600 dark:text-slate-300">
               <input
-                {...register('password')}
-                type={showPassword ? 'text' : 'password'}
-                className="input-field pr-12"
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3 text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
-              </button>
-            </div>
-            {errors.password && <p className="mt-1 text-sm text-red-500 font-medium">{errors.password.message}</p>}
-          </div>
-
-          <div className="flex items-center justify-between pt-2">
-            <label className="flex items-center text-sm text-gray-600 cursor-pointer hover:text-gray-900 transition-colors">
-              <input
-                {...register('rememberMe')}
                 type="checkbox"
-                className="w-4 h-4 rounded border-gray-300 bg-white text-primary focus:ring-primary focus:ring-offset-background mr-3 cursor-pointer"
+                className="h-4 w-4 rounded border-navy-900/15 accent-brand-600"
+                {...register('rememberMe')}
               />
               Remember me
             </label>
-            <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary-hover transition-colors">
+            <Link to="/forgot-password" className="text-[13px] font-semibold text-brand-600 transition-colors hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200">
               Forgot password?
             </Link>
           </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="btn-primary mt-4 flex items-center justify-center gap-2 group"
-          >
-            {isLoading ? (
-              <Loader2 className="animate-spin" size={24} />
-            ) : (
-              <>
-                Sign In to TaMaD
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="mt-10 text-center border-t border-border pt-8">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-bold text-primary hover:text-primary-hover transition-colors ml-1">
-              Create an account
-            </Link>
-          </p>
         </div>
+
+        <SubmitButton loading={isLoading}>
+          Sign in to TaMaD
+          <ArrowRight size={18} />
+        </SubmitButton>
+      </form>
+
+      <div className="mt-8 flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        Don't have an account?
+        <Link to="/register" className="font-bold text-brand-600 transition-colors hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200">
+          Create one free
+        </Link>
       </div>
-    </div>
+
+      <p className="mt-6 flex items-center justify-center gap-1.5 text-center text-[11.5px] text-slate-400 dark:text-slate-500">
+        <Check size={12} /> Free forever plan · No credit card required
+      </p>
+    </AuthLayout>
   );
 }

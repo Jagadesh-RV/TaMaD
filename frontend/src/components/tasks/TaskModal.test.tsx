@@ -6,7 +6,7 @@ import TaskModal from './TaskModal';
 // OR we can test the actual modal if we mock ResizeObserver
 beforeEach(() => {
   // Mock ResizeObserver
-  global.ResizeObserver = class ResizeObserver {
+  globalThis.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --color-background: #f8fafc;
   --color-background-secondary: #f1f5f9;
@@ -72,11 +74,28 @@
 @theme {
   --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   --font-mono: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  --font-serif: "Instrument Serif", Georgia, serif;
   --color-background: var(--color-background);
   --color-surface: var(--color-surface);
   --color-border: var(--color-border);
   --color-primary: var(--color-accent);
   --color-secondary: var(--color-muted);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-navy-950: #050b1a;
+  --color-navy-900: #0a0f1e;
+  --color-navy-850: #0d1428;
+  --color-navy-800: #111a33;
   --animate-fade-in: fadeIn 0.3s ease-out forwards;
   --animate-slide-up: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-slide-down: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -109,6 +128,23 @@
   @keyframes pulse-ring {
     0% { transform: scale(0.8); opacity: 1; }
     100% { transform: scale(2); opacity: 0; }
+  }
+  @keyframes btn-ripple {
+    from { transform: scale(0); opacity: 0.6; }
+    to { transform: scale(1); opacity: 0; }
+  }
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes aurora-shift {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(6%, -4%) scale(1.08); }
+    66% { transform: translate(-4%, 5%) scale(0.95); }
+  }
+  @keyframes shimmer-x {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
   * { @apply box-border; }
@@ -564,6 +600,34 @@
   .input-field:focus {
     border-color: var(--color-accent);
     box-shadow: var(--shadow-glow);
+  }
+}
+
+html.landing-scroll,
+html.landing-scroll body {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+html.landing-scroll body {
+  min-height: 100vh;
+}
+
+/* Focus visibility for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
