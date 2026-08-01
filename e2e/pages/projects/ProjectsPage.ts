@@ -13,14 +13,13 @@ export class ProjectsPage extends BasePage {
 
   constructor(page: Page) {
     super(page, '/projects');
-    // Accounts for both the header button and the empty state button
     this.newProjectBtn = page.getByRole('button', { name: /New Project|Create Project/i }).first();
     
     // Modal
-    this.projectNameInput = page.getByLabel('Project Name', { exact: true });
-    this.startDateInput = page.getByLabel('Start Date', { exact: true });
-    this.endDateInput = page.getByLabel('End Date', { exact: true });
-    this.descriptionInput = page.getByLabel('Description', { exact: true });
+    this.projectNameInput = page.getByPlaceholder('e.g., Q3 Marketing Site Redesign');
+    this.startDateInput = page.locator('input[type="date"]').nth(0);
+    this.endDateInput = page.locator('input[type="date"]').nth(1);
+    this.descriptionInput = page.getByPlaceholder('Add details about this project...');
     this.saveProjectBtn = page.getByRole('button', { name: 'Save Project' });
   }
 
@@ -28,9 +27,20 @@ export class ProjectsPage extends BasePage {
     await this.newProjectBtn.click();
   }
 
-  async fillProjectDetails(name: string, startDate: string, endDate: string, description?: string) {
-    // Fill the inputs using text locators matching the labels, wait let's use the explicit locators we defined
-    // Playwright `getByLabel` works if the label is associated properly. In ProjectModal.tsx, the labels do NOT have `htmlFor`. 
-    // They just have text. So we should use text locators instead. Let's fix that.
+  async createProject(name: string, startDate: string, endDate: string, description?: string) {
+    await this.clickNewProject();
+    await this.projectNameInput.waitFor({ state: 'visible' });
+    await this.projectNameInput.fill(name);
+    await this.startDateInput.fill(startDate);
+    await this.endDateInput.fill(endDate);
+    if (description) {
+      await this.descriptionInput.fill(description);
+    }
+    await this.saveProjectBtn.click();
+  }
+
+  getProjectCard(name: string): Locator {
+    // Looks for a heading with the project name within the projects grid
+    return this.page.locator('h3', { hasText: name });
   }
 }
