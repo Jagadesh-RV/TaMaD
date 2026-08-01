@@ -3,41 +3,66 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TaMaD — One Workspace for Work, AI & Life</title>
 
   <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+    name="description"
+    content="TaMaD unifies personal productivity, team collaboration, AI assistance, automation, Agile project management, meetings, and knowledge management into a single premium workspace."
   />
+  <meta name="keywords" content="TaMaD, productivity, project management, team collaboration, AI assistant, automation, agile, kanban, meetings, knowledge base" />
+  <meta name="author" content="TaMaD" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0a0f1e" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
-  <title>TaMaD</title>
-  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="TaMaD" />
+  <meta property="og:title" content="TaMaD — One Workspace for Work, AI & Life" />
+  <meta property="og:description" content="Unify personal productivity, team collaboration, AI, automation, and Agile project management in one premium platform." />
+  <meta property="og:url" content="https://tamad.app/" />
+  <meta property="og:image" content="/tamadmainlogo.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TaMaD — One Workspace for Work, AI & Life" />
+  <meta name="twitter:description" content="Unify personal productivity, team collaboration, AI, automation, and Agile project management in one premium platform." />
+  <meta name="twitter:image" content="/tamadmainlogo.png" />
+
   <link rel="icon" type="image/png" href="/tamadmainlogo.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <link rel="canonical" href="https://tamad.app/" />
 
   <!-- Google Fonts -->
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
-
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    rel="preconnect"
-    href="https://fonts.gstatic.com"
-    crossorigin
-  >
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet"
   />
 
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TaMaD",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web",
+      "description": "One unified workspace combining personal productivity, team collaboration, AI, automation, and Agile project management.",
+      "url": "https://tamad.app/",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+    }
+  </script>
 </head>
 
 <body>
 
   <div id="root"></div>
 
-  <script
-    type="module"
-    src="/src/main.tsx"
-  ></script>
+  <script type="module" src="/src/main.tsx"></script>
 
 </body>
 

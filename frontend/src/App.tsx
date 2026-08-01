@@ -5,6 +5,8 @@ import { useAuthStore } from "./store/authStore";
 import AppLayout from "./components/layout/AppLayout";
 import { RealtimeProvider } from "./providers/RealtimeProvider";
 
+import LandingPage from "./pages/LandingPage";
+import OnboardingPage from "./pages/OnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
 import TasksPage from "./pages/TasksPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -70,13 +72,15 @@ export default function App() {
   return (
     <ErrorBoundary>
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to="/" replace /> : <RegisterPage />} />
-      <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />} />
+      <Route path="/forgot-password" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/verify-email" element={isAuthenticated ? <VerifyEmailPage /> : <Navigate to="/login" replace />} />
-      <Route path="/phone-login" element={isAuthenticated ? <Navigate to="/" replace /> : <PhoneLoginPage />} />
+      <Route path="/phone-login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <PhoneLoginPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/onboarding" element={<OnboardingPage />} />
 
       <Route
         element={
@@ -87,7 +91,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/projects" element={<ProjectsPage />} />
