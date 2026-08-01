@@ -16,6 +16,8 @@
     "emulators": "firebase emulators:start"
   },
   "devDependencies": {
-    "concurrently": "^10.0.3"
+    "@playwright/test": "^1.62.1",
+    "concurrently": "^10.0.3",
+    "dotenv": "^16.6.1"
   }
 }
