@@ -3,12 +3,16 @@ import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
+import { TasksPage } from '../pages/tasks/TasksPage';
+import { ProjectsPage } from '../pages/projects/ProjectsPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
   registerPage: RegisterPage;
   dashboardPage: DashboardPage;
   settingsPage: SettingsPage;
+  tasksPage: TasksPage;
+  projectsPage: ProjectsPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -23,6 +27,12 @@ export const test = base.extend<MyFixtures>({
   },
   settingsPage: async ({ page }, use) => {
     await use(new SettingsPage(page));
+  },
+  tasksPage: async ({ page }, use) => {
+    await use(new TasksPage(page));
+  },
+  projectsPage: async ({ page }, use) => {
+    await use(new ProjectsPage(page));
   },
 });
 
