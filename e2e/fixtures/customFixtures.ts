@@ -18,6 +18,8 @@ import { MeetingsPage } from '../pages/meetings/MeetingsPage';
 import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
 import { TemplatesPage } from '../pages/templates/TemplatesPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
+import { ProfilePage } from '../pages/profile/ProfilePage';
+import { RoadmapPage } from '../pages/roadmap/RoadmapPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -39,6 +41,8 @@ type MyFixtures = {
   aiAssistantPage: AIAssistantPage;
   templatesPage: TemplatesPage;
   notificationsPage: NotificationsPage;
+  profilePage: ProfilePage;
+  roadmapPage: RoadmapPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -98,6 +102,12 @@ export const test = base.extend<MyFixtures>({
   },
   notificationsPage: async ({ page }, use) => {
     await use(new NotificationsPage(page));
+  },
+  profilePage: async ({ page }, use) => {
+    await use(new ProfilePage(page));
+  },
+  roadmapPage: async ({ page }, use) => {
+    await use(new RoadmapPage(page));
   },
 });
 
