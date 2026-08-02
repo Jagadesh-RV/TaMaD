@@ -20,6 +20,9 @@ import { TemplatesPage } from '../pages/templates/TemplatesPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 import { ProfilePage } from '../pages/profile/ProfilePage';
 import { RoadmapPage } from '../pages/roadmap/RoadmapPage';
+import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
+import { ReportsPage } from '../pages/reports/ReportsPage';
+import { SprintPlanningPage } from '../pages/sprint-planning/SprintPlanningPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -43,6 +46,9 @@ type MyFixtures = {
   notificationsPage: NotificationsPage;
   profilePage: ProfilePage;
   roadmapPage: RoadmapPage;
+  analyticsPage: AnalyticsPage;
+  reportsPage: ReportsPage;
+  sprintPlanningPage: SprintPlanningPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -108,6 +114,15 @@ export const test = base.extend<MyFixtures>({
   },
   roadmapPage: async ({ page }, use) => {
     await use(new RoadmapPage(page));
+  },
+  analyticsPage: async ({ page }, use) => {
+    await use(new AnalyticsPage(page));
+  },
+  reportsPage: async ({ page }, use) => {
+    await use(new ReportsPage(page));
+  },
+  sprintPlanningPage: async ({ page }, use) => {
+    await use(new SprintPlanningPage(page));
   },
 });
 
