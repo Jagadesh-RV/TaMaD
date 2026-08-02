@@ -18,6 +18,19 @@ import { MeetingsPage } from '../pages/meetings/MeetingsPage';
 import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
 import { TemplatesPage } from '../pages/templates/TemplatesPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
+import { ProfilePage } from '../pages/profile/ProfilePage';
+import { RoadmapPage } from '../pages/roadmap/RoadmapPage';
+import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
+import { ReportsPage } from '../pages/reports/ReportsPage';
+import { SprintPlanningPage } from '../pages/sprint-planning/SprintPlanningPage';
+import { LandingPage } from '../pages/landing/LandingPage';
+import { ContactPage } from '../pages/contact/ContactPage';
+import { OnboardingPage } from '../pages/onboarding/OnboardingPage';
+import { NotFoundPage } from '../pages/not-found/NotFoundPage';
+import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
+import { VerifyEmailPage } from '../pages/auth/VerifyEmailPage';
+import { PhoneLoginPage } from '../pages/auth/PhoneLoginPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -39,6 +52,19 @@ type MyFixtures = {
   aiAssistantPage: AIAssistantPage;
   templatesPage: TemplatesPage;
   notificationsPage: NotificationsPage;
+  profilePage: ProfilePage;
+  roadmapPage: RoadmapPage;
+  analyticsPage: AnalyticsPage;
+  reportsPage: ReportsPage;
+  sprintPlanningPage: SprintPlanningPage;
+  landingPage: LandingPage;
+  contactPage: ContactPage;
+  onboardingPage: OnboardingPage;
+  notFoundPage: NotFoundPage;
+  forgotPasswordPage: ForgotPasswordPage;
+  resetPasswordPage: ResetPasswordPage;
+  verifyEmailPage: VerifyEmailPage;
+  phoneLoginPage: PhoneLoginPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -98,6 +124,45 @@ export const test = base.extend<MyFixtures>({
   },
   notificationsPage: async ({ page }, use) => {
     await use(new NotificationsPage(page));
+  },
+  profilePage: async ({ page }, use) => {
+    await use(new ProfilePage(page));
+  },
+  roadmapPage: async ({ page }, use) => {
+    await use(new RoadmapPage(page));
+  },
+  analyticsPage: async ({ page }, use) => {
+    await use(new AnalyticsPage(page));
+  },
+  reportsPage: async ({ page }, use) => {
+    await use(new ReportsPage(page));
+  },
+  sprintPlanningPage: async ({ page }, use) => {
+    await use(new SprintPlanningPage(page));
+  },
+  landingPage: async ({ page }, use) => {
+    await use(new LandingPage(page));
+  },
+  contactPage: async ({ page }, use) => {
+    await use(new ContactPage(page));
+  },
+  onboardingPage: async ({ page }, use) => {
+    await use(new OnboardingPage(page));
+  },
+  notFoundPage: async ({ page }, use) => {
+    await use(new NotFoundPage(page));
+  },
+  forgotPasswordPage: async ({ page }, use) => {
+    await use(new ForgotPasswordPage(page));
+  },
+  resetPasswordPage: async ({ page }, use) => {
+    await use(new ResetPasswordPage(page));
+  },
+  verifyEmailPage: async ({ page }, use) => {
+    await use(new VerifyEmailPage(page));
+  },
+  phoneLoginPage: async ({ page }, use) => {
+    await use(new PhoneLoginPage(page));
   },
 });
 
