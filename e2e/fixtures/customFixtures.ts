@@ -7,6 +7,17 @@ import { TasksPage } from '../pages/tasks/TasksPage';
 import { ProjectsPage } from '../pages/projects/ProjectsPage';
 import { AgileBoardPage } from '../pages/agile/AgileBoardPage';
 import { TeamsPage } from '../pages/teams/TeamsPage';
+import { NotesPage } from '../pages/notes/NotesPage';
+import { WhiteboardPage } from '../pages/whiteboard/WhiteboardPage';
+import { DocumentsPage } from '../pages/documents/DocumentsPage';
+import { FilesPage } from '../pages/files/FilesPage';
+import { CalendarPage } from '../pages/calendar/CalendarPage';
+import { PlannerPage } from '../pages/planner/PlannerPage';
+import { FocusPage } from '../pages/focus/FocusPage';
+import { MeetingsPage } from '../pages/meetings/MeetingsPage';
+import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
+import { TemplatesPage } from '../pages/templates/TemplatesPage';
+import { NotificationsPage } from '../pages/notifications/NotificationsPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -17,6 +28,17 @@ type MyFixtures = {
   projectsPage: ProjectsPage;
   agilePage: AgileBoardPage;
   teamsPage: TeamsPage;
+  notesPage: NotesPage;
+  whiteboardPage: WhiteboardPage;
+  documentsPage: DocumentsPage;
+  filesPage: FilesPage;
+  calendarPage: CalendarPage;
+  plannerPage: PlannerPage;
+  focusPage: FocusPage;
+  meetingsPage: MeetingsPage;
+  aiAssistantPage: AIAssistantPage;
+  templatesPage: TemplatesPage;
+  notificationsPage: NotificationsPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -43,6 +65,39 @@ export const test = base.extend<MyFixtures>({
   },
   teamsPage: async ({ page }, use) => {
     await use(new TeamsPage(page));
+  },
+  notesPage: async ({ page }, use) => {
+    await use(new NotesPage(page));
+  },
+  whiteboardPage: async ({ page }, use) => {
+    await use(new WhiteboardPage(page));
+  },
+  documentsPage: async ({ page }, use) => {
+    await use(new DocumentsPage(page));
+  },
+  filesPage: async ({ page }, use) => {
+    await use(new FilesPage(page));
+  },
+  calendarPage: async ({ page }, use) => {
+    await use(new CalendarPage(page));
+  },
+  plannerPage: async ({ page }, use) => {
+    await use(new PlannerPage(page));
+  },
+  focusPage: async ({ page }, use) => {
+    await use(new FocusPage(page));
+  },
+  meetingsPage: async ({ page }, use) => {
+    await use(new MeetingsPage(page));
+  },
+  aiAssistantPage: async ({ page }, use) => {
+    await use(new AIAssistantPage(page));
+  },
+  templatesPage: async ({ page }, use) => {
+    await use(new TemplatesPage(page));
+  },
+  notificationsPage: async ({ page }, use) => {
+    await use(new NotificationsPage(page));
   },
 });
 
