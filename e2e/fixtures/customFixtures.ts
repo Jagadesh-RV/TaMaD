@@ -14,6 +14,7 @@ import { FilesPage } from '../pages/files/FilesPage';
 import { CalendarPage } from '../pages/calendar/CalendarPage';
 import { PlannerPage } from '../pages/planner/PlannerPage';
 import { FocusPage } from '../pages/focus/FocusPage';
+import { MeetingsPage } from '../pages/meetings/MeetingsPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -31,6 +32,7 @@ type MyFixtures = {
   calendarPage: CalendarPage;
   plannerPage: PlannerPage;
   focusPage: FocusPage;
+  meetingsPage: MeetingsPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -78,6 +80,9 @@ export const test = base.extend<MyFixtures>({
   },
   focusPage: async ({ page }, use) => {
     await use(new FocusPage(page));
+  },
+  meetingsPage: async ({ page }, use) => {
+    await use(new MeetingsPage(page));
   },
 });
 
