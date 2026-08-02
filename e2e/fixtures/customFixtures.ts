@@ -23,6 +23,14 @@ import { RoadmapPage } from '../pages/roadmap/RoadmapPage';
 import { AnalyticsPage } from '../pages/analytics/AnalyticsPage';
 import { ReportsPage } from '../pages/reports/ReportsPage';
 import { SprintPlanningPage } from '../pages/sprint-planning/SprintPlanningPage';
+import { LandingPage } from '../pages/landing/LandingPage';
+import { ContactPage } from '../pages/contact/ContactPage';
+import { OnboardingPage } from '../pages/onboarding/OnboardingPage';
+import { NotFoundPage } from '../pages/not-found/NotFoundPage';
+import { ForgotPasswordPage } from '../pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '../pages/auth/ResetPasswordPage';
+import { VerifyEmailPage } from '../pages/auth/VerifyEmailPage';
+import { PhoneLoginPage } from '../pages/auth/PhoneLoginPage';
 
 type MyFixtures = {
   loginPage: LoginPage;
@@ -49,6 +57,14 @@ type MyFixtures = {
   analyticsPage: AnalyticsPage;
   reportsPage: ReportsPage;
   sprintPlanningPage: SprintPlanningPage;
+  landingPage: LandingPage;
+  contactPage: ContactPage;
+  onboardingPage: OnboardingPage;
+  notFoundPage: NotFoundPage;
+  forgotPasswordPage: ForgotPasswordPage;
+  resetPasswordPage: ResetPasswordPage;
+  verifyEmailPage: VerifyEmailPage;
+  phoneLoginPage: PhoneLoginPage;
 };
 
 export const test = base.extend<MyFixtures>({
@@ -123,6 +139,30 @@ export const test = base.extend<MyFixtures>({
   },
   sprintPlanningPage: async ({ page }, use) => {
     await use(new SprintPlanningPage(page));
+  },
+  landingPage: async ({ page }, use) => {
+    await use(new LandingPage(page));
+  },
+  contactPage: async ({ page }, use) => {
+    await use(new ContactPage(page));
+  },
+  onboardingPage: async ({ page }, use) => {
+    await use(new OnboardingPage(page));
+  },
+  notFoundPage: async ({ page }, use) => {
+    await use(new NotFoundPage(page));
+  },
+  forgotPasswordPage: async ({ page }, use) => {
+    await use(new ForgotPasswordPage(page));
+  },
+  resetPasswordPage: async ({ page }, use) => {
+    await use(new ResetPasswordPage(page));
+  },
+  verifyEmailPage: async ({ page }, use) => {
+    await use(new VerifyEmailPage(page));
+  },
+  phoneLoginPage: async ({ page }, use) => {
+    await use(new PhoneLoginPage(page));
   },
 });
 
