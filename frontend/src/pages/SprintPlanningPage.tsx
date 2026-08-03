@@ -4,9 +4,8 @@ import { useTaskStore } from '../store/taskStore';
 import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
 import TaskModal from '../components/tasks/TaskModal';
-import { DndContext, closestCenter, pointerWithin, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { DndContext, pointerWithin, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import SprintModal from '../components/tasks/SprintModal';
-import { DndContext, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
@@ -60,31 +59,13 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
   );
 }
 
-function DroppableContainer({ id, children, emptyText }: { id: string, children: React.ReactNode, emptyText?: string }) {
-  const { setNodeRef, isOver } = useDroppable({ id });
-  
-  return (
-    <div 
-      ref={setNodeRef} 
-      id={id} 
-      className={`min-h-[100px] transition-colors rounded-lg ${isOver ? 'bg-[var(--color-surface-hover)] border-2 border-dashed border-[var(--color-accent)]' : ''}`}
-    >
-      {children}
-      {React.Children.count(children) === 0 && emptyText && (
-        <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
-          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>{emptyText}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export default function SprintPlanningPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { tasks, fetchTasks, loading: tasksLoading, updateTask, createTask } = useTaskStore();
   const { sprints, fetchSprints, startSprint, createSprint } = useAgileStore();
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
 
   const [activeDragTask, setActiveDragTask] = useState<any>(null);
 
@@ -127,8 +108,6 @@ export default function SprintPlanningPage() {
       newSprintId = overId === 'backlog' ? null : overId;
     }
 
-
-
     const task = tasks.find(t => t._id === taskId);
     if (!task) return;
 
@@ -148,22 +127,6 @@ export default function SprintPlanningPage() {
         tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: currentSprintId || undefined } : t)
       }));
       toast.error('Failed to move task');
-    }
-  };
-
-  const handleCreateTask = async (data: any) => {
-    if (!currentWorkspace) return;
-    try {
-      await useTaskStore.getState().createTask({
-        ...data,
-        workspaceId: currentWorkspace._id,
-        status: 'todo',
-        priority: 'medium',
-        order: tasks.length,
-      });
-      setIsTaskModalOpen(false);
-    } catch (e) {
-      // Error handled by store
     }
   };
 
@@ -311,6 +274,12 @@ export default function SprintPlanningPage() {
         onSave={async (data: any) => {
           await createTask({ ...data, workspaceId: currentWorkspace._id });
         }}
+      />
+
+      <SprintModal
+        isOpen={isSprintModalOpen}
+        onClose={() => setIsSprintModalOpen(false)}
+        onSave={handleCreateSprint}
       />
     </div>
   );

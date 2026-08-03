@@ -218,11 +218,12 @@ export default function IssueDetailModal({
                 <label className="text-xs font-semibold text-[color:var(--color-muted)] block mb-1 uppercase tracking-wider">Due Date</label>
                 <div className="relative">
                   <Calendar size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
-                  <Input 
-                    type="date" 
-                    value={formData.dueDate ? formData.dueDate.split('T')[0] : ''} 
-                    onChange={(e) => handleChange('dueDate', e.target.value ? new Date(e.target.value).toISOString() : '')} 
-                    className="pl-9 h-9 text-sm" 
+                  <input
+                    type="date"
+                    value={formData.dueDate ? formData.dueDate.split('T')[0] : ''}
+                    onChange={(e) => handleChange('dueDate', e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    className="w-full pl-9 h-9 text-sm rounded bg-[color:var(--color-background)] border outline-none"
+                    style={{ borderColor: 'var(--color-border)' }}
                   />
                 </div>
               </div>
