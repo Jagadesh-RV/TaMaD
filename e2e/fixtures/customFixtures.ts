@@ -2,6 +2,7 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { TeamDashboardPage } from '../pages/dashboard/TeamDashboardPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TasksPage } from '../pages/tasks/TasksPage';
 import { ProjectsPage } from '../pages/projects/ProjectsPage';
@@ -41,6 +42,7 @@ type MyFixtures = {
   loginPage: LoginPage;
   registerPage: RegisterPage;
   dashboardPage: DashboardPage;
+  teamDashboardPage: TeamDashboardPage;
   settingsPage: SettingsPage;
   tasksPage: TasksPage;
   projectsPage: ProjectsPage;
@@ -86,6 +88,9 @@ export const test = base.extend<MyFixtures>({
   },
   dashboardPage: async ({ page }, use) => {
     await use(new DashboardPage(page));
+  },
+  teamDashboardPage: async ({ page }, use) => {
+    await use(new TeamDashboardPage(page));
   },
   settingsPage: async ({ page }, use) => {
     await use(new SettingsPage(page));
