@@ -43,4 +43,75 @@ export class CalendarPage extends BasePage {
     // Finds a day cell that contains the given day number
     return this.page.locator('div[class*="flex flex-col p-2"]', { hasText: dateText }).first();
   }
+
+  getTodayCell(): Locator {
+    // Today's day cell has a day number rendered with white text on the accent color
+    return this.page.locator('div[class*="flex flex-col p-2"]', {
+      has: this.page.locator('div[style*="color: white"]'),
+    });
+  }
+
+  getTaskChip(title: string): Locator {
+    return this.page
+      .getByText(title, { exact: true })
+      .locator('xpath=ancestor::div[contains(@class, "cursor-grab")]');
+  }
+
+  getTaskInCell(title: string, cell: Locator): Locator {
+    return cell.getByText(title, { exact: true });
+  }
+
+  async dragTaskToToday(title: string) {
+    const chip = this.getTaskChip(title);
+    const target = this.getTodayCell();
+    const chipBox = await chip.boundingBox();
+    const targetBox = await target.boundingBox();
+    if (!chipBox || !targetBox) throw new Error(`Could not locate task '${title}' or today's cell`);
+
+    const startX = chipBox.x + chipBox.width / 2;
+    const startY = chipBox.y + chipBox.height / 2;
+    const endX = targetBox.x + targetBox.width / 2;
+    const endY = targetBox.y + targetBox.height / 2;
+
+    await this.page.mouse.move(startX, startY);
+    await this.page.mouse.down();
+    await this.page.mouse.move(startX + 10, startY + 10, { steps: 5 });
+    await this.page.mouse.move(endX, endY, { steps: 20 });
+    await this.page.mouse.up();
+  }
+
+  async mockCalendarApi(options: { tasks: Array<Record<string, unknown>> }) {
+    const { tasks } = options;
+    await this.page.route('**/api/projects*', (route) => {
+      return route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ projects: [] }),
+      });
+    });
+    await this.page.route('**/api/tasks*', (route) => {
+      const req = route.request();
+      const method = req.method();
+      const path = new URL(req.url()).pathname;
+      const id = path.split('/').filter(Boolean)[2] || '';
+
+      if (method === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ tasks }),
+        });
+      }
+      if (method === 'PUT') {
+        const body = (req.postDataJSON?.() || {}) as Record<string, unknown>;
+        const existing = tasks.find(t => t._id === id) || tasks[0];
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ ...existing, ...body }),
+        });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+  }
 }
