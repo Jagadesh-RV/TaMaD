@@ -1,6 +1,19 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../BasePage';
 
+export interface MockOrgMember {
+  userId: { _id: string; name: string; email: string };
+  role: string;
+}
+
+export interface MockOrganization {
+  _id: string;
+  name: string;
+  domain?: string;
+  members: MockOrgMember[];
+  billing?: { plan?: string; status?: string };
+}
+
 export class OrganizationDashboardPage extends BasePage {
   readonly loadingMessage: Locator;
   readonly orgName: Locator;
@@ -33,5 +46,19 @@ export class OrganizationDashboardPage extends BasePage {
   async navigateToOrg(id: string) {
     await this.page.goto(`/org/${id}`);
     await this.waitForLoad();
+  }
+
+  getMemberName(nameOrEmail: string): Locator {
+    return this.page.locator('p.text-sm', { hasText: nameOrEmail });
+  }
+
+  async mockOrganization(org: MockOrganization) {
+    await this.page.route('**/api/organizations', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([org]),
+      });
+    });
   }
 }
