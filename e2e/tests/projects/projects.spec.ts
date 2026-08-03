@@ -1,34 +1,74 @@
 import { test, expect } from '../../fixtures/customFixtures';
 
-test.describe('Projects Page', () => {
-  test.beforeEach(async ({ projectsPage }) => {
-    await projectsPage.navigate();
-  });
+const seededProjects = [
+  {
+    _id: 'pa',
+    name: 'Alpha Project',
+    description: 'First seeded project',
+    status: 'active',
+    color: '#6366f1',
+    dueDate: '2026-12-31',
+    members: ['alice@example.com', 'bob@example.com'],
+  },
+  {
+    _id: 'pb',
+    name: 'Beta Project',
+    description: 'Second seeded project',
+    status: 'on-hold',
+    color: '#f59e0b',
+    dueDate: '2026-10-15',
+    members: [],
+  },
+];
 
+const seededTasks = [
+  { _id: 't1', title: 'Alpha task one', status: 'done', priority: 'high', projectId: 'pa' },
+  { _id: 't2', title: 'Alpha task two', status: 'todo', priority: 'medium', projectId: 'pa' },
+  { _id: 't3', title: 'Beta task one', status: 'done', priority: 'low', projectId: 'pb' },
+];
+
+test.describe('Projects Page', () => {
   test('should create a new project', async ({ projectsPage }) => {
     const projectName = `E2E Project ${Date.now()}`;
     const startDate = '2027-01-01';
     const endDate = '2027-12-31';
 
+    await projectsPage.mockProjectsApi({ projects: [], tasks: [] });
+    await projectsPage.navigate();
     await projectsPage.createProject(projectName, startDate, endDate, 'This is a test project');
 
     // Wait for the modal to close and the project to appear
     await expect(projectsPage.getProjectCard(projectName)).toBeVisible();
   });
 
-  test('should expand project card and show details', async ({ projectsPage }) => {
-    const projectName = `Expandable Project ${Date.now()}`;
-    await projectsPage.createProject(projectName, '2027-01-01', '2027-12-31');
+  test('should render summary stats and progress from mocked data', async ({ projectsPage }) => {
+    await projectsPage.mockProjectsApi({ projects: seededProjects, tasks: seededTasks });
+    await projectsPage.navigate();
 
-    const projectCard = projectsPage.getProjectCard(projectName);
-    await expect(projectCard).toBeVisible();
+    await expect(projectsPage.getStatValue('Total Projects')).toHaveText('2');
+    await expect(projectsPage.getStatValue('Total Tasks')).toHaveText('3');
+    await expect(projectsPage.getStatValue('Avg Progress')).toHaveText('75%');
 
-    // The project card expands when you click on it. We'll click the heading's parent container.
-    // In ProjectsPage.tsx, it's `.cursor-pointer.p-5`
-    await projectCard.locator('xpath=ancestor::div[contains(@class, "cursor-pointer")]').first().click();
+    const alphaCard = projectsPage.getProjectCardContainer('Alpha Project');
+    await expect(alphaCard).toContainText('1 of 2 tasks');
+    await expect(alphaCard).toContainText('50%');
+    await expect(alphaCard.locator('.badge')).toContainText('active');
 
-    // We can't strictly assert team members if none exist, but we can assert the visual expansion happens
-    // The container changes border color, but checking the expanded DOM is tricky if it's empty.
-    // At minimum, we know it shouldn't crash and the click works.
+    const betaCard = projectsPage.getProjectCardContainer('Beta Project');
+    await expect(betaCard).toContainText('1 of 1 tasks');
+    await expect(betaCard).toContainText('100%');
+    await expect(betaCard.locator('.badge')).toContainText('on-hold');
+  });
+
+  test('should expand a project card to show team members', async ({ projectsPage }) => {
+    await projectsPage.mockProjectsApi({ projects: seededProjects, tasks: seededTasks });
+    await projectsPage.navigate();
+
+    const alphaCard = projectsPage.getProjectCardContainer('Alpha Project');
+    await projectsPage.expandProject('Alpha Project');
+
+    await expect(alphaCard).toContainText('Team Members');
+    await expect(alphaCard).toContainText('alice@example.com');
+    await expect(alphaCard).toContainText('bob@example.com');
   });
 });

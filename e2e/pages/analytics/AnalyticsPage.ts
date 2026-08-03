@@ -26,4 +26,34 @@ export class AnalyticsPage extends BasePage {
       .locator('.stat-card', { has: this.page.getByText(label, { exact: true }) })
       .locator('div.text-3xl');
   }
+
+  getLegendValue(card: Locator, label: string): Locator {
+    return card
+      .locator('div.flex', { has: this.page.getByText(label, { exact: true }) })
+      .locator('span.ml-auto');
+  }
+
+  async mockAnalyticsApi(options: { tasks: Array<Record<string, unknown>>; projects: Array<Record<string, unknown>> }) {
+    const { tasks, projects } = options;
+    await this.page.route('**/api/tasks*', (route) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ tasks }),
+        });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+    await this.page.route('**/api/projects*', (route) => {
+      if (route.request().method() === 'GET') {
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ projects }),
+        });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+    });
+  }
 }

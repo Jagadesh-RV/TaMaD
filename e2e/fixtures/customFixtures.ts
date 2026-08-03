@@ -2,11 +2,14 @@ import { test as base } from '@playwright/test';
 import { LoginPage } from '../pages/auth/LoginPage';
 import { RegisterPage } from '../pages/auth/RegisterPage';
 import { DashboardPage } from '../pages/dashboard/DashboardPage';
+import { TeamDashboardPage } from '../pages/dashboard/TeamDashboardPage';
 import { SettingsPage } from '../pages/settings/SettingsPage';
 import { TasksPage } from '../pages/tasks/TasksPage';
 import { ProjectsPage } from '../pages/projects/ProjectsPage';
 import { AgileBoardPage } from '../pages/agile/AgileBoardPage';
 import { TeamsPage } from '../pages/teams/TeamsPage';
+import { TeamSettingsPage } from '../pages/teams/TeamSettingsPage';
+import { OrganizationDashboardPage } from '../pages/organizations/OrganizationDashboardPage';
 import { NotesPage } from '../pages/notes/NotesPage';
 import { WhiteboardPage } from '../pages/whiteboard/WhiteboardPage';
 import { DocumentsPage } from '../pages/documents/DocumentsPage';
@@ -15,6 +18,9 @@ import { CalendarPage } from '../pages/calendar/CalendarPage';
 import { PlannerPage } from '../pages/planner/PlannerPage';
 import { FocusPage } from '../pages/focus/FocusPage';
 import { MeetingsPage } from '../pages/meetings/MeetingsPage';
+import { MeetingsDashboardPage } from '../pages/meetings/MeetingsDashboardPage';
+import { MeetingRoomPage } from '../pages/meetings/MeetingRoomPage';
+import { TamadMeetRoomPage } from '../pages/tamad-meet/TamadMeetRoomPage';
 import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
 import { TemplatesPage } from '../pages/templates/TemplatesPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
@@ -36,11 +42,14 @@ type MyFixtures = {
   loginPage: LoginPage;
   registerPage: RegisterPage;
   dashboardPage: DashboardPage;
+  teamDashboardPage: TeamDashboardPage;
   settingsPage: SettingsPage;
   tasksPage: TasksPage;
   projectsPage: ProjectsPage;
   agilePage: AgileBoardPage;
   teamsPage: TeamsPage;
+  teamSettingsPage: TeamSettingsPage;
+  organizationDashboardPage: OrganizationDashboardPage;
   notesPage: NotesPage;
   whiteboardPage: WhiteboardPage;
   documentsPage: DocumentsPage;
@@ -49,6 +58,9 @@ type MyFixtures = {
   plannerPage: PlannerPage;
   focusPage: FocusPage;
   meetingsPage: MeetingsPage;
+  meetingsDashboardPage: MeetingsDashboardPage;
+  meetingRoomPage: MeetingRoomPage;
+  tamadMeetRoomPage: TamadMeetRoomPage;
   aiAssistantPage: AIAssistantPage;
   templatesPage: TemplatesPage;
   notificationsPage: NotificationsPage;
@@ -77,6 +89,9 @@ export const test = base.extend<MyFixtures>({
   dashboardPage: async ({ page }, use) => {
     await use(new DashboardPage(page));
   },
+  teamDashboardPage: async ({ page }, use) => {
+    await use(new TeamDashboardPage(page));
+  },
   settingsPage: async ({ page }, use) => {
     await use(new SettingsPage(page));
   },
@@ -91,6 +106,12 @@ export const test = base.extend<MyFixtures>({
   },
   teamsPage: async ({ page }, use) => {
     await use(new TeamsPage(page));
+  },
+  teamSettingsPage: async ({ page }, use) => {
+    await use(new TeamSettingsPage(page));
+  },
+  organizationDashboardPage: async ({ page }, use) => {
+    await use(new OrganizationDashboardPage(page));
   },
   notesPage: async ({ page }, use) => {
     await use(new NotesPage(page));
@@ -115,6 +136,15 @@ export const test = base.extend<MyFixtures>({
   },
   meetingsPage: async ({ page }, use) => {
     await use(new MeetingsPage(page));
+  },
+  meetingsDashboardPage: async ({ page }, use) => {
+    await use(new MeetingsDashboardPage(page));
+  },
+  meetingRoomPage: async ({ page }, use) => {
+    await use(new MeetingRoomPage(page));
+  },
+  tamadMeetRoomPage: async ({ page }, use) => {
+    await use(new TamadMeetRoomPage(page));
   },
   aiAssistantPage: async ({ page }, use) => {
     await use(new AIAssistantPage(page));
