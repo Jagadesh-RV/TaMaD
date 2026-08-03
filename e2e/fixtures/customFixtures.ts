@@ -19,6 +19,7 @@ import { FocusPage } from '../pages/focus/FocusPage';
 import { MeetingsPage } from '../pages/meetings/MeetingsPage';
 import { MeetingsDashboardPage } from '../pages/meetings/MeetingsDashboardPage';
 import { MeetingRoomPage } from '../pages/meetings/MeetingRoomPage';
+import { TamadMeetRoomPage } from '../pages/tamad-meet/TamadMeetRoomPage';
 import { AIAssistantPage } from '../pages/ai/AIAssistantPage';
 import { TemplatesPage } from '../pages/templates/TemplatesPage';
 import { NotificationsPage } from '../pages/notifications/NotificationsPage';
@@ -57,6 +58,7 @@ type MyFixtures = {
   meetingsPage: MeetingsPage;
   meetingsDashboardPage: MeetingsDashboardPage;
   meetingRoomPage: MeetingRoomPage;
+  tamadMeetRoomPage: TamadMeetRoomPage;
   aiAssistantPage: AIAssistantPage;
   templatesPage: TemplatesPage;
   notificationsPage: NotificationsPage;
@@ -135,6 +137,9 @@ export const test = base.extend<MyFixtures>({
   },
   meetingRoomPage: async ({ page }, use) => {
     await use(new MeetingRoomPage(page));
+  },
+  tamadMeetRoomPage: async ({ page }, use) => {
+    await use(new TamadMeetRoomPage(page));
   },
   aiAssistantPage: async ({ page }, use) => {
     await use(new AIAssistantPage(page));
