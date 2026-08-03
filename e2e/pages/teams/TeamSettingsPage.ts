@@ -1,6 +1,32 @@
 import { Page, Locator } from '@playwright/test';
 import { BasePage } from '../BasePage';
 
+export interface MockWorkspace {
+  _id: string;
+  name: string;
+  type: 'personal' | 'team';
+  teamId?: string;
+  organizationId?: string;
+  ownerId: string;
+  members: unknown[];
+  isActive: boolean;
+  settings: { allowGuests: boolean; isPublic: boolean };
+}
+
+export interface MockTeam {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  logoUrl?: string;
+  color: string;
+  visibility: 'private' | 'public';
+  organizationId?: string;
+  timeZone: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export class TeamSettingsPage extends BasePage {
   readonly pageTitle: Locator;
   readonly noTeamMessage: Locator;
@@ -29,5 +55,54 @@ export class TeamSettingsPage extends BasePage {
     this.dangerZone = page.locator('section', { has: page.getByRole('heading', { name: 'Danger Zone' }) });
     this.leaveTeamBtn = this.dangerZone.getByRole('button', { name: 'Leave Team', exact: true });
     this.deleteTeamBtn = this.dangerZone.getByRole('button', { name: 'Delete Team', exact: true });
+  }
+
+  async mockTeamContext(workspace: MockWorkspace, teams: MockTeam[]) {
+    // Workspace pointing at a team so the settings form renders
+    await this.page.route('**/api/workspaces', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([workspace]),
+      });
+    });
+
+    await this.page.route('**/api/teams', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ teams }),
+      });
+    });
+  }
+
+  async mockUpdateTeam(team: MockTeam) {
+    await this.page.route('**/api/teams/*', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ team }),
+      });
+    });
+  }
+
+  async mockLeaveTeam() {
+    await this.page.route('**/api/teams/*/leave', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
+  }
+
+  async mockDeleteTeam() {
+    await this.page.route('**/api/teams/*', (route) => {
+      void route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
+    });
   }
 }
