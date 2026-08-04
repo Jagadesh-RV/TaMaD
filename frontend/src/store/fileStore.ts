@@ -162,6 +162,8 @@ export const useFileStore = create<FileState>((set, get) => ({
     try {
       const { data } = await api.get('/files/stats', { params: { workspaceId } });
       set({ stats: data });
-    } catch {}
+    } catch (error) {
+      // Ignore error
+    }
   },
 }));
