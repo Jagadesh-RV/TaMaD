@@ -1,5 +1,3 @@
-version: '3.8'
-
 # TaMaD Docker Compose
 # Development: docker-compose -f docker-compose.dev.yml up --build
 # Production:  docker-compose -f docker-compose.prod.yml up -d --build
