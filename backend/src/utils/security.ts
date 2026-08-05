@@ -94,6 +94,6 @@ export const setupSecurity = (app: Express) => {
   app.use(securityHeaders);
   app.use(sanitizeInput);
   app.use('/api', globalRateLimiter);
-  app.use('/api/auth', authRateLimiter);
-  app.use('/api/contact', strictRateLimiter);
+  app.use('/api/v1/auth', authRateLimiter);
+  app.use('/api/v1/contact', strictRateLimiter);
 };
