@@ -11,16 +11,14 @@ export default function TaskModal({
   onSave,
   initialData,
 }: any) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [priority, setPriority] = useState('medium');
-  const [status, setStatus] = useState('todo');
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [dueDate, setDueDate] = useState(initialData?.dueDate || initialData?.initialDate || '');
+  const [priority, setPriority] = useState(initialData?.priority || 'medium');
+  const [status, setStatus] = useState(initialData?.status || 'todo');
 
   // Reset state when modal opens
-  const prevIsOpen = React.useRef(isOpen);
-  if (isOpen !== prevIsOpen.current) {
-    prevIsOpen.current = isOpen;
+  React.useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
@@ -28,7 +26,7 @@ export default function TaskModal({
       setPriority(initialData?.priority || 'medium');
       setStatus(initialData?.status || 'todo');
     }
-  }
+  }, [isOpen, initialData]);
 
   if (!isOpen) return null;
 

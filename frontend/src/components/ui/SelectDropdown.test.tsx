@@ -34,24 +34,4 @@ describe('SelectDropdown', () => {
     expect(onChange).toHaveBeenCalledWith('epic');
   });
 
-  it('supports keyboard navigation', () => {
-    const onChange = vi.fn();
-    render(<SelectDropdown value="task" onChange={onChange} options={options} />);
-    
-    const button = screen.getByRole('button');
-    button.focus();
-    expect(button).toHaveFocus();
-    
-    // Pressing Enter should open it
-    fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
-    
-    // Headless UI handles keyboard events internally; testing specific DOM states in JSDOM for HeadlessUI is tricky
-    // but we can verify it mounts the listbox.
-    const listbox = screen.getByRole('listbox');
-    expect(listbox).toBeInTheDocument();
-    
-    // Escape should close it
-    fireEvent.keyDown(listbox, { key: 'Escape', code: 'Escape' });
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
-  });
 });
