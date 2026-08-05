@@ -64,7 +64,11 @@ app.use(
   }),
 );
 setupSecurity(app);
-app.use(morgan('dev'));
+app.use(
+  morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', {
+    stream: { write: (message: string) => logger.http(message.trim()) },
+  }),
+);
 
 app.use('/api/health', healthRoutes);
 app.use('/api/v1/auth', authRoutes);
