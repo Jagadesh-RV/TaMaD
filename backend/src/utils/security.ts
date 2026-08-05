@@ -2,6 +2,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { Express, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
+import sanitizeHtml from 'sanitize-html';
 
 export const securityHeaders = helmet({
   contentSecurityPolicy: {
@@ -59,7 +60,13 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
   if (req.body && typeof req.body === 'object') {
     const sanitize = (obj: any): any => {
       if (typeof obj === 'string') {
-        return obj.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '').trim();
+        return sanitizeHtml(obj, {
+          allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
+          allowedAttributes: {
+            ...sanitizeHtml.defaults.allowedAttributes,
+            img: ['src', 'alt', 'width', 'height']
+          }
+        }).trim();
       }
       if (Array.isArray(obj)) return obj.map(sanitize);
       if (obj && typeof obj === 'object') {
