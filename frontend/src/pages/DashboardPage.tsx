@@ -63,6 +63,9 @@ export default function DashboardPage() {
   const { projects, loading: projectsLoading, fetchProjects } = useProjectStore();
   const workspaceId = workspace?._id || '';
   const today = format(new Date(), 'yyyy-MM-dd');
+  const authName = useAuthName();
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening';
 
   useEffect(() => {
     if (workspaceId) {
@@ -182,9 +185,9 @@ export default function DashboardPage() {
             {format(new Date(), 'EEEE, MMMM d, yyyy')}
           </p>
           <h1 className="page-title">
-            Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 18 ? 'afternoon' : 'evening'}, {useAuthName()}
+            Good {greeting}, {authName}
           </h1>
-          <p className="page-subtitle mt-1">Here's what's happening across your workspace.</p>
+          <p className="page-subtitle mt-1">Here&apos;s what&apos;s happening across your workspace.</p>
         </div>
       </div>
 

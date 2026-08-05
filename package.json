@@ -7,6 +7,8 @@
     "dev:backend": "pnpm --filter tamad-backend dev",
     "build:backend": "pnpm --filter tamad-backend build",
     "build:all": "pnpm --filter tamad-frontend build && pnpm --filter tamad-backend build",
+    "lint": "pnpm --filter tamad-frontend lint && pnpm --filter tamad-backend lint",
+    "typecheck": "pnpm --filter tamad-frontend typecheck && pnpm --filter tamad-backend typecheck",
     "test": "pnpm --filter tamad-backend test && pnpm --filter tamad-frontend test",
     "test:backend": "pnpm --filter tamad-backend test",
     "test:frontend": "pnpm --filter tamad-frontend test",

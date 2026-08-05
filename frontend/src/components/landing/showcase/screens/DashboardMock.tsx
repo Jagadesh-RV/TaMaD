@@ -41,7 +41,7 @@ export function DashboardMock() {
           </div>
           <MockCard className="overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 px-3.5 py-2.5">
-              <span className="text-[10px] font-bold text-slate-700">Today's focus</span>
+              <span className="text-[10px] font-bold text-slate-700">Today&apos;s focus</span>
               <span className="text-[9px] font-bold text-blue-600">View all →</span>
             </div>
             <div className="space-y-1 px-3.5 py-2.5">

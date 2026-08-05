@@ -114,8 +114,8 @@ export function WhyTamadSection() {
 
         <Reveal delay={0.1}>
           <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            We're not here to criticize anyone — Notion, Linear and the rest are great at what they do. The point is
-            simple: <strong className="font-semibold text-navy-900 dark:text-white">you shouldn't need all of them.</strong>
+            We&apos;re not here to criticize anyone — Notion, Linear and the rest are great at what they do. The point is
+            simple: <strong className="font-semibold text-navy-900 dark:text-white">you shouldn&apos;t need all of them.</strong>
           </p>
         </Reveal>
       </div>

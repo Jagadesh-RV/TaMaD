@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h2 className="text-lg font-extrabold text-navy-950 dark:text-white">Check your inbox</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-            We've sent a password reset link. If it doesn't arrive within a few minutes, check your spam folder.
+            We&apos;ve sent a password reset link. If it doesn&apos;t arrive within a few minutes, check your spam folder.
           </p>
           <button
             type="button"

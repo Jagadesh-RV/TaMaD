@@ -29,6 +29,7 @@ import { useAuthStore } from '../store/authStore';
 import api from '../utils/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
+import { showToast } from '../lib/toast';
 
 const DATE_RANGES = ['This Week', 'This Month', 'Last 3 Months', 'Year'];
 
@@ -116,7 +117,10 @@ export default function ReportsPage() {
       a.download = `tamad-report-${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch {}
+    } catch (err) {
+      showToast.error('Failed to export report');
+      console.error('Report export failed:', err);
+    }
   }, [workspaceId]);
 
   const completedTasks = filteredTasks.filter((t: any) => t.status === 'done').length;

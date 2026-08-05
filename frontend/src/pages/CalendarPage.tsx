@@ -231,7 +231,7 @@ export default function CalendarPage() {
         const key = format(parseISO(t.dueDate), 'yyyy-MM-dd');
         if (!map[key]) map[key] = [];
         map[key].push(t);
-      } catch {}
+      } catch { /* skip tasks with invalid due dates */ }
     });
     return map;
   }, [filteredTasks]);
@@ -244,7 +244,7 @@ export default function CalendarPage() {
         const key = format(parseISO(m.startTime), 'yyyy-MM-dd');
         if (!map[key]) map[key] = [];
         map[key].push(m);
-      } catch {}
+      } catch { /* skip meetings with invalid start times */ }
     });
     return map;
   }, [meetings]);

@@ -43,7 +43,7 @@ export function WhatIsSection() {
                   Nine tools collapsed into one. Zero context switching.
                 </h3>
                 <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/75">
-                  Stop paying for a stack of apps that don't talk to each other. TaMaD brings your whole
+                  Stop paying for a stack of apps that don&apos;t talk to each other. TaMaD brings your whole
                   workflow together — seamlessly, privately and beautifully.
                 </p>
               </div>

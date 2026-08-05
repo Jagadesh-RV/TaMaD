@@ -9,6 +9,7 @@ import clsx from 'clsx';
 import { useAIStore } from '../store/aiStore';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useTaskStore } from '../store/taskStore';
+import { showToast, extractErrorMessage } from '../lib/toast';
 
 const SUGGESTED_PROMPTS = [
   { icon: Zap, label: 'Summarize today', query: 'Summarize my tasks for today' },
@@ -68,7 +69,9 @@ export default function AIAssistantPage() {
       });
       clearParsedTask();
       setParseInput('');
-    } catch {}
+    } catch (err) {
+      showToast.error(extractErrorMessage(err));
+    }
   }, [parsedTask, workspaceId, createTask, clearParsedTask]);
 
   const handleCopy = useCallback((text: string) => {
@@ -290,7 +293,7 @@ export default function AIAssistantPage() {
                         className="w-full rounded-lg border p-3 text-left text-xs leading-relaxed transition-all hover:shadow-sm"
                         style={{ background: 'var(--color-background)', borderColor: 'var(--color-border-light)', color: 'var(--color-muted)' }}
                       >
-                        "{example}"
+                        &quot;{example}&quot;
                       </button>
                     ))}
                   </div>

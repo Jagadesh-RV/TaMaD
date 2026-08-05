@@ -75,7 +75,7 @@ export default function JoinTeamModal({ onClose }: JoinTeamModalProps) {
               required
             />
             <p className="mt-2 text-xs text-[var(--color-muted)]">
-              Ask your team admin for an invite link if you don't have one.
+              Ask your team admin for an invite link if you don&apos;t have one.
             </p>
           </div>
 

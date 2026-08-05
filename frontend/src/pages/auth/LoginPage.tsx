@@ -133,7 +133,7 @@ export default function LoginPage() {
       </form>
 
       <div className="mt-8 flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-        Don't have an account?
+        Don&apos;t have an account?
         <Link to="/register" className="font-bold text-brand-600 transition-colors hover:text-brand-700 dark:text-brand-300 dark:hover:text-brand-200">
           Create one free
         </Link>
