@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Plus,
   Calendar,
@@ -45,15 +45,21 @@ export default function ProjectsPage() {
     }
   }, [fetchProjects, fetchTasks, workspaceId]);
 
-  const getProjectStats = (projectId: string) => {
-    const projectTasks = tasks.filter((t: any) => t.projectId === projectId);
-    const completed = projectTasks.filter((t: any) => t.status === 'done').length;
-    return {
-      totalTasks: projectTasks.length,
-      completedTasks: completed,
-      progress: projectTasks.length > 0 ? Math.round((completed / projectTasks.length) * 100) : 0,
-    };
-  };
+  const projectStats = useMemo(() => {
+    const stats = new Map<string, { totalTasks: number; completedTasks: number; progress: number }>();
+    for (const task of tasks as any[]) {
+      const entry = stats.get(task.projectId) || { totalTasks: 0, completedTasks: 0, progress: 0 };
+      entry.totalTasks += 1;
+      if (task.status === 'done') entry.completedTasks += 1;
+      stats.set(task.projectId, entry);
+    }
+    for (const entry of stats.values()) {
+      entry.progress = entry.totalTasks > 0 ? Math.round((entry.completedTasks / entry.totalTasks) * 100) : 0;
+    }
+    return stats;
+  }, [tasks]);
+
+  const getProjectStats = (projectId: string) => projectStats.get(projectId) ?? { totalTasks: 0, completedTasks: 0, progress: 0 };
 
   const totalProjects = projects.length;
   const totalTasksAll = projects.reduce((sum: number, p: any) => sum + getProjectStats(p._id).totalTasks, 0);
