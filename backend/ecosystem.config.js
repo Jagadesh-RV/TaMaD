@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: 'tamad-api',
-      script: 'src/index.js',
+      script: 'dist/index.js',
       instances: 'max',
       exec_mode: 'cluster',
       env: {
