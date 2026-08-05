@@ -108,12 +108,22 @@ app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  logger.error(err.message, { stack: err.stack, requestId: _req.headers['x-request-id'] });
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const requestId = _req.headers['x-request-id'];
+  const statusCode =
+    err.status || err.statusCode ||
+    (err.name === 'CastError' ? 400 :
+      err.code === 11000 ? 409 :
+      err.name === 'ValidationError' ? 400 :
+      err.name === 'UnauthorizedError' ? 401 : 500);
+
+  if (statusCode >= 500) {
+    logger.error(err.message, { stack: err.stack, requestId });
+  }
+
   res.status(statusCode).json({
-    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-    requestId: _req.headers['x-request-id'],
+    error: statusCode >= 500 && process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
+    requestId,
   });
 });
 
