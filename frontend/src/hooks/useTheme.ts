@@ -1,32 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-
-type Theme = 'light' | 'dark';
-
-const STORAGE_KEY = 'tamad_theme';
+import { useCallback, useEffect, useState } from 'react';
+import {
+  type Theme,
+  THEME_STORAGE_KEY,
+  getStoredTheme,
+  applyTheme,
+  persistTheme,
+  toggleTheme as flipTheme,
+} from '../lib/theme';
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(STORAGE_KEY) as Theme;
-      if (stored) return stored;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }
-    return 'light';
-  });
+  const [theme, setThemeState] = useState<Theme>(getStoredTheme);
 
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem(STORAGE_KEY, theme);
+    applyTheme(theme);
+    persistTheme(theme);
   }, [theme]);
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = (e: MediaQueryListEvent) => {
-      if (!localStorage.getItem(STORAGE_KEY)) {
+      if (!localStorage.getItem(THEME_STORAGE_KEY)) {
         setThemeState(e.matches ? 'dark' : 'light');
       }
     };
@@ -35,7 +28,7 @@ export function useTheme() {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeState(prev => prev === 'light' ? 'dark' : 'light');
+    setThemeState((prev) => flipTheme(prev));
   }, []);
 
   return { theme, toggleTheme, isDark: theme === 'dark' };

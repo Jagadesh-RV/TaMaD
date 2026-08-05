@@ -1,37 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useTheme } from '../../hooks/useTheme';
+import { type Theme as LandingTheme, getStoredTheme, applyTheme } from '../../lib/theme';
 
-export type LandingTheme = 'light' | 'dark';
+export type { LandingTheme };
 
-const STORAGE_KEY = 'tamad_theme';
+export const getInitialTheme = getStoredTheme;
 
-export function getInitialTheme(): LandingTheme {
-  if (typeof window === 'undefined') return 'light';
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === 'dark' || stored === 'light') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
+export const applyLandingTheme = applyTheme;
 
-export function applyLandingTheme(theme: LandingTheme) {
-  if (typeof document === 'undefined') return;
-  document.documentElement.classList.toggle('dark', theme === 'dark');
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-  }
-}
-
-export function useLandingTheme() {
-  const [theme, setTheme] = useState<LandingTheme>(getInitialTheme);
-
-  useEffect(() => {
-    applyLandingTheme(theme);
-    localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
-  }, []);
-
-  return { theme, toggleTheme, isDark: theme === 'dark' };
-}
+export const useLandingTheme = useTheme;
