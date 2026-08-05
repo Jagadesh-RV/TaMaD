@@ -104,6 +104,10 @@ app.get('/api/ready', async (_req, res) => {
   }
 });
 
+app.use('/api', (_req, res) => {
+  res.status(404).json({ error: 'Route not found' });
+});
+
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error(err.message, { stack: err.stack, requestId: _req.headers['x-request-id'] });
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
