@@ -11,6 +11,7 @@ import { useFileStore } from '../store/fileStore';
 import { useAuthStore } from '../store/authStore';
 import { useFileUpload, formatFileSize } from '../hooks/useFileUpload';
 import FileUpload from '../components/ui/FileUpload';
+import { showToast } from '../lib/toast';
 
 const FILE_ICONS: Record<string, typeof File> = {
   image: Image,
@@ -90,7 +91,10 @@ export default function FilesPage() {
           storagePath,
           workspaceId,
         });
-      } catch {}
+      } catch (err) {
+        showToast.error(`Failed to upload ${file.name}`);
+        console.error('File upload failed:', err);
+      }
     }
 
     fetchFiles(workspaceId);
@@ -118,7 +122,10 @@ export default function FilesPage() {
           storagePath,
           workspaceId,
         });
-      } catch {}
+      } catch (err) {
+        showToast.error(`Failed to upload ${file.name}`);
+        console.error('File upload failed:', err);
+      }
     }
 
     fetchFiles(workspaceId);

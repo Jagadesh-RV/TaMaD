@@ -26,10 +26,6 @@ export default function AppLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', localStorage.getItem('tamad-theme') || 'light');
-  }, []);
-
   return (
     <div className="layout" style={{ background: 'var(--color-background)' }}>
       {/* Desktop sidebar */}

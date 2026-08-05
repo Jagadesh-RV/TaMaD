@@ -17,6 +17,23 @@
   <meta name="theme-color" content="#0a0f1e" media="(prefers-color-scheme: dark)" />
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 
+  <!-- Theme bootstrap: apply persisted theme before first paint to prevent FOUC -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('tamad_theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var root = document.documentElement;
+        root.classList.toggle('dark', dark);
+        if (dark) {
+          root.setAttribute('data-theme', 'dark');
+        } else {
+          root.removeAttribute('data-theme');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="TaMaD" />

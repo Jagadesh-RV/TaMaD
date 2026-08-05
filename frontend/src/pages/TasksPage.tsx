@@ -386,7 +386,7 @@ function CalendarMiniView({ tasks }: { tasks: Task[] }) {
         if (!tasksByDate[day]) tasksByDate[day] = [];
         tasksByDate[day].push(t);
       }
-    } catch {}
+    } catch { /* skip tasks with invalid due dates */ }
   });
 
   return (

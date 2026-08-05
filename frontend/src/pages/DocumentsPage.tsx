@@ -236,7 +236,7 @@ export default function DocumentsPage() {
 
                 <p className="mb-4 line-clamp-3 text-sm leading-relaxed" style={{ color: 'var(--color-muted)' }}>
                   {doc.content
-                    ? doc.content.replace(/[#*_`~\[\]]/g, '').slice(0, 150) + (doc.content.length > 150 ? '...' : '')
+                    ? doc.content.replace(/[#*_`~[\]]/g, '').slice(0, 150) + (doc.content.length > 150 ? '...' : '')
                     : 'Empty document'}
                 </p>
 

@@ -7,7 +7,7 @@ export const toastConfig = {
   position: 'top-right' as const,
   style: {
     background: 'var(--color-surface)',
-    color: 'var(--color-text)',
+    color: 'var(--color-foreground)',
     border: '1px solid var(--color-border)',
     borderRadius: '12px',
     padding: '12px 16px',
