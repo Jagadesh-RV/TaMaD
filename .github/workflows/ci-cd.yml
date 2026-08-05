@@ -77,6 +77,12 @@ jobs:
       - name: Run TypeScript check (frontend)
         run: cd frontend && npx tsc --noEmit
 
+      - name: Run ESLint (backend)
+        run: cd backend && npx eslint src --ext .ts,.js
+
+      - name: Run ESLint (frontend)
+        run: cd frontend && npx eslint "src/**/*.{ts,tsx}"
+
   deploy:
     needs: [test, lint]
     runs-on: ubuntu-latest
