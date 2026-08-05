@@ -20,10 +20,10 @@ interface TaskCardProps {
 }
 
 const priorityColors = {
-  low: 'bg-slate-100 text-slate-700',
-  medium: 'bg-sky-100 text-sky-700',
-  high: 'bg-amber-100 text-amber-700',
-  urgent: 'bg-rose-100 text-rose-700',
+  low: 'bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]',
+  medium: 'bg-[color:var(--color-info-light)] text-[color:var(--color-info)]',
+  high: 'bg-[color:var(--color-warning-light)] text-[color:var(--color-warning)]',
+  urgent: 'bg-[color:var(--color-danger-light)] text-[color:var(--color-danger)]',
 };
 
 export default function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) {
