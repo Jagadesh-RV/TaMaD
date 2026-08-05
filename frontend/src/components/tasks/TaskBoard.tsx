@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -45,11 +45,16 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleToggleSelect = (id: string) => {
+  const handleToggleSelect = useCallback((id: string) => {
     setSelectedTaskIds(prev => 
       prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id]
     );
-  };
+  }, []);
+
+  const tasksByColumn = useMemo(
+    () => Object.fromEntries(COLUMNS.map((colId) => [colId, localTasks.filter((t) => t.status === colId)])),
+    [localTasks]
+  );
 
   const handleBulkDelete = () => {
     if (confirm(`Delete ${selectedTaskIds.length} tasks?`)) {
@@ -149,7 +154,7 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
             key={colId}
             id={colId}
             title={colId}
-            tasks={localTasks.filter((t) => t.status === colId)}
+            tasks={tasksByColumn[colId]}
             selectedTaskIds={selectedTaskIds}
             onToggleSelect={handleToggleSelect}
             onTaskClick={onTaskClick}

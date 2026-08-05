@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Clock, GripVertical } from 'lucide-react';
@@ -26,7 +27,7 @@ const priorityColors = {
   urgent: 'bg-[color:var(--color-danger-light)] text-[color:var(--color-danger)]',
 };
 
-export default function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) {
+function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -89,3 +90,5 @@ export default function TaskCard({ task, isSelected, onToggleSelect, onClick }: 
     </div>
   );
 }
+
+export default memo(TaskCard);
