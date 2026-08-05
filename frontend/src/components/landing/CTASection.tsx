@@ -30,7 +30,7 @@ export function CTASection() {
             </motion.div>
 
             <h2 className="mx-auto max-w-2xl text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-white md:text-5xl">
-              Your team's whole workflow, finally in one place.
+              Your team&apos;s whole workflow, finally in one place.
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-pretty text-base leading-relaxed text-white/80 md:text-lg">
               Join thousands of teams who traded the stack for the platform. Set up your workspace in minutes — free forever, no card required.

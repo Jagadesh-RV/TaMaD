@@ -72,7 +72,7 @@ export default function VerifyEmailPage() {
           <Mail size={30} />
         </div>
         <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          We sent a verification link to your inbox. Click it, then come back — we'll check automatically every{' '}
+          We sent a verification link to your inbox. Click it, then come back — we&apos;ll check automatically every{' '}
           <strong className="font-bold text-navy-950 dark:text-white">{countdown}s</strong>.
         </p>
 

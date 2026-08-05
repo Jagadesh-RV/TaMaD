@@ -68,7 +68,7 @@ export default function OnboardingPage() {
               <PartyPopper size={36} />
             </motion.div>
             <h1 className="text-balance text-3xl font-extrabold tracking-tight text-navy-950 dark:text-white">
-              You're all set, {firstName}!
+              You&apos;re all set, {firstName}!
             </h1>
             <p className="mx-auto mt-3 max-w-sm text-pretty text-sm leading-relaxed text-slate-500 dark:text-slate-400">
               Your workspace is ready. Start with your dashboard, create your first task, and watch TaMaD bring it all together.
@@ -98,7 +98,7 @@ export default function OnboardingPage() {
               <h1 className="text-balance text-3xl font-extrabold tracking-tight text-navy-950 dark:text-white">
                 Welcome to TaMaD, {firstName}
               </h1>
-              <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400">Let's set up your workspace in a few seconds.</p>
+              <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400">Let&apos;s set up your workspace in a few seconds.</p>
             </div>
 
             <div className="space-y-3">

@@ -15,7 +15,7 @@ export default function NotFoundPage() {
           Page Not Found
         </h1>
         <p className="mb-8 text-sm" style={{ color: 'var(--color-muted)' }}>
-          The page you're looking for doesn't exist or has been moved.
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => window.history.back()} className="btn btn-ghost">

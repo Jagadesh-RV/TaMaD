@@ -83,7 +83,7 @@ export function AISection() {
 
                 <div className="space-y-4 p-5">
                   <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-brand-600 px-4 py-2.5 text-[13px] font-medium text-white shadow-sm">
-                    What's blocking the launch sprint?
+                    What&apos;s blocking the launch sprint?
                   </div>
 
                   <div className="w-fit max-w-[92%] rounded-2xl rounded-bl-md border border-navy-900/[0.06] bg-slate-50 px-4 py-3 text-[13px] leading-relaxed text-slate-600 dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-300">
@@ -95,7 +95,7 @@ export function AISection() {
                       <span className="rounded-lg border border-rose-500/20 bg-rose-500/[0.07] px-2.5 py-1.5 text-[12px]">Payment API integration — due in 2 days, 6h of work left</span>
                       <span className="rounded-lg border border-amber-500/20 bg-amber-500/[0.07] px-2.5 py-1.5 text-[12px]">Onboarding copy — awaiting review since Monday</span>
                     </span>
-                    <p className="mt-2">I've drafted an updated sprint plan that rebalances both before the launch date.</p>
+                    <p className="mt-2">I&apos;ve drafted an updated sprint plan that rebalances both before the launch date.</p>
                   </div>
 
                   <div className="flex items-center gap-1.5">

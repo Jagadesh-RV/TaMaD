@@ -148,7 +148,7 @@ export default function RegisterPage() {
           />
 
           <p className="text-[11.5px] leading-relaxed text-slate-400 dark:text-slate-500">
-            By creating an account, you agree to TaMaD's Terms of Service and acknowledge the Privacy Policy.
+            By creating an account, you agree to TaMaD&apos;s Terms of Service and acknowledge the Privacy Policy.
           </p>
 
           <SubmitButton loading={isLoading}>
