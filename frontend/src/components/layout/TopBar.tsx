@@ -21,16 +21,35 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuItemRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
+    if (!profileOpen) return;
+    const handleMouseDown = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setProfileOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setProfileOpen(false);
+        profileButtonRef.current?.focus();
+      }
+    };
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileOpen]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const timer = window.setTimeout(() => firstMenuItemRef.current?.focus(), 30);
+    return () => window.clearTimeout(timer);
+  }, [profileOpen]);
 
   const handleLogout = async () => {
     setProfileOpen(false);
@@ -111,7 +130,11 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
         {/* Profile dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
+            ref={profileButtonRef}
             onClick={() => setProfileOpen(!profileOpen)}
+            aria-haspopup="menu"
+            aria-expanded={profileOpen}
+            aria-controls="profile-menu"
             className="flex items-center gap-2 rounded-lg p-1.5 pr-3 transition-colors"
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-surface-hover)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
@@ -132,6 +155,9 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
 
           {profileOpen && (
             <div
+              id="profile-menu"
+              role="menu"
+              aria-label="Account menu"
               className="dropdown absolute right-0 top-full mt-2 w-56"
               style={{ animation: 'scaleIn 0.15s ease-out' }}
             >
@@ -141,6 +167,8 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
               </div>
               <div className="p-1">
                 <button
+                  ref={firstMenuItemRef}
+                  role="menuitem"
                   onClick={() => { setProfileOpen(false); navigate('/profile'); }}
                   className="dropdown-item w-full"
                 >
@@ -148,6 +176,7 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
                   Profile
                 </button>
                 <button
+                  role="menuitem"
                   onClick={() => { setProfileOpen(false); navigate('/settings'); }}
                   className="dropdown-item w-full"
                 >
@@ -156,6 +185,7 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
                 </button>
                 <div className="my-1 border-t" style={{ borderColor: 'var(--color-border-light)' }} />
                 <button
+                  role="menuitem"
                   onClick={handleLogout}
                   className="dropdown-item w-full"
                   style={{ color: 'var(--color-danger)' }}
