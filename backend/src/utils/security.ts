@@ -84,8 +84,9 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
 };
 
 // Add request ID for tracing
-export const requestId = (req: Request, _res: Response, next: NextFunction) => {
+export const requestId = (req: Request, res: Response, next: NextFunction) => {
   req.headers['x-request-id'] = req.headers['x-request-id'] || crypto.randomUUID();
+  res.setHeader('x-request-id', req.headers['x-request-id']);
   next();
 };
 

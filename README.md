@@ -122,6 +122,12 @@ The frontend uses **Zustand** for state management. Each feature domain has its 
 
 Stores are lightweight, use Zustand middleware (persist, devtools where applicable), and interact with the backend via Axios-based API calls defined in `utils/api.ts`.
 
+### Design System
+
+- **Tokens**: Semantic color/shadow/radius tokens are defined in `frontend/src/index.css` (`--color-*`, `--shadow-*`, `--radius-*`) with a `[data-theme='dark']` block for dark mode.
+- **Theme mechanism**: All theme reads/writes go through `frontend/src/lib/theme.ts` — the single source of truth for stored/system preference resolution, `data-theme` + `.dark` class application, and a pre-paint FOUC-prevention bootstrap script in `frontend/index.html`. `hooks/useTheme.ts` is a thin consumer of that module.
+- **Primitives**: Shared UI components live in `frontend/src/components/ui/` (Button, Dialog, ConfirmDialog, SelectDropdown, etc.). Legacy `@layer components` CSS classes (`.btn`, `.card`, etc.) still coexist and are being gradually consolidated onto the `ui/*` primitives.
+
 ### API Pattern
 
 - Express routers are organized by domain (`taskRoutes.ts`, `projectRoutes.ts`, etc.)
@@ -302,7 +308,7 @@ The backend runs on `http://localhost:5000` and the frontend on `http://localhos
 
 ## API Endpoints
 
-All API routes are prefixed with `/api`. Most endpoints require authentication via a Bearer token in the `Authorization` header.
+All API routes are prefixed with `/api`. Versioned domain routes live under `/api/v1` (e.g. `/api/v1/tasks`, `/api/v1/auth`), while operational endpoints use `/api/health` and `/api/ready`. Most endpoints require authentication via a Bearer token in the `Authorization` header. Every response echoes a `x-request-id` header that can be correlated with server logs.
 
 ### Auth
 
@@ -449,7 +455,7 @@ Socket.IO is used for real-time communication. Clients authenticate by passing a
 
 ## Testing
 
-The project uses **Vitest** with **Testing Library** for frontend tests and **supertest** for backend tests.
+Frontend tests use **Vitest + Testing Library** (jsdom environment); backend tests use **Vitest** with mocked requests/responses (no live database or supertest).
 
 ```bash
 # Run all frontend tests
@@ -465,8 +471,20 @@ cd frontend && pnpm test:watch
 cd backend && pnpm test:watch
 ```
 
+### Quality checks
+
+Run `typecheck`, `lint`, and `build` before merging from either package directory (scripts exist at root, frontend, and backend):
+
+```bash
+# Frontend
+cd frontend && pnpm typecheck && pnpm lint && pnpm build
+
+# Backend
+cd backend && pnpm typecheck && pnpm lint && pnpm build
+```
+
 Test files are located in:
-- Frontend: `frontend/src/test/` and `frontend/src/store/__tests__/`
+- Frontend: `frontend/src/components/**/*.test.tsx`, `frontend/src/store/__tests__/`, `frontend/src/lib/__tests__/`
 - Backend: `backend/src/__tests__/`
 
 ---
@@ -562,10 +580,14 @@ TaMaD/
 │   │   ├── styles/              # Global CSS
 │   │   │   ├── animations.css
 │   │   │   ├── global.css
-│   │   │   └── theme.css
+│   │   │   ├── theme.css
+│   │   │   └── index.css        # Design tokens + Tailwind entry
+│   │   ├── lib/                 # Canonical framework helpers
+│   │   │   ├── theme.ts         # Single source of truth for theming
+│   │   │   ├── toast.ts
+│   │   │   └── animations.ts
 │   │   ├── utils/               # Utilities and API client
-│   │   │   ├── api.ts
-│   │   │   └── themes.ts
+│   │   │   └── api.ts
 │   │   ├── App.tsx
 │   │   └── main.tsx
 │   ├── package.json
@@ -615,7 +637,6 @@ TaMaD/
 │   │   │   └── healthRoutes.ts
 │   │   ├── middleware/           # Auth, validation, rate limiting
 │   │   │   ├── auth.ts
-│   │   │   ├── auth.middleware.ts
 │   │   │   ├── schemas.ts
 │   │   │   └── validate.ts
 │   │   ├── config/              # Infrastructure configuration
