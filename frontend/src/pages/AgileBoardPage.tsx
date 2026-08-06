@@ -7,6 +7,8 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 function SortableKanbanItem({ task, onClick }: { task: any, onClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task._id });
@@ -15,24 +17,29 @@ function SortableKanbanItem({ task, onClick }: { task: any, onClick: () => void 
   return (
     <div 
       ref={setNodeRef}
-      style={{ ...style, borderColor: 'var(--color-border-light)' }}
-      className="mb-2 cursor-pointer rounded-lg border p-3 bg-[color:var(--color-surface)] shadow-sm hover:border-[color:var(--color-accent)] transition-colors"
+      style={style}
+      className={`mb-2.5 transition-all outline-none ${isDragging ? 'z-50 scale-[1.02]' : ''}`}
       onClick={onClick}
     >
-      <div className="mb-2 flex justify-between items-center" {...attributes} {...listeners}>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">{task.taskType || 'Task'}</span>
-        <span className="text-xs text-[color:var(--color-muted)]">{task.storyPoints ? `${task.storyPoints} pts` : ''}</span>
-      </div>
-      <h4 className="text-sm font-medium text-[color:var(--color-foreground)]">{task.title}</h4>
-      {task.assignees && task.assignees.length > 0 && (
-        <div className="mt-3 flex -space-x-1">
-          {task.assignees.map((a: any) => (
-            <div key={a.email} className="h-5 w-5 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-[10px] font-bold border border-[color:var(--color-surface)]" title={a.name}>
-              {a.name.charAt(0)}
-            </div>
-          ))}
+      <Card
+        interactive
+        className={`p-3.5 border transition-all duration-300 ${isDragging ? 'shadow-float border-[color:var(--color-accent)] bg-[color:var(--color-surface-hover)] ring-2 ring-[color:var(--color-accent-ghost)]' : 'shadow-xs hover:shadow-soft border-[color:var(--color-border)] hover:border-[color:var(--color-border-hover)] bg-[color:var(--color-surface)]'}`}
+      >
+        <div className="mb-3 flex justify-between items-center" {...attributes} {...listeners}>
+          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-0.5 rounded-full">{task.taskType || 'Task'}</span>
+          <span className="text-[11px] font-bold text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-1.5 py-0.5 rounded-md">{task.storyPoints ? `${task.storyPoints} pts` : ''}</span>
         </div>
-      )}
+        <h4 className="text-[13px] font-semibold leading-snug text-[color:var(--color-foreground)]">{task.title}</h4>
+        {task.assignees && task.assignees.length > 0 && (
+          <div className="mt-3.5 flex -space-x-1.5 pt-3 border-t border-[color:var(--color-border-light)]">
+            {task.assignees.map((a: any) => (
+              <div key={a.email} className="h-6 w-6 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-[10px] font-bold border-2 border-[color:var(--color-surface)] shadow-xs" title={a.name}>
+                {a.name.charAt(0)}
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
     </div>
   );
 }
@@ -134,19 +141,19 @@ export default function AgileBoardPage() {
               {columns.map((col) => {
                 const colTasks = activeTasks.filter(t => t.status === col.id);
                 return (
-                  <div key={col.id} className="flex w-80 flex-col rounded-xl" style={{ background: 'var(--color-surface-hover)' }}>
-                    <div className="flex items-center justify-between p-4">
-                      <h3 className="font-semibold text-[var(--color-foreground)]">{col.label}</h3>
-                      <span className="flex h-5 items-center justify-center rounded-full px-2 text-xs font-medium" style={{ background: 'var(--color-surface)', color: 'var(--color-muted)' }}>
+                  <div key={col.id} className="flex w-[320px] flex-col">
+                    <div className="mb-4 flex items-center justify-between px-2">
+                      <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{col.label}</h3>
+                      <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border">
                         {colTasks.length}
                       </span>
                     </div>
                     
                     <SortableContext items={colTasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
-                      <div className="flex-1 p-2 flex flex-col gap-2 min-h-[200px]" id={col.id}>
+                      <div className="flex-1 rounded-3xl border-2 border-transparent bg-[color:var(--color-surface-active)] p-2.5 flex flex-col gap-1 min-h-[400px]" id={col.id}>
                         {colTasks.length === 0 ? (
-                          <div className="flex h-full min-h-[100px] items-center justify-center border-2 border-dashed rounded-lg opacity-50" style={{ borderColor: 'var(--color-border-light)' }}>
-                            <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Drop tasks here</p>
+                          <div className="flex h-full min-h-[100px] items-center justify-center border-2 border-dashed rounded-2xl opacity-50 m-1 bg-[color:var(--color-background)] border-[color:var(--color-border-light)]">
+                            <p className="text-xs font-bold uppercase tracking-widest text-[color:var(--color-muted)]">Drop tasks here</p>
                           </div>
                         ) : (
                           colTasks.map(task => (
