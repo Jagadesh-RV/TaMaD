@@ -4,6 +4,7 @@ import { useAuthStore } from "./store/authStore";
 
 import AppLayout from "./components/layout/AppLayout";
 import { RealtimeProvider } from "./providers/RealtimeProvider";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 const LandingPage = lazy(() => import("./pages/LandingPage"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage"));
@@ -33,7 +34,6 @@ const FilesPage = lazy(() => import("./pages/FilesPage"));
 const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
 const TemplatesPage = lazy(() => import("./pages/TemplatesPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
-const ErrorBoundary = lazy(() => import("./components/ui/ErrorBoundary"));
 const AgileBoardPage = lazy(() => import("./pages/AgileBoardPage"));
 const SprintPlanningPage = lazy(() => import("./pages/SprintPlanningPage"));
 const MembersPage = lazy(() => import("./pages/teams/MembersPage"));

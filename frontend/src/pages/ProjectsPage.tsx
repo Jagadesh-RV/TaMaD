@@ -1,26 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   Plus,
   Calendar,
   Users,
-  CheckCircle2,
   FolderKanban,
   ChevronDown,
   ChevronUp,
+  Trash2,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isPast, parseISO } from 'date-fns';
-import clsx from 'clsx';
 import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
 
 export default function ProjectsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectToDelete, setProjectToDelete] = useState<any>(null);
 
   const { projects, fetchProjects, createProject, deleteProject, loading: projectsLoading, error: projectsError } = useProjectStore() as any;
   const { tasks, fetchTasks } = useTaskStore();
@@ -44,15 +45,21 @@ export default function ProjectsPage() {
     }
   }, [fetchProjects, fetchTasks, workspaceId]);
 
-  const getProjectStats = (projectId: string) => {
-    const projectTasks = tasks.filter((t: any) => t.projectId === projectId);
-    const completed = projectTasks.filter((t: any) => t.status === 'done').length;
-    return {
-      totalTasks: projectTasks.length,
-      completedTasks: completed,
-      progress: projectTasks.length > 0 ? Math.round((completed / projectTasks.length) * 100) : 0,
-    };
-  };
+  const projectStats = useMemo(() => {
+    const stats = new Map<string, { totalTasks: number; completedTasks: number; progress: number }>();
+    for (const task of tasks as any[]) {
+      const entry = stats.get(task.projectId) || { totalTasks: 0, completedTasks: 0, progress: 0 };
+      entry.totalTasks += 1;
+      if (task.status === 'done') entry.completedTasks += 1;
+      stats.set(task.projectId, entry);
+    }
+    for (const entry of stats.values()) {
+      entry.progress = entry.totalTasks > 0 ? Math.round((entry.completedTasks / entry.totalTasks) * 100) : 0;
+    }
+    return stats;
+  }, [tasks]);
+
+  const getProjectStats = (projectId: string) => projectStats.get(projectId) ?? { totalTasks: 0, completedTasks: 0, progress: 0 };
 
   const totalProjects = projects.length;
   const totalTasksAll = projects.reduce((sum: number, p: any) => sum + getProjectStats(p._id).totalTasks, 0);
@@ -77,9 +84,18 @@ export default function ProjectsPage() {
     await createProject({ ...data, workspaceId });
   };
 
-  const handleDeleteProject = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-      deleteProject(id);
+  const handleDeleteClick = (id: string) => {
+    const project = projects.find((p: any) => p._id === id);
+    setProjectToDelete(project || null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!projectToDelete) return;
+    try {
+      await deleteProject(projectToDelete._id);
+      setProjectToDelete(null);
+    } catch {
+      setProjectToDelete(null);
     }
   };
 
@@ -190,9 +206,23 @@ export default function ProjectsPage() {
                         </p>
                       </div>
                     </div>
-                    <button className="btn btn-ghost btn-icon-sm flex-shrink-0" style={{ color: 'var(--color-muted)' }}>
-                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        className="btn btn-ghost btn-icon-sm flex-shrink-0 transition-colors hover:bg-[color:var(--color-danger-light)] hover:text-[color:var(--color-danger)]"
+                        style={{ color: 'var(--color-muted)' }}
+                        title="Delete project"
+                        aria-label={`Delete ${project.name || 'project'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(project._id);
+                        }}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                      <button className="btn btn-ghost btn-icon-sm flex-shrink-0" style={{ color: 'var(--color-muted)' }}>
+                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                    </div>
                   </div>
 
                   {/* Progress Bar */}
@@ -282,6 +312,20 @@ export default function ProjectsPage() {
       )}
 
       <ProjectModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSaveProject} />
+
+      <ConfirmDialog
+        open={!!projectToDelete}
+        title="Delete project"
+        message={
+          <>
+            Are you sure you want to delete <strong>{projectToDelete?.name || 'this project'}</strong>? This action
+            cannot be undone.
+          </>
+        }
+        confirmLabel="Delete project"
+        onConfirm={handleConfirmDelete}
+        onClose={() => setProjectToDelete(null)}
+      />
     </div>
   );
 }

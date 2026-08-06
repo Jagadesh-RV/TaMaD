@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskCard from './TaskCard';
@@ -19,11 +20,13 @@ interface TaskColumnProps {
   onTaskClick?: (task: Task) => void;
 }
 
-export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onToggleSelect, onTaskClick }: TaskColumnProps) {
+function TaskColumn({ id, title, tasks, selectedTaskIds = [], onToggleSelect, onTaskClick }: TaskColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: { type: 'Column', columnId: id },
   });
+
+  const handleTaskClick = useCallback((task: Task) => onTaskClick?.(task), [onTaskClick]);
 
   return (
     <div className="flex min-w-[280px] max-w-[320px] flex-1 flex-col">
@@ -51,7 +54,7 @@ export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onT
                 task={task} 
                 isSelected={selectedTaskIds.includes(task._id)}
                 onToggleSelect={onToggleSelect}
-                onClick={() => onTaskClick && onTaskClick(task)}
+                onClick={() => handleTaskClick(task)}
               />
             ))}
           </div>
@@ -60,3 +63,5 @@ export default function TaskColumn({ id, title, tasks, selectedTaskIds = [], onT
     </div>
   );
 }
+
+export default memo(TaskColumn);

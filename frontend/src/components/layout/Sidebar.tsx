@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
   FileText, PenTool, BarChart3, Bell, Settings, User, ChevronLeft,
@@ -95,6 +94,15 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     navigate('/login', { replace: true });
   };
 
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      const timer = window.setTimeout(() => closeButtonRef.current?.focus(), 30);
+      return () => window.clearTimeout(timer);
+    }
+  }, [isMobile, isOpen]);
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Brand */}
@@ -173,6 +181,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         <div className="px-2 pb-2">
           <button
             onClick={onToggleCollapse}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className="flex w-full items-center justify-center rounded-lg p-2 transition-colors"
             style={{ color: 'var(--color-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-surface-hover)')}
@@ -232,6 +241,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
               onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-danger)'; e.currentTarget.style.background = 'var(--color-danger-light)'; }}
               onMouseLeave={e => { e.currentTarget.style.color = 'var(--color-muted)'; e.currentTarget.style.background = 'transparent'; }}
               title="Sign out"
+              aria-label="Sign out"
             >
               <LogOut size={16} />
             </button>
@@ -252,6 +262,9 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
           />
         )}
         <aside
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation"
           className={clsx(
             'fixed inset-y-0 left-0 z-50 flex flex-col transition-transform duration-300',
             isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -260,7 +273,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         >
           <div className="flex items-center justify-between p-4 pb-0">
             <div />
-            <button onClick={onClose} className="rounded-lg p-1.5" style={{ color: 'var(--color-muted)' }}>
+            <button ref={closeButtonRef} onClick={onClose} aria-label="Close menu" className="rounded-lg p-1.5" style={{ color: 'var(--color-muted)' }}>
               <ChevronLeft size={20} />
             </button>
           </div>

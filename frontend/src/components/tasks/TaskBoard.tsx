@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -45,11 +45,16 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleToggleSelect = (id: string) => {
+  const handleToggleSelect = useCallback((id: string) => {
     setSelectedTaskIds(prev => 
       prev.includes(id) ? prev.filter(tId => tId !== id) : [...prev, id]
     );
-  };
+  }, []);
+
+  const tasksByColumn = useMemo(
+    () => Object.fromEntries(COLUMNS.map((colId) => [colId, localTasks.filter((t) => t.status === colId)])),
+    [localTasks]
+  );
 
   const handleBulkDelete = () => {
     if (confirm(`Delete ${selectedTaskIds.length} tasks?`)) {
@@ -132,7 +137,7 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
   };
 
   if (loading && localTasks.length === 0) {
-    return <div className="p-8 text-center text-gray-500">Loading tasks...</div>;
+    return <div className="p-8 text-center text-[color:var(--color-muted)]">Loading tasks...</div>;
   }
 
   return (
@@ -149,7 +154,7 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
             key={colId}
             id={colId}
             title={colId}
-            tasks={localTasks.filter((t) => t.status === colId)}
+            tasks={tasksByColumn[colId]}
             selectedTaskIds={selectedTaskIds}
             onToggleSelect={handleToggleSelect}
             onTaskClick={onTaskClick}
@@ -168,10 +173,10 @@ export default function TaskBoard({ onTaskClick }: { onTaskClick?: (task: any) =
             {selectedTaskIds.length} selected
           </span>
           <div className="h-6 w-px bg-border" />
-          <button onClick={handleBulkComplete} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors">
+          <button onClick={handleBulkComplete} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-[color:var(--color-success)] hover:bg-[color:var(--color-success-light)] transition-colors">
             <CheckCircle2 size={16} /> Mark Done
           </button>
-          <button onClick={handleBulkDelete} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+          <button onClick={handleBulkDelete} className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger-light)] transition-colors">
             <Trash2 size={16} /> Delete
           </button>
         </div>
