@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
+import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
@@ -54,6 +55,38 @@ export default function AppLayout() {
       </div>
 
       <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
+      
+      <Toaster
+        position="bottom-right"
+        toastOptions={{
+          className: 'shadow-lg font-medium text-sm rounded-2xl',
+          style: {
+            background: 'var(--color-surface)',
+            color: 'var(--color-foreground)',
+            border: '1px solid var(--color-border)',
+            padding: '12px 20px',
+            boxShadow: 'var(--shadow-md)',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--color-success)',
+              secondary: 'var(--color-background)',
+            },
+            style: {
+              border: '1px solid var(--color-success-ghost)',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: 'var(--color-danger)',
+              secondary: 'var(--color-background)',
+            },
+            style: {
+              border: '1px solid var(--color-danger-ghost)',
+            },
+          },
+        }}
+      />
     </div>
   );
 }
