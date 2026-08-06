@@ -1,5 +1,6 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { Card } from '../ui/Card';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -13,8 +14,8 @@ export const BurndownWidget = () => {
     { day: 'Sat', ideal: 0, actual: 5 },
   ];
   return (
-    <div className="w-full h-full flex flex-col p-4 bg-[color:var(--color-surface)] border border-[color:var(--color-border-light)] rounded-xl shadow-sm">
-      <h3 className="text-sm font-semibold text-[color:var(--color-foreground)] mb-4">Sprint Burndown</h3>
+    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
+      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Sprint Burndown</h3>
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
@@ -27,7 +28,7 @@ export const BurndownWidget = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -40,8 +41,8 @@ export const VelocityWidget = () => {
     { sprint: 'Sprint 5', points: 42 },
   ];
   return (
-    <div className="w-full h-full flex flex-col p-4 bg-[color:var(--color-surface)] border border-[color:var(--color-border-light)] rounded-xl shadow-sm">
-      <h3 className="text-sm font-semibold text-[color:var(--color-foreground)] mb-4">Team Velocity</h3>
+    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
+      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Team Velocity</h3>
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
@@ -53,7 +54,7 @@ export const VelocityWidget = () => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -65,8 +66,8 @@ export const WorkloadWidget = () => {
     { name: 'Jordan', tasks: 5 },
   ];
   return (
-    <div className="w-full h-full flex flex-col p-4 bg-[color:var(--color-surface)] border border-[color:var(--color-border-light)] rounded-xl shadow-sm">
-      <h3 className="text-sm font-semibold text-[color:var(--color-foreground)] mb-4">Workload Distribution</h3>
+    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
+      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Workload Distribution</h3>
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -93,21 +94,21 @@ export const WorkloadWidget = () => {
 
 export const ActiveSprintWidget = () => {
   return (
-    <div className="w-full h-full flex flex-col p-4 bg-[color:var(--color-surface)] border border-[color:var(--color-border-light)] rounded-xl shadow-sm">
-      <h3 className="text-sm font-semibold text-[color:var(--color-foreground)] mb-4">Active Sprint Progress</h3>
+    <Card className="w-full h-full flex flex-col p-6 shadow-sm justify-between">
+      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-2">Active Sprint Progress</h3>
       <div className="flex-1 flex flex-col justify-center">
-        <div className="flex items-end justify-between mb-2">
-          <span className="text-3xl font-bold text-[color:var(--color-foreground)]">65%</span>
-          <span className="text-sm font-medium text-[color:var(--color-muted)]">3 days remaining</span>
+        <div className="flex items-end justify-between mb-4">
+          <span className="text-5xl font-extrabold tracking-tighter text-[color:var(--color-foreground)]">65%</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-1 rounded-full">3 days remaining</span>
         </div>
-        <div className="w-full h-3 bg-[color:var(--color-surface-hover)] rounded-full overflow-hidden">
-          <div className="h-full bg-[color:var(--color-accent)]" style={{ width: '65%' }}></div>
+        <div className="w-full h-4 bg-[color:var(--color-surface-active)] rounded-full overflow-hidden shadow-inner">
+          <div className="h-full bg-[color:var(--color-accent)] rounded-full shadow-sm" style={{ width: '65%' }}></div>
         </div>
-        <div className="mt-4 flex justify-between text-xs text-[color:var(--color-muted)]">
+        <div className="mt-5 flex justify-between text-xs font-semibold text-[color:var(--color-muted)] uppercase tracking-wider">
           <span>42/65 pts completed</span>
           <span>12 issues open</span>
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
