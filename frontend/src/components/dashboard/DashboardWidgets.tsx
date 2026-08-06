@@ -88,7 +88,7 @@ export const WorkloadWidget = () => {
           </PieChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </Card>
   );
 };
 
