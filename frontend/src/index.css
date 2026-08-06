@@ -472,7 +472,7 @@
     @apply flex items-center justify-between py-2 px-1 sticky top-0 bg-transparent;
   }
   .kanban-card {
-    @apply relative p-4 transition-all duration-200 cursor-grab group;
+    @apply relative p-4 transition-all duration-200 cursor-grab;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
