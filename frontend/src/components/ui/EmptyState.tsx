@@ -22,20 +22,21 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
 }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      className={`empty-state ${className}`}
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+      className={`flex flex-col items-center justify-center py-16 text-center ${className}`}
     >
-      <div className="empty-state-icon">
-        <Icon size={48} />
+      <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[color:var(--color-surface-active)] shadow-inner text-[color:var(--color-muted)]">
+        <Icon size={40} />
       </div>
-      <h3 className="empty-state-title">{title}</h3>
-      <p className="empty-state-description">{description}</p>
+      <h3 className="mb-3 text-2xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">{title}</h3>
+      <p className="mb-8 max-w-sm text-[15px] font-medium leading-relaxed text-[color:var(--color-foreground-secondary)]">{description}</p>
       {action && (
         <button
           onClick={action.onClick}
-          className="btn btn-primary"
+          className="flex h-12 items-center justify-center rounded-2xl bg-[color:var(--color-foreground)] px-8 font-bold text-[color:var(--color-background)] transition-transform hover:scale-105 active:scale-95 shadow-md"
         >
           {action.label}
         </button>
