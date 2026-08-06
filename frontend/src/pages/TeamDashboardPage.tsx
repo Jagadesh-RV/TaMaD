@@ -28,25 +28,25 @@ export default function TeamDashboardPage() {
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[color:var(--color-background)]">
-      <div className="flex items-center justify-between border-b p-6" style={{ borderColor: 'var(--color-border-light)' }}>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between px-8 py-6 mb-2">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>{dashboard.name}</h1>
-          <p className="mt-1 text-sm text-[color:var(--color-muted)]">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">{dashboard.name}</h1>
+          <p className="mt-2 text-sm font-medium text-[color:var(--color-foreground-secondary)]">
             Command center for {currentWorkspace.name}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {isEditing ? (
             <>
-              <Button variant="secondary" onClick={() => setIsEditing(false)}>
+              <Button variant="secondary" onClick={() => setIsEditing(false)} className="rounded-xl px-5">
                 <X size={16} className="mr-2" /> Cancel
               </Button>
-              <Button onClick={handleSave}>
+              <Button onClick={handleSave} className="rounded-xl px-5 shadow-sm">
                 <Save size={16} className="mr-2" /> Save Layout
               </Button>
             </>
           ) : (
-            <Button variant="secondary" onClick={() => setIsEditing(true)}>
+            <Button variant="secondary" onClick={() => setIsEditing(true)} className="rounded-xl px-5">
               <Settings size={16} className="mr-2" /> Customize
             </Button>
           )}

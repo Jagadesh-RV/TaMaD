@@ -27,6 +27,7 @@ import { useAuthStore } from '../store/authStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
 
 interface Task {
   _id: string;
@@ -177,71 +178,69 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       className={clsx(
-        'group relative cursor-grab rounded-xl border p-3.5 transition-all active:cursor-grabbing',
-        isDragging ? 'z-50 scale-[1.02] shadow-float' : 'shadow-xs hover:shadow-soft',
+        'group relative cursor-grab transition-all active:cursor-grabbing outline-none',
+        isDragging ? 'z-50 scale-[1.02]' : '',
       )}
       {...attributes}
       {...listeners}
       onClick={onClick}
     >
-      <div
-        className="absolute inset-0 rounded-xl border-2 border-transparent transition-colors"
-        style={{
-          background: 'var(--color-surface)',
-          borderColor: isDragging ? 'var(--color-accent)' : 'var(--color-border)',
-        }}
-      />
+      <Card
+        interactive
+        className={clsx(
+          "p-3.5 border transition-all duration-300",
+          isDragging ? "shadow-float border-accent bg-surface-hover ring-2 ring-accent/20" : "shadow-xs hover:shadow-soft border-border hover:border-border-hover bg-surface"
+        )}
+      >
+        <div className="relative">
+          <div className="mb-2.5 flex items-start justify-between gap-2">
+            <h4 className="text-[13px] font-semibold leading-snug text-[color:var(--color-foreground)] group-hover:text-[color:var(--color-accent)] transition-colors">
+              {task.title}
+            </h4>
+            <GripVertical size={14} className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity text-[color:var(--color-muted)]" />
+          </div>
 
-      <div className="relative">
-        <div className="mb-2.5 flex items-start justify-between gap-2">
-          <h4 className="text-[13px] font-medium leading-snug" style={{ color: 'var(--color-foreground)' }}>
-            {task.title}
-          </h4>
-          <GripVertical size={14} className="shrink-0 opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: 'var(--color-muted)' }} />
-        </div>
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <PriorityBadge priority={task.priority} />
+            {task.tags?.slice(0, 2).map((tag: string) => (
+              <span
+                key={tag}
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
 
-        <div className="mb-3 flex flex-wrap gap-1.5">
-          <PriorityBadge priority={task.priority} />
-          {task.tags?.slice(0, 2).map((tag: string) => (
-            <span
-              key={tag}
-              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-              style={{ background: 'var(--color-surface-active)', color: 'var(--color-muted)' }}
-            >
-              {tag}
-            </span>
-          ))}
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-light">
+            <MemberAvatar memberId={task.assignee} />
+            {task.dueDate && (
+              <span
+                className={clsx(
+                  'inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wide',
+                  isOverdue(task) && 'font-extrabold',
+                )}
+                style={{ color: isOverdue(task) ? 'var(--color-danger)' : 'var(--color-muted)' }}
+              >
+                <Clock size={11} strokeWidth={2.5} />
+                {formatDueDate(task.dueDate)}
+              </span>
+            )}
+          </div>
         </div>
-
-        <div className="flex items-center justify-between">
-          <MemberAvatar memberId={task.assignee} />
-          {task.dueDate && (
-            <span
-              className={clsx(
-                'inline-flex items-center gap-1 text-[11px] font-medium',
-                isOverdue(task) && 'font-semibold',
-              )}
-              style={{ color: isOverdue(task) ? 'var(--color-danger)' : 'var(--color-muted)' }}
-            >
-              <Clock size={11} />
-              {formatDueDate(task.dueDate)}
-            </span>
-          )}
-        </div>
-      </div>
+      </Card>
     </motion.div>
   );
 }
 
 function KanbanOverlay({ task }: { task: Task }) {
   return (
-    <div
-      className="w-[300px] rounded-xl border p-3.5 shadow-float"
-      style={{ background: 'var(--color-surface)', borderColor: 'var(--color-accent)' }}
+    <Card
+      className="w-[300px] p-3.5 shadow-float border-accent bg-surface-hover ring-2 ring-accent/20 rotate-2"
     >
-      <h4 className="text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</h4>
-      <div className="mt-2"><PriorityBadge priority={task.priority} /></div>
-    </div>
+      <h4 className="text-[13px] font-semibold text-[color:var(--color-foreground)]">{task.title}</h4>
+      <div className="mt-3"><PriorityBadge priority={task.priority} /></div>
+    </Card>
   );
 }
 
@@ -266,13 +265,14 @@ function KanbanColumn({
   const taskIds = tasks.map(t => t._id);
 
   return (
-    <div className="flex min-w-[280px] max-w-[320px] flex-1 flex-col">
-      <div className="mb-3 flex items-center gap-2.5 px-1">
-        <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
-        <h3 className="text-sm font-semibold" style={{ color: 'var(--color-foreground)' }}>{label}</h3>
+    <div className="flex min-w-[300px] max-w-[340px] flex-1 flex-col">
+      <div className="mb-4 flex items-center justify-between px-2">
+        <div className="flex items-center gap-3">
+          <span className="h-3 w-3 rounded-full shadow-sm" style={{ background: color }} />
+          <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{label}</h3>
+        </div>
         <span
-          className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold"
-          style={{ background: 'var(--color-surface-active)', color: 'var(--color-muted)' }}
+          className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border"
         >
           {tasks.length}
         </span>
@@ -281,30 +281,25 @@ function KanbanColumn({
       <div
         ref={setNodeRef}
         className={clsx(
-          'flex min-h-[480px] flex-1 flex-col rounded-2xl border p-2 transition-all',
-          isOver ? 'border-[color:var(--color-accent)]/30' : '',
+          'flex min-h-[500px] flex-1 flex-col rounded-3xl border-2 p-2.5 transition-all duration-300',
+          isOver ? 'border-[color:var(--color-accent)] bg-[color:var(--color-accent-ghost)]' : 'border-transparent bg-[color:var(--color-surface-active)]',
         )}
-        style={{
-          background: isOver ? 'var(--color-surface-hover)' : 'var(--color-surface-active)',
-          borderColor: isOver ? 'var(--color-accent)' : 'var(--color-border-light)',
-        }}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2.5 h-full">
             <AnimatePresence>
               {tasks.map(task => (
                 <KanbanCard key={task._id} task={task} onClick={() => onTaskClick(task)} />
               ))}
             </AnimatePresence>
+            
+            {tasks.length === 0 && (
+              <div className="flex flex-1 items-center justify-center rounded-2xl border-2 border-dashed border-border-light m-1 opacity-50 bg-[color:var(--color-background)]">
+                <p className="text-xs font-bold uppercase tracking-widest text-[color:var(--color-muted)]">Drop tasks here</p>
+              </div>
+            )}
           </div>
         </SortableContext>
-
-        {tasks.length === 0 && (
-          <div className="flex flex-1 items-center justify-center rounded-xl border-2 border-dashed p-6"
-            style={{ borderColor: 'var(--color-border)' }}>
-            <p className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>Drop tasks here</p>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -590,20 +585,20 @@ export default function TasksPage() {
       </div>
 
       {/* Filter Bar */}
-      <div
-        className="mb-4 flex flex-col gap-3 rounded-2xl border p-3 sm:flex-row sm:items-center"
-        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+      <Card
+        className="mb-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center shadow-xs"
       >
-        <div className="search-input flex-1">
-          <Search size={16} style={{ color: 'var(--color-muted)' }} />
+        <div className="search-input flex-1 bg-[color:var(--color-surface-active)] border-transparent focus-within:border-[color:var(--color-accent)] focus-within:bg-[color:var(--color-surface)] transition-all">
+          <Search size={18} className="text-[color:var(--color-muted)]" />
           <input
             placeholder="Search tasks..."
             value={search}
             onChange={e => setSearch(e.target.value)}
+            className="text-sm font-medium"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="rounded p-0.5 transition-colors hover:bg-[color:var(--color-surface-active)]">
-              <X size={14} style={{ color: 'var(--color-muted)' }} />
+            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]">
+              <X size={14} className="text-[color:var(--color-muted)]" />
             </button>
           )}
         </div>
@@ -611,8 +606,7 @@ export default function TasksPage() {
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-xl border px-3 py-2 text-[12px] font-medium outline-none transition-all"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-foreground)' }}
+          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-bold outline-none transition-all hover:border-border-hover focus:border-[color:var(--color-accent)] shadow-xs"
         >
           {STATUS_OPTIONS.map(s => (
             <option key={s} value={s}>{statusLabels[s]}{s !== 'all' && statusCounts[s] !== undefined ? ` (${statusCounts[s]})` : ''}</option>
@@ -622,8 +616,7 @@ export default function TasksPage() {
         <select
           value={priorityFilter}
           onChange={e => setPriorityFilter(e.target.value)}
-          className="rounded-xl border px-3 py-2 text-[12px] font-medium outline-none transition-all"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-foreground)' }}
+          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-bold outline-none transition-all hover:border-border-hover focus:border-[color:var(--color-accent)] shadow-xs"
         >
           {PRIORITY_OPTIONS.map(p => (
             <option key={p} value={p}>{priorityLabels[p]}</option>
@@ -633,41 +626,42 @@ export default function TasksPage() {
         {(search || statusFilter !== 'all' || priorityFilter !== 'all') && (
           <button
             onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); }}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors"
-            style={{ color: 'var(--color-danger)', background: 'var(--color-danger-light)' }}
+            className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all bg-[color:var(--color-danger-light)] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)] hover:text-white"
           >
-            <X size={12} />
+            <X size={14} />
             Clear
           </button>
         )}
-      </div>
+      </Card>
 
       {/* Quick Add */}
-      <div
-        className="mb-4 flex items-center gap-3 rounded-2xl border p-2.5"
-        style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
+      <Card
+        className="mb-6 flex items-center gap-3 p-2 pl-3 shadow-xs border-dashed focus-within:border-solid focus-within:border-[color:var(--color-accent)] transition-all"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ background: 'var(--color-accent-light)' }}>
-          <Plus size={16} style={{ color: 'var(--color-accent)' }} />
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-accent-ghost)]">
+          <Plus size={18} className="text-[color:var(--color-accent)]" />
         </div>
         <input
           value={quickTitle}
           onChange={e => setQuickTitle(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
-          placeholder="Quick add a task..."
-          className="flex-1 bg-transparent text-[13px] font-medium outline-none"
-          style={{ color: 'var(--color-foreground)' }}
+          placeholder="Quick add a task... (Press Enter)"
+          className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
         />
-        {quickTitle.trim() && (
-          <button
-            onClick={handleQuickAdd}
-            className="rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-all"
-            style={{ background: 'var(--color-accent)', color: 'white' }}
-          >
-            Add
-          </button>
-        )}
-      </div>
+        <AnimatePresence>
+          {quickTitle.trim() && (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
+              <Button
+                onClick={handleQuickAdd}
+                size="sm"
+                className="rounded-lg shadow-sm"
+              >
+                Add Task
+              </Button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
