@@ -1,21 +1,30 @@
 import * as React from 'react';
 import { clsx } from 'clsx';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-type CardProps = React.HTMLAttributes<HTMLDivElement> & {
-  variant?: 'default' | 'elevated';
+type CardProps = HTMLMotionProps<"div"> & {
+  variant?: 'default' | 'elevated' | 'glass';
+  interactive?: boolean;
 };
 
-export function Card({ className, variant = 'default', ...props }: CardProps) {
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(function Card(
+  { className, variant = 'default', interactive = false, whileHover, ...props },
+  ref
+) {
   return (
-    <div
+    <motion.div
+      ref={ref}
+      whileHover={interactive ? (whileHover ?? { y: -2 }) : undefined}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={clsx(
-        'rounded-2xl border border-border bg-surface',
-        variant === 'elevated' && 'shadow-soft',
+        'card',
+        variant === 'glass' && 'glass',
+        interactive && 'cursor-pointer',
         className,
       )}
       {...props}
     />
   );
-}
+});
 
 export default Card;
