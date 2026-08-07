@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
 import { QuickCreate } from '../ui/QuickCreate';
+import { Inspector } from '../ui/Inspector';
 import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { pageVariants } from '../../utils/motion';
 import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
@@ -79,6 +80,7 @@ export default function AppLayout() {
 
       <CommandPalette />
       <QuickCreate />
+      <Inspector />
       
       <Toaster
         position="bottom-right"
