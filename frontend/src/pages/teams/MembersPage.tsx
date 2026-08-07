@@ -63,7 +63,7 @@ export default function MembersPage() {
           </p>
           <h1 className="page-title">Team Members</h1>
           <p className="page-subtitle mt-1">
-            Manage who's in your workspace and what they can do.
+            Manage who&apos;s in your workspace and what they can do.
           </p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 py-2 shadow-xs">
@@ -86,7 +86,7 @@ export default function MembersPage() {
           </span>
           <div>
             <h3 className="text-sm font-bold text-[color:var(--color-foreground)]">Invite new member</h3>
-            <p className="text-xs font-medium text-[color:var(--color-muted)]">They'll get an email to join your team.</p>
+            <p className="text-xs font-medium text-[color:var(--color-muted)]">They&apos;ll get an email to join your team.</p>
           </div>
         </div>
         <form onSubmit={handleInvite} className="flex flex-col gap-3 sm:flex-row sm:items-center">
