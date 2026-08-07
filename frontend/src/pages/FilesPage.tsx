@@ -4,13 +4,14 @@ import {
   Upload, Search, Grid3X3, List, ArrowUpDown, Trash2, Archive,
   RotateCcw, Eye, Download, FolderOpen, Image, FileText, File,
   Film, Music, ArchiveIcon, HardDrive, Folder, ChevronDown,
-  X, Loader2, Plus, Filter,
+  X, Loader2, Filter,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { useFileStore } from '../store/fileStore';
 import { useAuthStore } from '../store/authStore';
 import { useFileUpload, formatFileSize } from '../hooks/useFileUpload';
 import FileUpload from '../components/ui/FileUpload';
+import EmptyState from '../components/ui/EmptyState';
 import { showToast } from '../lib/toast';
 
 const FILE_ICONS: Record<string, typeof File> = {
@@ -379,28 +380,21 @@ export default function FilesPage() {
           <Loader2 size={24} className="animate-spin" style={{ color: 'var(--color-accent)' }} />
         </div>
       ) : files.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div
-            className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: 'var(--color-surface-active)', color: 'var(--color-muted)' }}
-          >
-            <FolderOpen size={28} />
-          </div>
-          <h3 className="mb-2 text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>
-            {searchQuery ? 'No files found' : 'No files yet'}
-          </h3>
-          <p className="mb-6 text-sm text-center max-w-sm" style={{ color: 'var(--color-muted)' }}>
-            {searchQuery
-              ? 'Try adjusting your search terms.'
-              : 'Drop files anywhere on this page or click Upload to get started.'}
-          </p>
-          {!searchQuery && (
-            <label className="btn btn-primary cursor-pointer gap-1.5">
-              <Plus size={16} /> Upload Files
-              <input type="file" multiple onChange={handleQuickUpload} className="hidden" />
-            </label>
-          )}
-        </div>
+        <EmptyState
+          icon={searchQuery ? Search : FolderOpen}
+          title={searchQuery ? 'No matching files' : 'No files yet'}
+          description={
+            searchQuery
+              ? 'Nothing matches your search. Try different terms or widen the net.'
+              : 'Your file hub is ready. Bring in the first asset and give your workspace a memory.'
+          }
+          steps={
+            searchQuery
+              ? ['Check the spelling of your search terms', 'Try a broader keyword', 'Clear the search filter']
+              : ['Click Upload Files and pick what to bring in', 'Files appear instantly in this grid', 'Preview or download them any time']
+          }
+          action={searchQuery ? undefined : { label: 'Upload Files', onClick: () => setShowUploadModal(true) }}
+        />
       ) : viewMode === 'grid' ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {files.map((file) => {

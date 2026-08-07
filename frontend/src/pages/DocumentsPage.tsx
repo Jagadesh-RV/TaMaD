@@ -9,6 +9,7 @@ import { useDocumentStore } from '../store/documentStore';
 import { useAuthStore } from '../store/authStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
 
 type SortField = 'title' | 'updatedAt' | 'createdAt';
 
@@ -139,31 +140,24 @@ export default function DocumentsPage() {
             ))}
           </div>
         ) : filteredDocuments.length === 0 ? (
-          <motion.div
+          <EmptyState
             key="empty"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="empty-state"
-          >
-            <div className="empty-state-icon">
-              <FileText size={32} />
-            </div>
-            <p className="empty-state-title">
-              {searchQuery ? 'No matching documents' : showArchived ? 'No archived documents' : 'No documents yet'}
-            </p>
-            <p className="empty-state-description">
-              {searchQuery
-                ? 'Try adjusting your search terms.'
-                : 'Create your first document to get started.'}
-            </p>
-            {!searchQuery && (
-              <Button onClick={handleCreate} className="btn-primary mt-4">
-                <Plus size={16} />
-                Create Document
-              </Button>
-            )}
-          </motion.div>
+            icon={FileText}
+            title={searchQuery ? 'No matching documents' : showArchived ? 'No archived documents' : 'No documents yet'}
+            description={
+              searchQuery
+                ? 'Nothing matches your search. Try different terms or widen the net.'
+                : showArchived
+                  ? 'Archived documents will gather here when you tidy up.'
+                  : 'A blank page is a promise. Create the first document and start turning thoughts into artifacts.'
+            }
+            steps={
+              searchQuery
+                ? ['Check the spelling of your search terms', 'Try a broader keyword', 'Clear the search filter']
+                : ['Click Create Document to open a fresh page', 'Start writing — drafts save automatically', 'Organize with folders and tags as you go']
+            }
+            action={searchQuery ? undefined : { label: 'Create Document', onClick: handleCreate }}
+          />
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredDocuments.map((doc, index) => (

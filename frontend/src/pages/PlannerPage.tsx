@@ -7,6 +7,7 @@ import { useHabitStore } from '../store/habitStore';
 import { useAuthStore } from '../store/authStore';
 import GoalModal from '../components/planner/GoalModal';
 import HabitModal from '../components/planner/HabitModal';
+import EmptyState from '../components/ui/EmptyState';
 
 export default function PlannerPage() {
   const [activeTab, setActiveTab] = useState<'habits' | 'goals'>('habits');
@@ -80,9 +81,17 @@ export default function PlannerPage() {
       {activeTab === 'habits' ? (
         <div className="grid gap-4">
           {habits.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm font-medium border-2 border-dashed border-gray-200 rounded-2xl">
-              No habits yet. Create one to start building consistency!
-            </div>
+            <EmptyState
+              icon={Activity}
+              title="No habits yet"
+              description="Small daily reps compound into results. Build one habit and let consistency do the heavy lifting."
+              steps={[
+                'Click New Habit and name your daily practice',
+                'Check in every day to grow your streak',
+                'Watch small wins turn into long-term momentum',
+              ]}
+              action={{ label: 'New Habit', onClick: () => setIsHabitModalOpen(true) }}
+            />
           ) : habits.map((habit: any) => (
             <div key={habit._id} className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4">
@@ -126,9 +135,18 @@ export default function PlannerPage() {
       ) : (
         <div className="grid lg:grid-cols-2 gap-6">
           {goals.length === 0 ? (
-            <div className="col-span-2 flex items-center justify-center h-32 text-gray-400 text-sm font-medium border-2 border-dashed border-gray-200 rounded-2xl">
-              No goals yet. Set a long-term goal to track!
-            </div>
+            <EmptyState
+              icon={Target}
+              title="No goals yet"
+              description="A goal gives your effort a direction. Set a long-term target and break it into milestones you can actually reach."
+              steps={[
+                'Click New Goal and picture the finish line',
+                'Define milestones to make progress visible',
+                'Track your climb until the goal is done',
+              ]}
+              action={{ label: 'New Goal', onClick: () => setIsGoalModalOpen(true) }}
+              className="col-span-2"
+            />
           ) : goals.map((goal: any) => (
             <div key={goal._id} className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-md transition-all group">
               <div className="flex justify-between items-start mb-6">
