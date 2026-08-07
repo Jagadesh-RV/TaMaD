@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useNotifStore } from '../store/notifStore';
+import EmptyState from '../components/ui/EmptyState';
 
 type FilterTab = 'all' | 'unread' | 'mentions' | 'assignments';
 
@@ -169,27 +170,24 @@ export default function NotificationsPage() {
             <p className="mt-4 text-sm" style={{ color: 'var(--color-muted)' }}>Loading notifications...</p>
           </div>
         ) : filteredNotifications.length === 0 ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="empty-state"
-          >
-            <div className="empty-state-icon">
-              <Inbox size={32} />
-            </div>
-            <p className="empty-state-title">No notifications</p>
-            <p className="empty-state-description">
-              {activeTab === 'unread'
-                ? "You're all caught up! No unread notifications."
+          <EmptyState
+            icon={Inbox}
+            title="No notifications"
+            description={
+              activeTab === 'unread'
+                ? "You're all caught up. No unread notifications right now."
                 : activeTab === 'mentions'
-                  ? 'No mention notifications at this time.'
+                  ? 'No mentions yet. When someone tags you, it lands here.'
                   : activeTab === 'assignments'
-                    ? 'No assignment notifications at this time.'
-                    : 'No notifications to display.'}
-            </p>
-          </motion.div>
+                    ? 'No assignments yet. Tasks you get pulled into show up here.'
+                    : 'Nothing here yet. Activity across your workspace will surface in this feed.'
+            }
+            steps={
+              activeTab === 'unread'
+                ? ['Stay relaxed — nothing needs your attention', 'New activity will land here instantly', 'Mark items read to keep the feed tidy']
+                : ['Invite a teammate to spark activity', 'Comment on or assign a task', 'Check back after your next sprint']
+            }
+          />
         ) : (
           <div className="flex flex-col gap-2">
             {filteredNotifications.map((notification, index) => {
