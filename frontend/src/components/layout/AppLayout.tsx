@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
+import { QuickCreate } from '../ui/QuickCreate';
 import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { pageVariants } from '../../utils/motion';
-import { useInteractionStore } from '../../store/interactionStore';
+import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
 import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
@@ -19,8 +20,12 @@ export default function AppLayout() {
       e.preventDefault();
       useInteractionStore.getState().openCommandPalette();
     }
+    if (!isTypingTarget(e.target) && e.key.toLowerCase() === 'c' && !(e.metaKey || e.ctrlKey || e.altKey)) {
+      useInteractionStore.getState().openQuickCreate();
+    }
     if (e.key === 'Escape') {
       useInteractionStore.getState().closeCommandPalette();
+      useInteractionStore.getState().closeQuickCreate();
       setMobileMenuOpen(false);
     }
   }, []);
@@ -73,6 +78,7 @@ export default function AppLayout() {
       </div>
 
       <CommandPalette />
+      <QuickCreate />
       
       <Toaster
         position="bottom-right"
