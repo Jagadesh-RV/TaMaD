@@ -130,6 +130,35 @@ export const pageIconFor = (pathname: string): LucideIcon => {
   return map[pathname] || LayoutDashboard;
 }
 
+export const iconNameFor = (pathname: string): string => {
+  const map: Record<string, string> = {
+    '/dashboard': 'dashboard',
+    '/tasks': 'tasks',
+    '/calendar': 'calendar',
+    '/projects': 'projects',
+    '/roadmap': 'roadmap',
+    '/focus': 'focus',
+    '/planner': 'planner',
+    '/notes': 'notes',
+    '/documents': 'documents',
+    '/files': 'files',
+    '/whiteboard': 'whiteboard',
+    '/analytics': 'analytics',
+    '/reports': 'reports',
+    '/ai': 'ai',
+    '/templates': 'templates',
+    '/notifications': 'notifications',
+    '/settings': 'settings',
+    '/profile': 'profile',
+    '/agile/board': 'sprint',
+    '/agile/planning': 'backlog',
+    '/team/members': 'members',
+    '/team/settings': 'settings',
+  };
+  if (pathname.startsWith('/team/') && pathname.includes('/meetings')) return 'meetings';
+  return map[pathname] || 'dashboard';
+}
+
 export function buildNav({ isTeam = false, teamId }: BuildNavOptions): NavSection[] {
   return [
     {

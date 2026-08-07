@@ -9,12 +9,25 @@ import { Inspector } from '../ui/Inspector';
 import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { pageVariants } from '../../utils/motion';
 import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
+import { pageLabelFor, iconNameFor } from '../../lib/navigation';
 import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const label = pageLabelFor(location.pathname);
+    if (label === 'Unknown') return;
+    useInteractionStore.getState().recordVisit({
+      id: `page-${location.pathname}`,
+      type: 'page',
+      label,
+      href: location.pathname,
+      icon: iconNameFor(location.pathname),
+    });
+  }, [location.pathname]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
