@@ -194,6 +194,98 @@
 }
 
 /* ==========================================================================
+   PREMIUM MOTION KEYFRAMES
+   Living atmosphere: floating, breathing, drifting, pulsing light.
+   ========================================================================== */
+
+@keyframes tamad-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
+}
+
+@keyframes tamad-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  33% { transform: translate3d(4%, -3%, 0) scale(1.06); }
+  66% { transform: translate3d(-3%, 4%, 0) scale(0.96); }
+}
+
+@keyframes tamad-breathe {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes tamad-pulse-ring {
+  0% { transform: scale(0.6); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes tamad-sheen {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  60%, 100% { transform: translateX(240%) skewX(-18deg); }
+}
+
+@keyframes tamad-glow-breathe {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes tamad-orb {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(2.5%, -2%) scale(1.05); }
+  50% { transform: translate(-2%, 2.5%) scale(0.97); }
+  75% { transform: translate(1.5%, -1%) scale(1.02); }
+}
+
+@keyframes tamad-grain {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  30% { transform: translate(5%, -10%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-10%, 5%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(-15%, 0); }
+  90% { transform: translate(10%, 5%); }
+  100% { transform: translate(5%, 0); }
+}
+
+@keyframes tamad-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes tamad-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Motion utilities */
+.animate-float { animation: tamad-float 6s ease-in-out infinite; }
+.animate-drift { animation: tamad-drift 18s ease-in-out infinite; }
+.animate-breathe { animation: tamad-breathe 5s ease-in-out infinite; }
+.animate-glow-breathe { animation: tamad-glow-breathe 4s ease-in-out infinite; }
+
+.text-gradient-animated {
+  background: linear-gradient(120deg, var(--color-accent), #a78bfa, var(--color-info), var(--color-accent));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: tamad-gradient-shift 8s ease-in-out infinite;
+}
+
+/* Respect reduced motion — motion should never be decorative or forceful */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
    COMPONENTS
    ========================================================================== */
 @layer components {
