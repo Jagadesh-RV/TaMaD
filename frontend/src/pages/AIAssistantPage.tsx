@@ -310,7 +310,7 @@ export default function AIAssistantPage() {
                     ))}
                   </div>
                 </div>
-              </div>
+              </Card>
 
               <Card className="p-8">
                 <h3 className="mb-6 text-lg font-bold text-[color:var(--color-foreground)] flex items-center">
@@ -391,7 +391,7 @@ export default function AIAssistantPage() {
                     </div>
                   </motion.div>
                 )}
-              </div>
+              </Card>
             </div>
           </motion.div>
         )}

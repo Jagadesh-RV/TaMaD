@@ -1,12 +1,15 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
-import { Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
+import AmbientEnvironment from '../ui/AmbientEnvironment';
+import { pageVariants } from '../../utils/motion';
 import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
+  const location = useLocation();
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -28,7 +31,10 @@ export default function AppLayout() {
   }, [handleKeyDown]);
 
   return (
-    <div className="layout" style={{ background: 'var(--color-background)' }}>
+    <div className="layout">
+      {/* Living atmosphere behind everything */}
+      <AmbientEnvironment />
+
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(p => !p)} />
@@ -50,7 +56,19 @@ export default function AppLayout() {
           onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
         />
         <main className="main-content">
-          <Outlet />
+          {/* Cinematic page choreography — every journey reveals itself */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              variants={pageVariants}
+              initial="initial"
+              animate="enter"
+              exit="exit"
+              className="min-h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
