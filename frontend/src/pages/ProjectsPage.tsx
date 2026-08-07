@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format, isPast, parseISO } from 'date-fns';
+import clsx from 'clsx';
 import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
@@ -19,6 +20,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorState from '../components/ui/ErrorState';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
 
 export default function ProjectsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -133,7 +135,7 @@ export default function ProjectsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs">
+            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs" variant="luminous">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
                 {stat.label}
               </p>
@@ -151,19 +153,17 @@ export default function ProjectsPage() {
       {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
 
       {!isLoading && !error && projects.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-state-icon">
-            <FolderKanban size={32} />
-          </div>
-          <p className="empty-state-title">No projects yet</p>
-          <p className="empty-state-description">
-            Create your first project to start tracking tasks and progress.
-          </p>
-          <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-            <Plus size={16} />
-            Create Project
-          </button>
-        </div>
+        <EmptyState
+          icon={FolderKanban}
+          title="No projects yet"
+          description="Projects are the containers for your work — group tasks, track progress, and keep your team aligned."
+          action={{ label: 'Create your first project', onClick: () => setIsModalOpen(true) }}
+          steps={[
+            'Name the project and pick an accent color',
+            'Invite teammates and set a deadline',
+            'Add tasks from the Task Hub to start moving',
+          ]}
+        />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {projects.map((project: any, index: number) => {
@@ -189,6 +189,10 @@ export default function ProjectsPage() {
                     boxShadow: isExpanded ? 'var(--shadow-md)' : 'var(--shadow-xs)',
                   }}
                 >
+                  <div
+                    className="pointer-events-none absolute inset-x-8 top-0 h-[3px] rounded-b-full opacity-70 transition-all duration-300"
+                    style={{ background: `linear-gradient(90deg, transparent, ${project.color || 'var(--color-accent)'}, transparent)`, boxShadow: `0 0 12px ${project.color || 'var(--color-accent)'}` }}
+                  />
                   <div className="cursor-pointer p-6 hover:bg-[color:var(--color-surface-hover)] transition-colors" onClick={() => toggleExpand(project._id)}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-4">

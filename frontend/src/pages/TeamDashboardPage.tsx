@@ -1,21 +1,38 @@
 import { useEffect, useState } from 'react';
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useDashboardStore } from '../store/dashboardStore';
+import { useTeamStore } from '../store/teamStore';
+import { useRealtime } from '../providers/RealtimeProvider';
 import DashboardWidgetEngine from '../components/dashboard/DashboardWidgetEngine';
+import LivePresenceStack from '../components/teams/LivePresenceStack';
 import { Settings, Save, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export default function TeamDashboardPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { dashboard, fetchDashboard, updateLayout, saveDashboard, loading } = useDashboardStore();
-  
+  const { members, getMembers } = useTeamStore();
+  const { onlineUsers } = useRealtime();
+
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace?._id) {
       fetchDashboard(currentWorkspace._id);
     }
-  }, [currentWorkspace?._id]);
+  }, [currentWorkspace?._id, fetchDashboard]);
+
+  useEffect(() => {
+    if (currentWorkspace?.type === 'team' && currentWorkspace.teamId) {
+      getMembers(currentWorkspace.teamId);
+    }
+  }, [currentWorkspace?.type, currentWorkspace?.teamId, getMembers]);
+
+  const presence = members.slice(0, 5).map(m => ({
+    name: m.userId.name,
+    avatarUrl: m.userId.avatarUrl,
+    isOnline: onlineUsers.includes(m.userId._id),
+  }));
 
   if (!currentWorkspace) return null;
   if (loading) return <div className="p-8 text-[color:var(--color-muted)]">Loading dashboard...</div>;
@@ -27,7 +44,7 @@ export default function TeamDashboardPage() {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-[color:var(--color-background)]">
+    <div className="flex h-full flex-col overflow-hidden bg-transparent">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between px-8 py-6 mb-2">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">{dashboard.name}</h1>
@@ -35,27 +52,30 @@ export default function TeamDashboardPage() {
             Command center for {currentWorkspace.name}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          {isEditing ? (
-            <>
-              <Button variant="secondary" onClick={() => setIsEditing(false)} className="rounded-xl px-5">
-                <X size={16} className="mr-2" /> Cancel
+        <div className="flex items-center gap-4">
+          <LivePresenceStack members={presence} />
+          <div className="flex items-center gap-3">
+            {isEditing ? (
+              <>
+                <Button variant="secondary" onClick={() => setIsEditing(false)} className="rounded-xl px-5">
+                  <X size={16} className="mr-2" /> Cancel
+                </Button>
+                <Button onClick={handleSave} className="rounded-xl px-5 shadow-sm">
+                  <Save size={16} className="mr-2" /> Save Layout
+                </Button>
+              </>
+            ) : (
+              <Button variant="secondary" onClick={() => setIsEditing(true)} className="rounded-xl px-5">
+                <Settings size={16} className="mr-2" /> Customize
               </Button>
-              <Button onClick={handleSave} className="rounded-xl px-5 shadow-sm">
-                <Save size={16} className="mr-2" /> Save Layout
-              </Button>
-            </>
-          ) : (
-            <Button variant="secondary" onClick={() => setIsEditing(true)} className="rounded-xl px-5">
-              <Settings size={16} className="mr-2" /> Customize
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
-        <DashboardWidgetEngine 
-          layout={dashboard.layout} 
+        <DashboardWidgetEngine
+          layout={dashboard.layout}
           onChange={updateLayout}
           isEditing={isEditing}
         />

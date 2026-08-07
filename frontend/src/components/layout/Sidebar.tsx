@@ -149,6 +149,14 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
                     )}
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-active-bar"
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-accent)] z-0 shadow-[0_0_12px_var(--color-accent)]"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      />
+                    )}
                     <Icon size={18} className="shrink-0 relative z-10" strokeWidth={isActive ? 2.5 : 2} />
                     {!collapsed && (
                       <span className="truncate text-[13px] font-medium relative z-10">{link.label}</span>
@@ -183,7 +191,9 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
                 </span>
-                <p className="text-[10px] text-[color:var(--color-foreground-tertiary)]">Online</p>
+                <p className="text-[10px] text-[color:var(--color-foreground-tertiary)]">
+                  {onlineUsers.length > 0 ? `${onlineUsers.length + 1} online now` : 'Online'}
+                </p>
               </div>
             </div>
           )}
@@ -230,7 +240,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     <motion.aside
       animate={{ width: collapsed ? 72 : 260 }}
       transition={{ type: "spring", stiffness: 400, damping: 40 }}
-      className="h-screen shrink-0 bg-background-secondary border-r border-border flex flex-col overflow-hidden"
+      className="h-screen shrink-0 bg-background-secondary/70 backdrop-blur-2xl border-r border-border flex flex-col overflow-hidden"
     >
       {sidebarContent}
     </motion.aside>
