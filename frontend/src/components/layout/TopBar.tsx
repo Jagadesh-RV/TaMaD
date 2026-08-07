@@ -2,11 +2,13 @@ import { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, Bell, Sun, Moon, Menu, Command, LogOut, User, Settings,
+  Wifi, WifiOff,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifStore } from '../../store/notifStore';
 import { useTheme } from '../../hooks/useTheme';
+import { useRealtime } from '../../providers/RealtimeProvider';
 import { popoverVariants } from '../../utils/motion';
 
 interface TopBarProps {
@@ -14,14 +16,25 @@ interface TopBarProps {
   onCommandPaletteOpen: () => void;
 }
 
+function useLiveClock() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(id);
+  }, []);
+  return now;
+}
+
 export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarProps) {
   const user = useAuthStore(s => s.user);
   const logout = useAuthStore(s => s.logout);
   const unread = useNotifStore(s => s.unread);
   const { theme, toggleTheme, isDark } = useTheme();
+  const { isConnected } = useRealtime();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const now = useLiveClock();
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -35,14 +48,30 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
   }, [profileOpen]);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 glass border-b border-border">
-      <div className="flex items-center gap-4 flex-1">
+    <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-3.5 glass border-b border-border">
+      <div className="flex items-center gap-4 flex-1 min-w-0">
         <button
           onClick={onMenuToggle}
           className="flex h-9 w-9 items-center justify-center rounded-lg lg:hidden text-[color:var(--color-foreground-secondary)] hover:bg-[color:var(--color-surface-hover)]"
         >
           <Menu size={20} />
         </button>
+
+        {/* Live clock — the workspace is always awake */}
+        <div className="hidden md:flex items-center gap-2.5 min-w-0">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[color:var(--color-success)] opacity-60 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[color:var(--color-success)]" />
+          </span>
+          <div className="leading-tight">
+            <p className="text-sm font-bold tabular-nums tracking-tight text-[color:var(--color-foreground)]">
+              {now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--color-muted)]">
+              {now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
+            </p>
+          </div>
+        </div>
 
         <button
           onClick={onCommandPaletteOpen}
@@ -56,7 +85,23 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
         </button>
       </div>
 
-      <div className="flex items-center gap-3 ml-4">
+      <div className="flex items-center gap-2.5 ml-4">
+        {/* Realtime system status */}
+        <motion.div
+          animate={{ opacity: 1 }}
+          className="hidden lg:flex items-center gap-1.5 rounded-full px-3 py-1.5 border border-border bg-surface text-[11px] font-bold"
+          title={isConnected ? 'Live workspace' : 'Reconnecting...'}
+        >
+          {isConnected ? (
+            <Wifi size={13} className="text-[color:var(--color-success)]" />
+          ) : (
+            <WifiOff size={13} className="text-warning animate-pulse" />
+          )}
+          <span className={isConnected ? 'text-[color:var(--color-foreground-secondary)]' : 'text-warning'}>
+            {isConnected ? 'Live' : 'Syncing'}
+          </span>
+        </motion.div>
+
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
