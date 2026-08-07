@@ -4,6 +4,7 @@ import { Menu } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
+import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
@@ -28,7 +29,10 @@ export default function AppLayout() {
   }, [handleKeyDown]);
 
   return (
-    <div className="layout" style={{ background: 'var(--color-background)' }}>
+    <div className="layout">
+      {/* Living atmosphere behind everything */}
+      <AmbientEnvironment />
+
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(p => !p)} />

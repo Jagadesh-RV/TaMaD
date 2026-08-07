@@ -302,6 +302,78 @@
 }
 
 /* ==========================================================================
+   AMBIENT ENVIRONMENT
+   The living atmosphere rendered behind every screen.
+   ========================================================================== */
+
+.ambient-env {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-env .ambient-cursor-glow {
+  position: absolute;
+  top: -300px;
+  left: -300px;
+  width: 600px;
+  height: 600px;
+  margin-top: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--ambient-cursor) 0%, transparent 62%);
+  will-change: transform;
+}
+
+.ambient-env .ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+.ambient-env .ambient-orb-a {
+  width: 55vw;
+  height: 55vw;
+  top: -18vw;
+  right: -12vw;
+  background: radial-gradient(circle at 30% 30%, var(--ambient-glow-a), transparent 70%);
+  animation: tamad-drift 26s ease-in-out infinite;
+}
+
+.ambient-env .ambient-orb-b {
+  width: 46vw;
+  height: 46vw;
+  bottom: -14vw;
+  left: -10vw;
+  background: radial-gradient(circle at 60% 40%, var(--ambient-glow-b), transparent 70%);
+  animation: tamad-drift 32s ease-in-out infinite reverse;
+}
+
+.ambient-env .ambient-orb-c {
+  width: 34vw;
+  height: 34vw;
+  top: 38%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, var(--ambient-glow-c), transparent 70%);
+  animation: tamad-drift 22s ease-in-out infinite;
+}
+
+.ambient-env .ambient-horizon {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, var(--ambient-horizon) 100%);
+}
+
+.ambient-env .ambient-grain {
+  position: absolute;
+  inset: -100%;
+  opacity: var(--ambient-grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: tamad-grain 9s steps(8) infinite;
+}
+
+/* ==========================================================================
    COMPONENTS
    ========================================================================== */
 @layer components {
@@ -309,12 +381,12 @@
   /* -- Layout -- */
   .layout {
     @apply flex h-screen overflow-hidden;
-    background: var(--color-background);
+    background: transparent;
   }
 
   .main-content {
     @apply flex-1 overflow-y-auto relative;
-    background: var(--color-background);
+    background: transparent;
     padding: 32px 48px;
     scroll-behavior: smooth;
   }
