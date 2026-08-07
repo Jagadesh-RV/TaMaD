@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useTemplateStore, type TaskTemplate } from '../store/templateStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
+import EmptyState from '../components/ui/EmptyState';
 
 const PRIORITY_OPTIONS = [
   { value: 'low', label: 'Low', color: 'var(--color-muted)' },
@@ -168,22 +169,17 @@ export default function TemplatesPage() {
 
       {/* Template List */}
       {templates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div
-            className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: 'var(--color-surface-hover)', color: 'var(--color-muted)' }}
-          >
-            <FileText size={28} />
-          </div>
-          <h3 className="mb-1 text-base font-bold" style={{ color: 'var(--color-foreground)' }}>No templates yet</h3>
-          <p className="mb-4 text-sm" style={{ color: 'var(--color-muted)' }}>
-            Create your first template to reuse common task structures.
-          </p>
-          <button onClick={() => { resetForm(); setShowCreate(true); }} className="btn btn-primary btn-sm">
-            <Plus size={14} />
-            Create Template
-          </button>
-        </div>
+        <EmptyState
+          icon={FileText}
+          title="No templates yet"
+          description="Templates turn repeat work into a one-click start. Save a task structure once and reuse it forever."
+          steps={[
+            'Click Create Template and define the structure',
+            'Give it a name and pick a priority baseline',
+            'Spin up new tasks from it in a single click',
+          ]}
+          action={{ label: 'Create Template', onClick: () => { resetForm(); setShowCreate(true); } }}
+        />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {templates.map((template, i) => (

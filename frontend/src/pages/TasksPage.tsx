@@ -24,6 +24,7 @@ import { format, isToday, isBefore, parseISO } from 'date-fns';
 import clsx from 'clsx';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
+import { useInteractionStore } from '../store/interactionStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -429,6 +430,7 @@ export default function TasksPage() {
   const { tasks, fetchTasks, createTask, reorderTask, loading } = useTaskStore();
   const workspace = useAuthStore(s => s.workspace);
   const workspaceId = workspace?._id || '';
+  const openInspector = useInteractionStore((s) => s.openInspector);
 
   const [view, setView] = useState<ViewMode>('kanban');
   const [search, setSearch] = useState('');
@@ -696,7 +698,7 @@ export default function TasksPage() {
                   label={col.label}
                   color={col.color}
                   tasks={filtered.filter(t => t.status === col.id)}
-                  onTaskClick={() => {}}
+                  onTaskClick={(task) => openInspector('task', task._id)}
                 />
               ))}
             </div>
@@ -745,7 +747,7 @@ export default function TasksPage() {
               <tbody>
                 <AnimatePresence>
                   {sorted.map((task, i) => (
-                    <ListRow key={task._id} task={task} index={i} onClick={() => {}} />
+                    <ListRow key={task._id} task={task} index={i} onClick={() => openInspector('task', task._id)} />
                   ))}
                 </AnimatePresence>
               </tbody>

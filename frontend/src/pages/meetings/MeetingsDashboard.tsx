@@ -3,7 +3,8 @@ import { useMeetingStore } from '../../store/meetingStore';
 import { useTeamStore } from '../../store/teamStore';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { MoreVertical, Edit2, Copy, XCircle, Trash2, UserPlus } from 'lucide-react';
+import { MoreVertical, Edit2, Copy, XCircle, Trash2, UserPlus, Video } from 'lucide-react';
+import EmptyState from '../../components/ui/EmptyState';
 import MeetingScheduler from './MeetingScheduler';
 import MeetingEditModal from './MeetingEditModal';
 import MeetingInviteModal from './MeetingInviteModal';
@@ -127,12 +128,18 @@ const MeetingsDashboard: React.FC = () => {
         ))}
         
         {meetings.length === 0 && (
-          <div className="col-span-full empty-state border border-dashed rounded-xl" style={{ borderColor: 'var(--color-border)' }}>
-            <div className="empty-state-icon">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            </div>
-            <h3 className="empty-state-title">No meetings found</h3>
-            <p className="empty-state-description">Schedule your first team meeting to collaborate and take live notes.</p>
+          <div className="col-span-full">
+            <EmptyState
+              icon={Video}
+              title="No meetings found"
+              description="Face-to-face beats back-and-forth. Schedule the first team meeting and turn chatter into action with live notes."
+              steps={[
+                'Click Schedule to pick a time and invite your team',
+                'Join with one click when the room is open',
+                'Walk away with live notes and an AI summary',
+              ]}
+              action={{ label: 'Schedule Meeting', onClick: () => setShowScheduler(true) }}
+            />
           </div>
         )}
       </div>

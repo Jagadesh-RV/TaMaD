@@ -3,13 +3,16 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
   FileText, PenTool, BarChart3, Bell, Settings, ChevronLeft,
-  ChevronRight, LogOut, FolderKanban, Users, Brain, HardDrive, Video
+  ChevronRight, LogOut, FolderKanban, Users, Brain, HardDrive, Video,
+  Pin, Clock, Star,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { useNotifStore } from '../../store/notifStore';
 import { useRealtime } from '../../providers/RealtimeProvider';
+import { useInteractionStore } from '../../store/interactionStore';
+import { pageLabelFor, pageIconFor, iconForName } from '../../lib/navigation';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { useWorkspaceStore } from '../../store/workspaceStore';
 
@@ -27,6 +30,9 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
   const logout = useAuthStore(s => s.logout);
   const unread = useNotifStore(s => s.unread);
   const { onlineUsers } = useRealtime();
+  const pinned = useInteractionStore(s => s.pinned);
+  const recents = useInteractionStore(s => s.recents);
+  const togglePin = useInteractionStore(s => s.togglePin);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -118,6 +124,93 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       )}
 
       <nav className="mt-4 flex-1 overflow-y-auto px-3 pb-4" style={{ scrollbarWidth: 'none' }}>
+        {!collapsed && (pinned.length > 0 || recents.length > 0) && (
+          <div className="mb-5 space-y-5">
+            {pinned.length > 0 && (
+              <div>
+                <p className="mb-2 flex items-center gap-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
+                  <Pin size={10} /> Pinned
+                </p>
+                <div className="space-y-0.5">
+                  {pinned.map((href) => {
+                    const Icon = pageIconFor(href);
+                    const label = pageLabelFor(href);
+                    const isActive = location.pathname === href;
+                    return (
+                      <div key={href} className="group relative flex items-center">
+                        <NavLink
+                          to={href}
+                          onClick={isMobile ? onClose : undefined}
+                          className={clsx(
+                            'relative z-10 flex flex-1 items-center gap-3 rounded-md py-2 pl-3 pr-8 transition-colors',
+                            isActive ? 'text-[color:var(--color-accent)]' : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
+                          )}
+                        >
+                          {isActive && (
+                            <span className="absolute inset-0 rounded-md bg-[color:var(--color-accent-ghost)]" />
+                          )}
+                          <Icon size={17} className="relative z-10 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                          <span className="relative z-10 truncate text-[13px] font-medium">{label}</span>
+                        </NavLink>
+                        <button
+                          onClick={() => togglePin(href)}
+                          className="absolute right-1.5 z-20 rounded-md p-1 text-[color:var(--color-accent)] opacity-0 transition-opacity hover:bg-[color:var(--color-surface-active)] group-hover:opacity-100"
+                          title="Unpin"
+                        >
+                          <Star size={12} fill="currentColor" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {recents.length > 0 && (
+              <div>
+                <p className="mb-2 flex items-center gap-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
+                  <Clock size={10} /> Recent
+                </p>
+                <div className="space-y-0.5">
+                  {recents.slice(0, 4).map((r) => {
+                    const Icon = iconForName(r.icon);
+                    const isActive = location.pathname === r.href;
+                    const isPinned = pinned.includes(r.href);
+                    return (
+                      <div key={r.id} className="group relative flex items-center">
+                        <NavLink
+                          to={r.href}
+                          onClick={isMobile ? onClose : undefined}
+                          className={clsx(
+                            'relative z-10 flex flex-1 items-center gap-3 rounded-md py-2 pl-3 pr-8 transition-colors',
+                            isActive ? 'text-[color:var(--color-accent)]' : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
+                          )}
+                        >
+                          {isActive && (
+                            <span className="absolute inset-0 rounded-md bg-[color:var(--color-accent-ghost)]" />
+                          )}
+                          <Icon size={17} className="relative z-10 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
+                          <span className="relative z-10 truncate text-[13px] font-medium">{r.label}</span>
+                        </NavLink>
+                        <button
+                          onClick={() => togglePin(r.href)}
+                          className={clsx(
+                            'absolute right-1.5 z-20 rounded-md p-1 transition-opacity hover:bg-[color:var(--color-surface-active)]',
+                            isPinned ? 'text-[color:var(--color-accent)] opacity-100' : 'text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100'
+                          )}
+                          title={isPinned ? 'Unpin' : 'Pin'}
+                        >
+                          <Star size={12} fill={isPinned ? 'currentColor' : 'none'} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {sections.map((section, idx) => (
           <div key={section.label} className={clsx("mb-4", collapsed && "flex flex-col items-center")}>
             {!collapsed && (

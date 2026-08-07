@@ -1,29 +1,107 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
+import { QuickCreate } from '../ui/QuickCreate';
+import { Inspector } from '../ui/Inspector';
+import { ShortcutsSheet, GNavHud } from '../ui/ShortcutsSheet';
 import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { pageVariants } from '../../utils/motion';
+import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
+import { pageLabelFor, iconNameFor } from '../../lib/navigation';
 import { Toaster } from 'react-hot-toast';
+
+const GOTO: Record<string, string> = {
+  d: '/dashboard',
+  t: '/tasks',
+  c: '/calendar',
+  p: '/projects',
+  r: '/roadmap',
+  f: '/focus',
+  l: '/planner',
+  n: '/notes',
+  o: '/documents',
+  i: '/files',
+  w: '/whiteboard',
+  a: '/analytics',
+  e: '/reports',
+  b: '/ai',
+  m: '/team/members',
+  s: '/settings',
+};
 
 export default function AppLayout() {
   const location = useLocation();
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const navigate = useNavigate();
+  const gNavKey = useInteractionStore((s) => s.gNavKey);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const label = pageLabelFor(location.pathname);
+    if (label === 'Unknown') return;
+    useInteractionStore.getState().recordVisit({
+      id: `page-${location.pathname}`,
+      type: 'page',
+      label,
+      href: location.pathname,
+      icon: iconNameFor(location.pathname),
+    });
+  }, [location.pathname]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      setCommandPaletteOpen(true);
+      useInteractionStore.getState().openCommandPalette();
+      return;
+    }
+    if (!isTypingTarget(e.target) && !(e.metaKey || e.ctrlKey || e.altKey)) {
+      const key = e.key.toLowerCase();
+      const st = useInteractionStore.getState();
+
+      if (st.gNavKey === 'g') {
+        e.preventDefault();
+        if (key === 'g' || key === 'escape') {
+          st.setGNavKey(null);
+          return;
+        }
+        st.setGNavKey(null);
+        const target = GOTO[key];
+        if (target) navigate(target);
+        return;
+      }
+      if (key === 'g') {
+        e.preventDefault();
+        st.setGNavKey('g');
+        return;
+      }
+      if (key === 'c') {
+        st.openQuickCreate();
+        return;
+      }
+      if (key === '?') {
+        st.toggleShortcutsSheet();
+        return;
+      }
     }
     if (e.key === 'Escape') {
-      setCommandPaletteOpen(false);
+      const st = useInteractionStore.getState();
+      if (st.shortcutsSheetOpen) st.toggleShortcutsSheet();
+      st.closeCommandPalette();
+      st.closeQuickCreate();
+      if (st.inspector) st.closeInspector();
+      st.setGNavKey(null);
       setMobileMenuOpen(false);
     }
-  }, []);
+  }, [navigate]);
+
+  useEffect(() => {
+    if (gNavKey !== 'g') return;
+    const timer = window.setTimeout(() => useInteractionStore.getState().setGNavKey(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [gNavKey]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -53,7 +131,7 @@ export default function AppLayout() {
       <div className="flex flex-1 flex-col min-w-0">
         <TopBar
           onMenuToggle={() => setMobileMenuOpen(true)}
-          onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+          onCommandPaletteOpen={() => useInteractionStore.getState().openCommandPalette()}
         />
         <main className="main-content">
           {/* Cinematic page choreography — every journey reveals itself */}
@@ -72,7 +150,11 @@ export default function AppLayout() {
         </main>
       </div>
 
-      <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
+      <CommandPalette />
+      <QuickCreate />
+      <Inspector />
+      <ShortcutsSheet />
+      <GNavHud />
       
       <Toaster
         position="bottom-right"

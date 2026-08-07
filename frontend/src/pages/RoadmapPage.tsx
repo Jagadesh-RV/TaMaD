@@ -5,6 +5,7 @@ import { format, addDays, startOfMonth, eachDayOfInterval } from 'date-fns';
 import { useProjectStore } from '../store/projectStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
+import EmptyState from '../components/ui/EmptyState';
 
 const COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-indigo-500', 'bg-teal-500', 'bg-rose-500'];
 
@@ -89,9 +90,17 @@ export default function RoadmapPage() {
         {/* Timeline Body */}
         <div className="flex-1 overflow-y-auto">
           {projects.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-gray-400 text-sm font-medium">
-              No projects yet. Create one to get started!
-            </div>
+            <EmptyState
+              icon={CalendarIcon}
+              title="No projects on the roadmap"
+              description="A roadmap turns scattered work into a timeline. Lay your first project on the map and watch the quarter take shape."
+              steps={[
+                'Click New Project to create your first milestone',
+                'Set a start and end date — the bar appears instantly',
+                'Drag and build your timeline as projects grow',
+              ]}
+              action={{ label: 'New Project', onClick: () => setIsModalOpen(true) }}
+            />
           ) : (
             projects.map((project: any, index: number) => {
               const color = COLORS[index % COLORS.length];
