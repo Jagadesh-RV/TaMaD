@@ -6,21 +6,21 @@ import TopBar from './TopBar';
 import { CommandPalette } from '../ui/CommandPalette';
 import AmbientEnvironment from '../ui/AmbientEnvironment';
 import { pageVariants } from '../../utils/motion';
+import { useInteractionStore } from '../../store/interactionStore';
 import { Toaster } from 'react-hot-toast';
 
 export default function AppLayout() {
   const location = useLocation();
-  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      setCommandPaletteOpen(true);
+      useInteractionStore.getState().openCommandPalette();
     }
     if (e.key === 'Escape') {
-      setCommandPaletteOpen(false);
+      useInteractionStore.getState().closeCommandPalette();
       setMobileMenuOpen(false);
     }
   }, []);
@@ -53,7 +53,7 @@ export default function AppLayout() {
       <div className="flex flex-1 flex-col min-w-0">
         <TopBar
           onMenuToggle={() => setMobileMenuOpen(true)}
-          onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
+          onCommandPaletteOpen={() => useInteractionStore.getState().openCommandPalette()}
         />
         <main className="main-content">
           {/* Cinematic page choreography — every journey reveals itself */}
@@ -72,7 +72,7 @@ export default function AppLayout() {
         </main>
       </div>
 
-      <CommandPalette open={commandPaletteOpen} onClose={() => setCommandPaletteOpen(false)} />
+      <CommandPalette />
       
       <Toaster
         position="bottom-right"

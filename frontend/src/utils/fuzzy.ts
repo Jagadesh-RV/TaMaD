@@ -47,3 +47,35 @@ export function fuzzyFilter<T>(
   scored.sort((a, b) => b.score - a.score);
   return scored.slice(0, limit).map((s) => s.item);
 }
+
+// Returns the index ranges in `text` matched by `query` as a fuzzy
+// subsequence, for highlighting.
+export function matchRanges(query: string, text: string): Array<[number, number]> {
+  const q = query.trim().toLowerCase();
+  const t = text.toLowerCase();
+  if (!q) return [];
+  const ranges: Array<[number, number]> = [];
+  let ti = 0;
+  let start = -1;
+  let prev = -1;
+  for (let qi = 0; qi < q.length; qi++) {
+    let found = false;
+    for (; ti < t.length; ti++) {
+      if (t[ti] === q[qi]) {
+        if (start === -1 || ti === prev + 1) {
+          if (start === -1) start = ti;
+        } else {
+          if (start !== -1) ranges.push([start, prev]);
+          start = ti;
+        }
+        prev = ti;
+        ti++;
+        found = true;
+        break;
+      }
+    }
+    if (!found) return [];
+  }
+  if (start !== -1) ranges.push([start, prev]);
+  return ranges;
+}
