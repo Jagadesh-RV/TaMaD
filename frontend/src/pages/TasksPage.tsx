@@ -28,6 +28,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import EmptyState from '../components/ui/EmptyState';
 
 interface Task {
   _id: string;
@@ -149,18 +150,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl" style={{ background: 'var(--color-surface-active)' }}>
-        <Inbox size={28} style={{ color: 'var(--color-muted)' }} />
-      </div>
-      <p className="mb-1 text-base font-semibold" style={{ color: 'var(--color-foreground)' }}>No tasks found</p>
-      <p className="text-sm" style={{ color: 'var(--color-muted)' }}>{message}</p>
-    </div>
-  );
-}
-
 function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task._id,
@@ -268,7 +257,14 @@ function KanbanColumn({
     <div className="flex min-w-[300px] max-w-[340px] flex-1 flex-col">
       <div className="mb-4 flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <span className="h-3 w-3 rounded-full shadow-sm" style={{ background: color }} />
+          <span className="relative flex h-2.5 w-2.5">
+            <motion.span
+              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.25, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              className="absolute inset-0 rounded-full shadow-sm"
+              style={{ background: color }}
+            />
+          </span>
           <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{label}</h3>
         </div>
         <span
@@ -282,7 +278,7 @@ function KanbanColumn({
         ref={setNodeRef}
         className={clsx(
           'flex min-h-[500px] flex-1 flex-col rounded-3xl border-2 p-2.5 transition-all duration-300',
-          isOver ? 'border-[color:var(--color-accent)] bg-[color:var(--color-accent-ghost)]' : 'border-transparent bg-[color:var(--color-surface-active)]',
+          isOver ? 'border-[color:var(--color-accent)] bg-[color:var(--color-accent-ghost)]' : 'border-transparent bg-[color:var(--color-surface-active)]/55',
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -319,8 +315,11 @@ function ListRow({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: index * 0.02 }}
-      className="cursor-pointer transition-colors"
-      style={{ background: index % 2 === 1 ? 'var(--color-surface-hover)' : 'transparent' }}
+      className={clsx(
+        'cursor-pointer transition-colors',
+        index % 2 === 1 && 'bg-[color:var(--color-surface-hover)]',
+        'hover:bg-[color:var(--color-accent-ghost)]',
+      )}
       onClick={onClick}
     >
       <td className="w-10 px-4 py-3">
@@ -553,7 +552,12 @@ export default function TasksPage() {
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Tasks</h1>
-          <p className="mt-1 text-sm font-medium" style={{ color: 'var(--color-muted)' }}>
+          <p className="mt-1 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--color-muted)' }}>
+            <motion.span
+              animate={{ scale: [1, 1.45, 1], opacity: [1, 0.55, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-success)]"
+            />
             {filtered.length} task{filtered.length !== 1 ? 's' : ''} across your workflow
           </p>
         </div>
@@ -568,16 +572,24 @@ export default function TasksPage() {
                 key={vb.mode}
                 onClick={() => setView(vb.mode)}
                 className={clsx(
-                  'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-all',
+                  'relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-colors',
                 )}
                 style={{
-                  background: view === vb.mode ? 'var(--color-surface)' : 'transparent',
                   color: view === vb.mode ? 'var(--color-accent)' : 'var(--color-muted)',
-                  boxShadow: view === vb.mode ? 'var(--shadow-sm)' : 'none',
                 }}
               >
-                <vb.icon size={14} />
-                {vb.label}
+                {view === vb.mode && (
+                  <motion.span
+                    layoutId="tasks-view-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-lg bg-[color:var(--color-surface)]"
+                    style={{ boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}
+                  />
+                )}
+                <span className="relative flex items-center gap-1.5">
+                  <vb.icon size={14} />
+                  {vb.label}
+                </span>
               </button>
             ))}
           </div>
@@ -668,7 +680,7 @@ export default function TasksPage() {
         {loading && <LoadingSpinner text="Loading tasks..." />}
 
         {!loading && view === 'kanban' && (
-          filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
+          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
@@ -695,7 +707,7 @@ export default function TasksPage() {
         )}
 
         {!loading && view === 'list' && (
-          filtered.length === 0 ? <EmptyState message="Try adjusting your filters to see more tasks." /> :
+          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :
           <div
             className="rounded-2xl border overflow-hidden"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
