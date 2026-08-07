@@ -60,6 +60,14 @@
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.5);
   --glass-blur: blur(20px);
+
+  /* Ambient atmosphere — living light */
+  --ambient-glow-a: rgba(0, 122, 255, 0.28);
+  --ambient-glow-b: rgba(124, 77, 255, 0.22);
+  --ambient-glow-c: rgba(90, 200, 250, 0.24);
+  --ambient-horizon: rgba(0, 122, 255, 0.05);
+  --ambient-cursor: rgba(0, 122, 255, 0.1);
+  --ambient-grain-opacity: 0.03;
   
   /* Radii */
   --radius-xs: 4px;
@@ -123,6 +131,14 @@
   /* Glassmorphism */
   --glass-bg: rgba(17, 17, 17, 0.7);
   --glass-border: rgba(255, 255, 255, 0.05);
+
+  /* Ambient atmosphere — living light */
+  --ambient-glow-a: rgba(59, 130, 246, 0.18);
+  --ambient-glow-b: rgba(139, 92, 246, 0.16);
+  --ambient-glow-c: rgba(34, 211, 238, 0.12);
+  --ambient-horizon: rgba(99, 102, 241, 0.06);
+  --ambient-cursor: rgba(96, 165, 250, 0.08);
+  --ambient-grain-opacity: 0.04;
 }
 
 @theme {
