@@ -356,7 +356,7 @@ export default function DashboardPage() {
                                 <div>
                                   <p className="text-sm font-semibold text-[color:var(--color-foreground)] group-hover:text-[color:var(--color-accent)] transition-colors">{task.title}</p>
                                   {task.tags && task.tags.length > 0 && (
-                                    <p className="text-[11px] font-medium mt-0.5 text-[color:var(--color-muted)]">{task.tags[0]}</p>
+                                    <p className="text-[11px] font-medium mt-0.5 text-[color:var(--color-muted)]">{task.tags[0].name}</p>
                                   )}
                                 </div>
                               </div>
