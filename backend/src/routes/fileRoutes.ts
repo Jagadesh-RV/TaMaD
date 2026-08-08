@@ -4,10 +4,12 @@ import {
   archiveFile, restoreFile, deleteFile, getFileStats,
 } from '../controllers/fileController';
 import { protect } from '../middleware/auth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
 
 const router = Router();
 
 router.use(protect);
+router.use(requireWorkspaceMember);
 
 router.get('/stats', getFileStats);
 router.get('/', getFiles);
