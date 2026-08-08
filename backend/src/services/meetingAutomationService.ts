@@ -4,11 +4,15 @@ import MeetingActionItem from '../models/MeetingActionItem';
 import mongoose from 'mongoose';
 import { io } from '../index';
 
+import { dispatchN8nWebhook } from './n8nService';
+
 export const triggerN8NMeetingWorkflow = async (event: string, meetingData: any) => {
-  // In a real production setup, this would POST to an n8n webhook URL
-  // const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
-  // await axios.post(n8nWebhookUrl, { event, data: meetingData });
-  console.log(`[MeetingAutomation] Triggered n8n workflow for event: ${event}`);
+  const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
+  if (n8nWebhookUrl) {
+    await dispatchN8nWebhook(n8nWebhookUrl, event, meetingData);
+  } else {
+    console.log(`[MeetingAutomation] n8n URL not configured. Event: ${event}`);
+  }
 };
 
 export const generateMockAISummary = async (meetingId: mongoose.Types.ObjectId) => {

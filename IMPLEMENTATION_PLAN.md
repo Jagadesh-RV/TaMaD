@@ -22,7 +22,7 @@ Branch: `feature/tamad-intelligent-workspace`
 | **Med** | `docker-compose.prod.yml` default `change-me` Mongo password, exposes DB/Redis to host, drops Firebase env | `deployment/docker-compose.prod.yml` |
 | **Med** | CI uses `npm` + `cache-dependency-path` pointing at non-existent lockfiles; no e2e job | `.github/workflows/ci.yml` |
 | **Low** | Playwright `webServer` disabled — e2e requires manually started servers | `playwright.config.ts` |
-| **Low** | `react-router-dom@6.30.4` (moderate advisory; fixed in 6.30.5) | `frontend/package.json` |
+| **Low** | `react-router-dom@6.30.4` — two moderate advisories: open redirect→XSS (patched only in v7.x) and arbitrary constructor injection via `deserializeErrors` (patched `>=7.18.0`). 6.x line is EOL at 6.30.4 | `frontend/package.json` |
 
 ### 1.3 Test/quality baseline
 - Backend: Vitest + Supertest; Frontend: Vitest + Testing Library.
@@ -40,7 +40,7 @@ Branch: `feature/tamad-intelligent-workspace`
 7. Harden `docker-compose.prod.yml` (no default secrets, no exposed DB ports, pass Firebase env).
 8. Rewrite CI to pnpm; add Playwright e2e job.
 9. Enable Playwright `webServer` config.
-10. Upgrade `react-router-dom` to patched 6.30.x.
+10. Upgrade `react-router-dom` to `^7.18.0` (6.x EOL; declarative-mode APIs are drop-in compatible).
 11. Lazy-load heavy chunks (LiveKit, Recharts, auth screens).
 
 ### Phase B — Data & real-time reliability

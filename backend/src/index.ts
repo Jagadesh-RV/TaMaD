@@ -54,8 +54,12 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173', 'http://localhost:3000'];
 
+import compression from 'compression';
+
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '2mb' })); // Reduced from 10mb to prevent DOS
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(compression());
 app.use(cookieParser());
 app.use(
   cors({

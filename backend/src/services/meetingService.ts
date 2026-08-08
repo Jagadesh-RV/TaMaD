@@ -51,6 +51,7 @@ export const generateParticipantToken = async (roomName: string, participantName
   const at = new AccessToken(apiKey, apiSecret, {
     identity: participantId,
     name: participantName,
+    ttl: 2 * 60 * 60, // 2 hours
   });
 
   const canPublish = role === 'host' || role === 'participant' || role === 'moderator';

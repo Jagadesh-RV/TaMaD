@@ -71,6 +71,7 @@ const ProjectSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+ProjectSchema.index({ workspaceId: 1, name: 1 }, { unique: true });
 ProjectSchema.index({ workspaceId: 1, status: 1 });
 ProjectSchema.index({ 'members.userId': 1 });
 

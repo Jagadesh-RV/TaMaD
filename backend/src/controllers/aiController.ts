@@ -14,8 +14,8 @@ export const parseTask = async (req: AuthRequest, res: Response) => {
   try {
     const { text } = req.body;
 
-    if (!text) {
-      return res.status(400).json({ error: 'Text input is required' });
+    if (!text || typeof text !== 'string' || text.length > 2000) {
+      return res.status(400).json({ error: 'Text input is required and must be under 2000 characters' });
     }
 
     const taskData = await parseNaturalLanguageTask(text);
@@ -32,7 +32,9 @@ export const chatWithWorkspace = async (req: AuthRequest, res: Response) => {
   try {
     const { query, workspaceId } = req.body;
     
-    if (!query) return res.status(400).json({ error: 'Query is required' });
+    if (!query || typeof query !== 'string' || query.length > 500) {
+      return res.status(400).json({ error: 'Query is required and must be under 500 characters' });
+    }
 
     // Fetch workspace context
     const [tasks, projects, notes, habits, goals] = await Promise.all([

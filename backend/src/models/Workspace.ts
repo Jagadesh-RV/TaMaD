@@ -49,4 +49,9 @@ const WorkspaceSchema: Schema = new Schema(
   { timestamps: true }
 );
 
+WorkspaceSchema.index({ 'members.userId': 1 });
+WorkspaceSchema.index({ ownerId: 1 });
+WorkspaceSchema.index({ teamId: 1 });
+WorkspaceSchema.index({ name: 1 });
+
 export default mongoose.model<IWorkspace>('Workspace', WorkspaceSchema);
