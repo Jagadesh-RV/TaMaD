@@ -12,7 +12,7 @@ import MeetingNotes from './MeetingNotes';
 
 const MeetingRoom: React.FC = () => {
   const { meetingId } = useParams<{ meetingId: string }>();
-  const { activeToken, currentMeeting, endMeeting, clearActiveMeeting, joinMeeting } = useMeetingStore();
+  const { activeToken, activeServerUrl, currentMeeting, endMeeting, clearActiveMeeting, joinMeeting } = useMeetingStore();
   const navigate = useNavigate();
   const [showNotes, setShowNotes] = useState(false);
 
@@ -37,7 +37,7 @@ const MeetingRoom: React.FC = () => {
 
   if (!activeToken || !currentMeeting) return <div className="p-8 text-center">Connecting to meeting room...</div>;
 
-  const serverUrl = 'wss://tamad-hmidu7j9.livekit.cloud';
+  const serverUrl = activeServerUrl || (import.meta as any).env?.VITE_LIVEKIT_URL || '';
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-950">
