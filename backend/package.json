@@ -33,7 +33,6 @@
     "openai": "^7.3.0",
     "sanitize-html": "^2.17.6",
     "socket.io": "^4.8.3",
-    "uuid": "^14.0.1",
     "winston": "^3.19.0",
     "zod": "^3.25.76"
   },
@@ -48,7 +47,6 @@
     "@types/nodemailer": "^6.4.24",
     "@types/sanitize-html": "^2.16.1",
     "@types/supertest": "^7.2.1",
-    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.66.0",
     "@typescript-eslint/parser": "^8.66.0",
     "eslint": "^8.57.1",
