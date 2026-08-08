@@ -187,3 +187,67 @@ export const getFileStats = async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+import { getFirebaseStorage } from '../config/firebase';
+
+// @desc    Generate a signed URL for uploading a file
+// @route   POST /api/files/upload-url
+// @access  Private
+export const generateUploadUrl = async (req: AuthRequest, res: Response) => {
+  try {
+    const { fileName, contentType, workspaceId } = req.body;
+    
+    if (!fileName || !workspaceId) {
+      return res.status(400).json({ error: 'fileName and workspaceId are required' });
+    }
+
+    const bucket = getFirebaseStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app');
+    
+    const filePath = `workspaces/${workspaceId}/${Date.now()}_${fileName}`;
+    const fileRef = bucket.file(filePath);
+    
+    const options: any = {
+      version: 'v4',
+      action: 'write',
+      expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+    };
+    
+    if (contentType) {
+      options.contentType = contentType;
+    }
+
+    const [url] = await fileRef.getSignedUrl(options);
+    
+    res.json({ uploadUrl: url, storagePath: filePath });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to generate upload URL: ' + error.message });
+  }
+};
+
+// @desc    Generate a signed URL for downloading a file
+// @route   GET /api/files/:id/download-url
+// @access  Private
+export const generateDownloadUrl = async (req: AuthRequest, res: Response) => {
+  try {
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ error: 'File not found' });
+    
+    if (!file.storagePath) {
+      return res.status(400).json({ error: 'File does not have a storage path' });
+    }
+    
+    // We assume requireEntityWorkspaceMember has already validated access
+    const bucket = getFirebaseStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app');
+    const fileRef = bucket.file(file.storagePath);
+    
+    const [url] = await fileRef.getSignedUrl({
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 60 * 60 * 1000, // 1 hour
+    });
+    
+    res.json({ downloadUrl: url });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to generate download URL: ' + error.message });
+  }
+};
