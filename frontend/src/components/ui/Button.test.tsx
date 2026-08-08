@@ -10,19 +10,19 @@ describe('Button', () => {
 
   it('applies the primary variant by default', () => {
     render(<Button>Go</Button>);
-    expect(screen.getByRole('button', { name: 'Go' }).className).toContain('--color-accent');
+    expect(screen.getByRole('button', { name: 'Go' }).className).toContain('btn-primary');
   });
 
   it('applies the danger variant classes', () => {
     render(<Button variant="danger">Delete</Button>);
-    expect(screen.getByRole('button', { name: 'Delete' }).className).toContain('--color-danger');
+    expect(screen.getByRole('button', { name: 'Delete' }).className).toContain('btn-danger');
   });
 
   it('supports the sm and lg sizes', () => {
     const { rerender } = render(<Button size="sm">Small</Button>);
-    expect(screen.getByRole('button', { name: 'Small' }).className).toContain('px-3 py-2');
+    expect(screen.getByRole('button', { name: 'Small' }).className).toContain('btn-sm');
     rerender(<Button size="lg">Large</Button>);
-    expect(screen.getByRole('button', { name: 'Large' }).className).toContain('px-5 py-3');
+    expect(screen.getByRole('button', { name: 'Large' }).className).toContain('btn-lg');
   });
 
   it('calls onClick when clicked', () => {

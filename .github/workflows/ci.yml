@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  NODE_VERSION: '22'
+
 jobs:
   backend:
     name: Backend Tests
@@ -17,21 +20,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
         env:
           MONGODB_URI: mongodb://localhost:27017/tamad-test
           JWT_SECRET: test-secret-key
@@ -49,21 +58,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: TypeScript check
-        run: npx tsc --noEmit
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
 
       - name: Run tests
-        run: npm test
+        run: pnpm test
 
   build:
     name: Build
@@ -73,13 +88,87 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build backend
-        run: cd backend && npm install && npm run build
+        run: pnpm --filter tamad-backend build
 
       - name: Build frontend
-        run: cd frontend && npm install && npm run build
+        run: pnpm --filter tamad-frontend build
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: build
+    # Requires configured repository secrets (real Firebase + a seeded test user).
+    # Skipped automatically when the test-user secret is not configured.
+    if: ${{ secrets.TEST_USER_EMAIL != '' }}
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      MONGODB_URI: mongodb://localhost:27017/tamad-e2e
+      REDIS_URL: redis://localhost:6379
+      JWT_SECRET: ${{ secrets.E2E_JWT_SECRET }}
+      JWT_REFRESH_SECRET: ${{ secrets.E2E_JWT_SECRET }}
+      FRONTEND_URL: http://localhost:5173
+      CORS_ORIGIN: http://localhost:5173
+      FIREBASE_PROJECT_ID: ${{ secrets.E2E_FIREBASE_PROJECT_ID }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.E2E_FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.E2E_FIREBASE_PRIVATE_KEY }}
+      VITE_FIREBASE_API_KEY: ${{ secrets.E2E_FIREBASE_API_KEY }}
+      VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.E2E_FIREBASE_AUTH_DOMAIN }}
+      VITE_FIREBASE_PROJECT_ID: ${{ secrets.E2E_FIREBASE_PROJECT_ID }}
+      VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.E2E_FIREBASE_STORAGE_BUCKET }}
+      VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.E2E_FIREBASE_MESSAGING_SENDER_ID }}
+      VITE_FIREBASE_APP_ID: ${{ secrets.E2E_FIREBASE_APP_ID }}
+      VITE_API_URL: http://localhost:5000/api/v1
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build backend
+        run: pnpm --filter tamad-backend build
+
+      - name: Build frontend (with Firebase web config)
+        run: pnpm --filter tamad-frontend build
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright e2e
+        run: pnpm test:e2e

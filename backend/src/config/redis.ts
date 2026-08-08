@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import logger from '../utils/logger';
+import { redactConnectionString } from '../utils/redact';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -14,7 +15,7 @@ export const redis = new Redis(redisUrl, {
 });
 
 redis.on('connect', () => {
-  logger.info(`Redis connected successfully at ${redisUrl}`);
+  logger.info(`Redis connected successfully at ${redactConnectionString(redisUrl)}`);
 });
 
 redis.on('error', (err) => {

@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import { getWhiteboards, getWhiteboardById, createWhiteboard, updateWhiteboard, deleteWhiteboard } from '../controllers/whiteboardController';
 import { protect } from '../middleware/auth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
 import { validate } from '../middleware/validate';
 import { whiteboardCreateSchema, whiteboardUpdateSchema } from '../middleware/schemas';
 
 const router = Router();
 
 router.use(protect);
+router.use(requireWorkspaceMember);
 
 router.route('/')
   .get(getWhiteboards)

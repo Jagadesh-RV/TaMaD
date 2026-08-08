@@ -54,8 +54,12 @@ const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
   : ['http://localhost:5173', 'http://localhost:3000'];
 
+import compression from 'compression';
+
 app.set('trust proxy', 1);
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '2mb' })); // Reduced from 10mb to prevent DOS
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(compression());
 app.use(cookieParser());
 app.use(
   cors({
@@ -70,7 +74,7 @@ app.use(
   }),
 );
 
-app.use('/api/health', healthRoutes);
+app.use('/api', healthRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/projects', projectRoutes);
@@ -98,15 +102,6 @@ app.use('/api/v1/dashboards', dashboardRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/meetings', meetingRoutes);
 app.use('/api/v1/tamad-meet', tamadMeetRoutes);
-
-app.get('/api/ready', async (_req, res) => {
-  try {
-    await connectDB();
-    res.status(200).json({ status: 'READY' });
-  } catch {
-    res.status(503).json({ status: 'NOT_READY' });
-  }
-});
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Route not found' });

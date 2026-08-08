@@ -8,10 +8,9 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
+      format: process.env.NODE_ENV === 'production'
+        ? winston.format.combine(winston.format.timestamp(), winston.format.json())
+        : winston.format.combine(winston.format.colorize(), winston.format.simple()),
     }),
   ],
 });

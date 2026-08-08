@@ -3,7 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import Meeting from '../models/Meeting';
 import MeetingParticipant from '../models/MeetingParticipant';
 import TeamMember from '../models/TeamMember';
-import { createMeetingRoom, generateParticipantToken, deleteRoom } from '../services/meetingService';
+import { createMeetingRoom, generateParticipantToken, deleteRoom, getLiveKitServerUrl } from '../services/meetingService';
 import { triggerN8NMeetingWorkflow, generateMockAISummary } from '../services/meetingAutomationService';
 import mongoose from 'mongoose';
 import { io } from '../index';
@@ -135,7 +135,7 @@ export const joinMeeting = async (req: AuthRequest, res: Response) => {
       participant.role
     );
 
-    res.json({ token, roomName: meeting.roomName, meeting });
+    res.json({ token, serverUrl: getLiveKitServerUrl(), roomName: meeting.roomName, meeting });
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to join meeting' });
   }

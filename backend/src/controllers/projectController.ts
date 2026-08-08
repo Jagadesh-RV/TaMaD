@@ -3,6 +3,7 @@ import { AuthRequest } from '../middleware/auth';
 import Project from '../models/Project';
 import '../models/User';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
+import { verifyWorkspaceMembership } from '../middleware/workspaceAuth';
 
 // @desc    Get all projects for a workspace
 // @route   GET /api/projects?workspaceId=...
@@ -68,6 +69,11 @@ export const updateProject = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Project not found' });
   }
 
+  const isMember = await verifyWorkspaceMembership(project.workspaceId.toString(), req.user._id);
+  if (!isMember) {
+    return res.status(403).json({ error: 'Not authorized to update this project' });
+  }
+
   const updatedProject = await Project.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
@@ -87,6 +93,11 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
 
   if (!project) {
     return res.status(404).json({ error: 'Project not found' });
+  }
+
+  const isMember = await verifyWorkspaceMembership(project.workspaceId.toString(), req.user._id);
+  if (!isMember) {
+    return res.status(403).json({ error: 'Not authorized to delete this project' });
   }
 
   await project.deleteOne();

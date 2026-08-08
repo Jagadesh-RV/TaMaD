@@ -65,10 +65,30 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /* Run the backend and frontend automatically before the tests.
+     Locally it reuses already-running dev servers when ports are up;
+     on CI the built backend (node backend/dist/index.js) and a Vite
+     preview of the built frontend are started. */
+  webServer: [
+    {
+      command: process.env.CI
+        ? 'node backend/dist/index.js'
+        : 'pnpm --filter tamad-backend dev',
+      url: 'http://localhost:5000/api/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+      env: {
+        PORT: '5000',
+        NODE_ENV: process.env.CI ? 'production' : 'development',
+      },
+    },
+    {
+      command: process.env.CI
+        ? 'pnpm --filter tamad-frontend preview -- --port 5173 --host'
+        : 'pnpm --filter tamad-frontend dev',
+      url: 'http://localhost:5173',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120000,
+    },
+  ],
 });

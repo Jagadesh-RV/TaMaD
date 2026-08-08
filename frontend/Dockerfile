@@ -15,6 +15,25 @@ COPY . .
 # Build the app (ensure Vite builds to 'dist' folder)
 RUN npm run build
 
+# Stage 1.5: Development (Vite dev server)
+FROM node:18-alpine AS development
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source code (src is volume-mounted for hot reload)
+COPY . .
+
+EXPOSE 5173
+
+# Start Vite dev server bound to all interfaces
+CMD ["npm", "run", "dev", "--", "--host"]
+
 # Stage 2: Serve with Nginx
 FROM nginx:alpine
 

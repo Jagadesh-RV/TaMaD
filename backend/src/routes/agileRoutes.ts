@@ -5,9 +5,11 @@ import {
   startSprint, completeSprint
 } from '../controllers/agileController';
 import { protect } from '../middleware/auth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
 
 const router = Router();
 router.use(protect);
+router.use(requireWorkspaceMember);
 
 router.route('/epics')
   .get(getEpics)

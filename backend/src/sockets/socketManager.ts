@@ -1,8 +1,10 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
-import jwt from 'jsonwebtoken';
 import { handleMeetingSockets } from './meetingSocket';
 import { initTamadMeetSocket } from '../gateways/tamadMeetSocketGateway';
+import { socketAuthMiddleware } from './socketAuth';
+import { rateLimitMiddleware } from './rateLimiter';
+import Workspace from '../models/Workspace';
 
 let io: Server;
 
@@ -22,35 +24,8 @@ export const initSocket = (server: HttpServer) => {
   });
 
   // Authentication Middleware
-  io.use((socket, next) => {
-    let token = socket.handshake.auth.token;
-
-    // The client cannot read the HttpOnly token, so it might pass user ID or undefined.
-    // Let's check cookies if the provided token isn't a valid JWT (or is missing)
-    if ((!token || token.split('.').length !== 3) && socket.request.headers.cookie) {
-      const cookieStr = socket.request.headers.cookie;
-      const cookies = cookieStr.split(';').reduce((acc, str) => {
-        const parts = str.split('=');
-        if (parts.length >= 2) {
-          acc[parts[0].trim()] = decodeURIComponent(parts[1].trim());
-        }
-        return acc;
-      }, {} as Record<string, string>);
-      token = cookies.tamad_access_token || token;
-    }
-
-    if (!token) {
-      return next(new Error('Authentication error'));
-    }
-    
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-      (socket as any).user = decoded;
-      next();
-    } catch (err) {
-      next(new Error('Authentication error'));
-    }
-  });
+  io.use(socketAuthMiddleware);
+  io.use(rateLimitMiddleware);
 
   io.on('connection', (socket: Socket) => {
     const userId = (socket as any).user.id;
@@ -64,20 +39,36 @@ export const initSocket = (server: HttpServer) => {
     const joinedWorkspaces = new Set<string>();
 
     // Join a workspace room
-    socket.on('join_workspace', (workspaceId: string) => {
-      socket.join(`workspace_${workspaceId}`);
-      joinedWorkspaces.add(workspaceId);
+    socket.on('join_workspace', async (workspaceId: string) => {
+      try {
+        const workspace = await Workspace.findById(workspaceId).lean();
+        if (!workspace) return;
+        
+        const isMember = workspace.members.some(
+          (m: any) => m.userId.toString() === userId.toString()
+        );
+        
+        if (!isMember) {
+          console.log(`User ${userId} attempted to join unauthorized workspace ${workspaceId}`);
+          return;
+        }
 
-      if (!workspacePresence.has(workspaceId)) {
-        workspacePresence.set(workspaceId, new Set());
+        socket.join(`workspace_${workspaceId}`);
+        joinedWorkspaces.add(workspaceId);
+
+        if (!workspacePresence.has(workspaceId)) {
+          workspacePresence.set(workspaceId, new Set());
+        }
+        workspacePresence.get(workspaceId)!.add(userId);
+
+        console.log(`User ${userId} joined workspace ${workspaceId}`);
+        io.to(`workspace_${workspaceId}`).emit('presence_update', {
+          workspaceId,
+          users: Array.from(workspacePresence.get(workspaceId)!),
+        });
+      } catch (error) {
+        console.error('Error joining workspace socket room:', error);
       }
-      workspacePresence.get(workspaceId)!.add(userId);
-
-      console.log(`User ${userId} joined workspace ${workspaceId}`);
-      io.to(`workspace_${workspaceId}`).emit('presence_update', {
-        workspaceId,
-        users: Array.from(workspacePresence.get(workspaceId)!),
-      });
     });
 
     // Leave a workspace room

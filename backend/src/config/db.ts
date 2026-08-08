@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
+import { redactConnectionString } from '../utils/redact';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 5000;
@@ -13,7 +14,7 @@ export const connectDB = async () => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
-      logger.info(`MongoDB connected successfully at ${mongoUri}`);
+      logger.info(`MongoDB connected successfully at ${redactConnectionString(mongoUri)}`);
       return;
     } catch (error) {
       logger.error(`MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed:`, error);

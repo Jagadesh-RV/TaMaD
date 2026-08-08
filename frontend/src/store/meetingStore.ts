@@ -22,10 +22,11 @@ interface MeetingState {
   loading: boolean;
   activeToken: string | null;
   activeRoomName: string | null;
+  activeServerUrl: string | null;
   
   fetchMeetings: (teamId?: string) => Promise<void>;
   createMeeting: (payload: any) => Promise<Meeting>;
-  joinMeeting: (id: string) => Promise<{ token: string, roomName: string }>;
+  joinMeeting: (id: string) => Promise<{ token: string, roomName: string, serverUrl: string }>;
   endMeeting: (id: string) => Promise<void>;
   setCurrentMeeting: (meeting: Meeting | null) => void;
   clearActiveMeeting: () => void;
@@ -43,10 +44,11 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   loading: false,
   activeToken: null,
   activeRoomName: null,
+  activeServerUrl: null,
 
   setCurrentMeeting: (meeting) => set({ currentMeeting: meeting }),
   
-  clearActiveMeeting: () => set({ activeToken: null, activeRoomName: null, currentMeeting: null }),
+  clearActiveMeeting: () => set({ activeToken: null, activeRoomName: null, activeServerUrl: null, currentMeeting: null }),
 
   fetchMeetings: async (teamId?: string) => {
     set({ loading: true });
@@ -76,8 +78,8 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   joinMeeting: async (id) => {
     try {
       const { data } = await api.post(`/meetings/${id}/join`);
-      set({ activeToken: data.token, activeRoomName: data.roomName, currentMeeting: data.meeting });
-      return { token: data.token, roomName: data.roomName };
+      set({ activeToken: data.token, activeRoomName: data.roomName, activeServerUrl: data.serverUrl, currentMeeting: data.meeting });
+      return { token: data.token, roomName: data.roomName, serverUrl: data.serverUrl };
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to join meeting');
       throw new Error('Failed to join meeting');
