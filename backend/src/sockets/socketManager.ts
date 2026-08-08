@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { handleMeetingSockets } from './meetingSocket';
 import { initTamadMeetSocket } from '../gateways/tamadMeetSocketGateway';
 import { socketAuthMiddleware } from './socketAuth';
+import Workspace from '../models/Workspace';
 
 let io: Server;
 
@@ -36,20 +37,36 @@ export const initSocket = (server: HttpServer) => {
     const joinedWorkspaces = new Set<string>();
 
     // Join a workspace room
-    socket.on('join_workspace', (workspaceId: string) => {
-      socket.join(`workspace_${workspaceId}`);
-      joinedWorkspaces.add(workspaceId);
+    socket.on('join_workspace', async (workspaceId: string) => {
+      try {
+        const workspace = await Workspace.findById(workspaceId).lean();
+        if (!workspace) return;
+        
+        const isMember = workspace.members.some(
+          (m: any) => m.userId.toString() === userId.toString()
+        );
+        
+        if (!isMember) {
+          console.log(`User ${userId} attempted to join unauthorized workspace ${workspaceId}`);
+          return;
+        }
 
-      if (!workspacePresence.has(workspaceId)) {
-        workspacePresence.set(workspaceId, new Set());
+        socket.join(`workspace_${workspaceId}`);
+        joinedWorkspaces.add(workspaceId);
+
+        if (!workspacePresence.has(workspaceId)) {
+          workspacePresence.set(workspaceId, new Set());
+        }
+        workspacePresence.get(workspaceId)!.add(userId);
+
+        console.log(`User ${userId} joined workspace ${workspaceId}`);
+        io.to(`workspace_${workspaceId}`).emit('presence_update', {
+          workspaceId,
+          users: Array.from(workspacePresence.get(workspaceId)!),
+        });
+      } catch (error) {
+        console.error('Error joining workspace socket room:', error);
       }
-      workspacePresence.get(workspaceId)!.add(userId);
-
-      console.log(`User ${userId} joined workspace ${workspaceId}`);
-      io.to(`workspace_${workspaceId}`).emit('presence_update', {
-        workspaceId,
-        users: Array.from(workspacePresence.get(workspaceId)!),
-      });
     });
 
     // Leave a workspace room
