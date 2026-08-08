@@ -15,7 +15,7 @@ export function Dialog({ open, onClose, children }: DialogProps) {
   return (
     <AnimatePresence>
       {open && (
-        <HeadlessDialog as="div" className="relative z-[60]" onClose={onClose} static>
+        <HeadlessDialog as="div" className="relative z-[60]" open={open} onClose={onClose} static>
           <motion.div
             variants={overlayVariants}
             initial="initial"
