@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { handleMeetingSockets } from './meetingSocket';
 import { initTamadMeetSocket } from '../gateways/tamadMeetSocketGateway';
 import { socketAuthMiddleware } from './socketAuth';
+import { rateLimitMiddleware } from './rateLimiter';
 import Workspace from '../models/Workspace';
 
 let io: Server;
@@ -24,6 +25,7 @@ export const initSocket = (server: HttpServer) => {
 
   // Authentication Middleware
   io.use(socketAuthMiddleware);
+  io.use(rateLimitMiddleware);
 
   io.on('connection', (socket: Socket) => {
     const userId = (socket as any).user.id;
