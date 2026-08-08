@@ -37,45 +37,61 @@ service firebase.storage {
         || request.resource.contentType.matches('application/vnd.openxmlformats.*');
     }
 
+    // New uploads must be bound to the authenticated uploader via custom
+    // metadata. Mutations (overwrite/delete) are restricted to that uploader;
+    // legacy objects without the uid metadata remain deletable by any
+    // authenticated user so pre-existing files are not orphaned.
+    function isOwnedUpload() {
+      return isAuthenticated()
+        && request.resource.metadata.uid == request.auth.uid;
+    }
+
+    function canMutate() {
+      return isAuthenticated()
+        && (resource.metadata.uid == request.auth.uid
+          || !resource.metadata.keys().hasAny(['uid']));
+    }
+
     // User profile images
     match /users/{userId}/{allPaths=**} {
       allow read: if true;
       allow write: if isOwner(userId) && isValidImage();
+      allow delete: if isOwner(userId);
     }
 
     // Workspace files
     match /workspaces/{workspaceId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isValidFile();
-      allow delete: if isAuthenticated();
+      allow write: if isOwnedUpload() && isValidFile();
+      allow delete: if canMutate();
     }
 
     // Task attachments
     match /workspaces/{workspaceId}/tasks/{taskId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isValidFile();
-      allow delete: if isAuthenticated();
+      allow write: if isOwnedUpload() && isValidFile();
+      allow delete: if canMutate();
     }
 
     // Project files
     match /workspaces/{workspaceId}/projects/{projectId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isValidFile();
-      allow delete: if isAuthenticated();
+      allow write: if isOwnedUpload() && isValidFile();
+      allow delete: if canMutate();
     }
 
     // Notes attachments
     match /workspaces/{workspaceId}/notes/{noteId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isValidFile();
-      allow delete: if isAuthenticated();
+      allow write: if isOwnedUpload() && isValidFile();
+      allow delete: if canMutate();
     }
 
     // Whiteboard images
     match /workspaces/{workspaceId}/whiteboards/{whiteboardId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isImage() && request.resource.size < 10 * 1024 * 1024; // 10MB
-      allow delete: if isAuthenticated();
+      allow write: if isOwnedUpload() && isImage() && request.resource.size < 10 * 1024 * 1024; // 10MB
+      allow delete: if canMutate();
     }
 
     // Default deny everything else

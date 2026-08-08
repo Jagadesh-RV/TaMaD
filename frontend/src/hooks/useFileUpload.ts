@@ -5,7 +5,7 @@ import {
   getDownloadURL,
   deleteObject,
 } from 'firebase/storage';
-import { storage } from '../services/firebase';
+import { storage, auth } from '../services/firebase';
 
 interface UploadProgress {
   [key: string]: number;
@@ -31,7 +31,9 @@ export const useFileUpload = (): UseFileUploadReturn => {
 
     try {
       const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, file, {
+        customMetadata: { uid: auth.currentUser?.uid || '' },
+      });
 
       return new Promise((resolve, reject) => {
         uploadTask.on(
