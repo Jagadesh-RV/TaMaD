@@ -2,12 +2,14 @@ import { Router } from 'express';
 import { getTasks, createTask, updateTask, deleteTask, reorderTask, bulkUpdateTasks, bulkDeleteTasks, toggleWatchTask, toggleVoteTask } from '../controllers/taskController';
 import { getComments, addComment } from '../controllers/commentController';
 import { protect } from '../middleware/auth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
 import { validate } from '../middleware/validate';
 import { taskCreateSchema, taskUpdateSchema } from '../middleware/schemas';
 
 const router = Router();
 
 router.use(protect); // All task routes require authentication
+router.use(requireWorkspaceMember); // Require workspace membership for task routes
 
 router.route('/')
   .get(getTasks)
