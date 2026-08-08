@@ -45,3 +45,45 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
     return res.status(500).json({ error: 'Server error checking workspace permissions' });
   }
 };
+
+export const verifyWorkspaceMembership = async (workspaceId: string, userId: string): Promise<boolean> => {
+  try {
+    const cacheKey = CACHE_KEYS.WORKSPACE(workspaceId);
+    let workspace = await cache.get<any>(cacheKey);
+
+    if (!workspace) {
+      workspace = await Workspace.findById(workspaceId).lean();
+      if (!workspace) return false;
+      await cache.set(cacheKey, workspace, 300);
+    }
+
+    return workspace.members.some(
+      (m: any) => m.userId.toString() === userId.toString()
+    );
+  } catch {
+    return false;
+  }
+};
+
+export const requireEntityWorkspaceMember = (Model: any) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const entityId = req.params.id || req.params.taskId || req.params.projectId;
+    if (!entityId) return next();
+
+    try {
+      const entity = await Model.findById(entityId).select('workspaceId');
+      if (!entity) return res.status(404).json({ error: 'Resource not found' });
+      if (!entity.workspaceId) return next();
+
+      const isMember = await verifyWorkspaceMembership(entity.workspaceId.toString(), req.user._id);
+      if (!isMember) {
+        return res.status(403).json({ error: 'Not authorized to access this resource' });
+      }
+
+      next();
+    } catch (error) {
+      console.error('Entity auth error:', error);
+      return res.status(500).json({ error: 'Server error checking resource permissions' });
+    }
+  };
+};

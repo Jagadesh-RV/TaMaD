@@ -6,6 +6,7 @@ import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 export interface AuthRequest extends Request {
   user?: any;
   workspace?: any;
+  teamMember?: any;
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
