@@ -68,6 +68,7 @@ export default function SprintPlanningPage() {
   const [isSprintModalOpen, setIsSprintModalOpen] = useState(false);
 
   const [activeDragTask, setActiveDragTask] = useState<any>(null);
+  const [originalSprintId, setOriginalSprintId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentWorkspace?._id) {
@@ -86,11 +87,13 @@ export default function SprintPlanningPage() {
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const task = tasks.find(t => t._id === active.id);
-    if (task) setActiveDragTask(task);
+    if (task) {
+      setActiveDragTask(task);
+      setOriginalSprintId(task.sprintId || null);
+    }
   };
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    setActiveDragTask(null);
+  const handleDragOver = (event: any) => {
     const { active, over } = event;
     if (!over) return;
 
@@ -108,23 +111,35 @@ export default function SprintPlanningPage() {
       newSprintId = overId === 'backlog' ? null : overId;
     }
 
-    const task = tasks.find(t => t._id === taskId);
+    const task = useTaskStore.getState().tasks.find(t => t._id === taskId);
     if (!task) return;
 
     const currentSprintId = task.sprintId || null;
     if (currentSprintId === newSprintId) return;
 
-    // Optimistic UI update
+    // Optimistic UI update during drag
     useTaskStore.setState(s => ({
       tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: newSprintId || undefined } : t)
     }));
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveDragTask(null);
+    const { active } = event;
+    const taskId = active.id as string;
+
+    const task = useTaskStore.getState().tasks.find(t => t._id === taskId);
+    if (!task) return;
+
+    const currentSprintId = task.sprintId || null;
+    if (originalSprintId === currentSprintId) return;
 
     try {
-      await updateTask(taskId, { sprintId: newSprintId as any });
+      await updateTask(taskId, { sprintId: currentSprintId as any });
       toast.success('Task moved');
     } catch {
       useTaskStore.setState(s => ({
-        tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: currentSprintId || undefined } : t)
+        tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: originalSprintId || undefined } : t)
       }));
       toast.error('Failed to move task');
     }
@@ -166,13 +181,13 @@ export default function SprintPlanningPage() {
         </button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
         <div className="flex flex-1 overflow-hidden">
           {/* Sprints Area */}
           <div className="flex-1 overflow-y-auto p-6" style={{ borderRight: '1px solid var(--color-border-light)' }}>
             
             {activeSprint && (
-              <div className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
+              <DroppableContainer id={activeSprint._id} className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>{activeSprint.name} <span className="ml-2 text-xs bg-blue-500/20 text-blue-500 px-2 py-1 rounded">Active</span></h2>
@@ -181,7 +196,7 @@ export default function SprintPlanningPage() {
                   <button className="text-sm rounded border px-3 py-1 text-[var(--color-muted)] hover:bg-[var(--color-surface-hover)] border-[var(--color-border-light)]">Complete Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === activeSprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <DroppableContainer id={activeSprint._id} className="min-h-[100px]">
+                  <div className="min-h-[100px]">
                     {tasks.filter(t => t.sprintId === activeSprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
@@ -190,13 +205,13 @@ export default function SprintPlanningPage() {
                         <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Drag issues here</p>
                       </div>
                     )}
-                  </DroppableContainer>
+                  </div>
                 </SortableContext>
-              </div>
+              </DroppableContainer>
             )}
 
             {plannedSprints.map(sprint => (
-              <div key={sprint._id} className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
+              <DroppableContainer key={sprint._id} id={sprint._id} className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
                 <div className="mb-4 flex items-center justify-between">
                   <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>{sprint.name}</h2>
                   <button 
@@ -204,7 +219,7 @@ export default function SprintPlanningPage() {
                     className="text-sm rounded border px-3 py-1 bg-[var(--color-accent)] text-white hover:opacity-90 border-[var(--color-accent)]">Start Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === sprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <DroppableContainer id={sprint._id} className="min-h-[100px]">
+                  <div className="min-h-[100px]">
                     {tasks.filter(t => t.sprintId === sprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
@@ -213,9 +228,9 @@ export default function SprintPlanningPage() {
                         <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Plan your sprint here</p>
                       </div>
                     )}
-                  </DroppableContainer>
+                  </div>
                 </SortableContext>
-              </div>
+              </DroppableContainer>
             ))}
             
             {!activeSprint && plannedSprints.length === 0 && (
