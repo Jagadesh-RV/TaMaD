@@ -83,6 +83,20 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'workspaceId is required' });
   }
 
+  // Verify assignees belong to the workspace
+  if (assignees && Array.isArray(assignees)) {
+    const Workspace = require('../models/Workspace').default;
+    const workspace = await Workspace.findById(workspaceId);
+    if (workspace) {
+      const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
+      validMemberIds.push(workspace.ownerId.toString());
+      const invalidAssignees = assignees.filter((id: string) => !validMemberIds.includes(id));
+      if (invalidAssignees.length > 0) {
+        return res.status(403).json({ error: 'One or more assignees are not members of this workspace' });
+      }
+    }
+  }
+
   // Get max order for the given status to place at the bottom
   const lastTask = await Task.findOne({ workspaceId, status }).sort({ order: -1 });
   const order = lastTask ? lastTask.order + 1000 : 1000;
@@ -143,6 +157,25 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
   if (!task) {
     return res.status(404).json({ error: 'Task not found' });
+  }
+
+  // Prevent moving task to a different workspace
+  if (req.body.workspaceId && req.body.workspaceId !== task.workspaceId.toString()) {
+    delete req.body.workspaceId;
+  }
+
+  // Verify assignees belong to the workspace
+  if (req.body.assignees && Array.isArray(req.body.assignees)) {
+    const Workspace = require('../models/Workspace').default;
+    const workspace = await Workspace.findById(task.workspaceId);
+    if (workspace) {
+      const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
+      validMemberIds.push(workspace.ownerId.toString());
+      const invalidAssignees = req.body.assignees.filter((id: string) => !validMemberIds.includes(id));
+      if (invalidAssignees.length > 0) {
+        return res.status(403).json({ error: 'One or more assignees are not members of this workspace' });
+      }
+    }
   }
 
   const previousAssigneeIds = (task.assignees || []).map((id: any) => id.toString());

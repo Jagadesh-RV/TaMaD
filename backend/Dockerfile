@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Stage 1.5: Development (hot-reload via ts-node-dev)
-FROM node:18-alpine AS development
+FROM node:22-alpine AS development
 
 WORKDIR /app
 
@@ -35,7 +35,7 @@ EXPOSE 5000
 CMD ["npm", "run", "dev"]
 
 # Stage 2: Production
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
@@ -46,7 +46,10 @@ COPY package*.json ./
 RUN npm install --only=production
 
 # Copy compiled files from builder stage
-COPY --from=builder /app/dist ./dist
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+# Set user to non-root
+USER node
 
 # Expose port
 EXPOSE 5000

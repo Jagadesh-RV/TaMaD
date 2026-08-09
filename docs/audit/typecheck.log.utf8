@@ -1,0 +1,9 @@
+﻿node.exe : $ pnpm --filter tamad-frontend typecheck && pnpm --filter tamad-backend typecheck
+At C:\Users\jagad\AppData\Roaming\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ pnpm --filter...ckend typecheck:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+$ tsc --noEmit
+$ tsc --noEmit

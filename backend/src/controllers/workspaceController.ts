@@ -114,6 +114,10 @@ export const addMember = async (req: AuthRequest, res: Response) => {
     return res.status(403).json({ error: 'Not authorized to add members' });
   }
 
+  if (workspace.type === 'personal') {
+    return res.status(400).json({ error: 'Personal workspaces cannot be shared. Please create a Team workspace.' });
+  }
+
   const user = await User.findOne({ email });
   if (!user) {
     return res.status(404).json({ error: 'User not found with this email' });

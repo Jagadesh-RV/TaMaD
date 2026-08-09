@@ -93,4 +93,9 @@ TaskSchema.index({ epicId: 1 });
 TaskSchema.index({ assignees: 1, status: 1 });
 TaskSchema.index({ dueDate: 1 });
 
+// Analytics query indices
+TaskSchema.index({ workspaceId: 1, createdAt: 1 });
+TaskSchema.index({ workspaceId: 1, status: 1, updatedAt: 1 });
+TaskSchema.index({ workspaceId: 1, status: 1, dueDate: 1 });
+
 export default mongoose.model<ITask>('Task', TaskSchema);
