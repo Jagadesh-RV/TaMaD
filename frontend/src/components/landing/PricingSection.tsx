@@ -71,7 +71,6 @@ export function PricingSection() {
 
   return (
     <section id="pricing" className="relative py-24 md:py-32">
-    <section id="pricing" className="relative py-24 md:py-32">
 
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
@@ -91,6 +90,7 @@ export function PricingSection() {
               aria-checked={annual}
               aria-label="Toggle annual billing"
               onClick={() => setAnnual((value) => !value)}
+              className={clsx(
                 'relative h-7 w-13 rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2',
                 annual ? 'bg-foreground' : 'bg-surface-active border border-border',
               )}
