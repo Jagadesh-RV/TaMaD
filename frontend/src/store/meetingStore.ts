@@ -53,7 +53,7 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   fetchMeetings: async (teamId?: string) => {
     set({ loading: true });
     try {
-      const url = teamId ? `/meetings?teamId=${teamId}` : '/meetings';
+      const url = (teamId && teamId !== 'undefined') ? `/meetings?teamId=${teamId}` : '/meetings';
       const { data } = await api.get(url);
       set({ meetings: data.meetings, loading: false });
     } catch {

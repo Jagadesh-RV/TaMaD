@@ -69,10 +69,12 @@ export const getMeetings = async (req: AuthRequest, res: Response) => {
   const { teamId } = req.query;
   try {
     const query: any = {};
-    if (teamId) query.teamId = teamId;
+    const isValidTeamId = teamId && teamId !== 'undefined';
     
-    // Default to fetching for user's teams if teamId not provided
-    if (!teamId) {
+    if (isValidTeamId) {
+      query.teamId = teamId;
+    } else {
+      // Default to fetching for user's teams if teamId not provided
       const memberships = await TeamMember.find({ userId: req.user?._id, isDeleted: false });
       query.teamId = { $in: memberships.map(m => m.teamId) };
     }
