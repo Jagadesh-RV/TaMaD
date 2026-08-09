@@ -1,4 +1,4 @@
-import { useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react';
+import React, { useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react';
 import clsx from 'clsx';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
@@ -17,69 +17,77 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   hint?: string;
 }
 
-export function TextField({ label, error, hint, className, id, ...rest }: TextFieldProps) {
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
-        {label}
-      </label>
-      <input
-        id={id}
-        className={clsx(
-          'h-12 w-full rounded-xl border bg-white/70 px-4 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
-          error
-            ? 'border-rose-500/60 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
-            : 'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
-          className,
-        )}
-        {...rest}
-      />
-      {error ? (
-        <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>
-      ) : hint ? (
-        <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">{hint}</p>
-      ) : null}
-    </div>
-  );
-}
+export const TextField = React.forwardRef<HTMLInputElement, TextFieldProps>(
+  ({ label, error, hint, className, id, ...rest }, ref) => {
+    return (
+      <div>
+        <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
+          {label}
+        </label>
+        <input
+          ref={ref}
+          id={id}
+          className={clsx(
+            'h-12 w-full rounded-xl border bg-white/70 px-4 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
+            error
+              ? 'border-rose-500/60 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
+              : 'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
+            className,
+          )}
+          {...rest}
+        />
+        {error ? (
+          <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>
+        ) : hint ? (
+          <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">{hint}</p>
+        ) : null}
+      </div>
+    );
+  }
+);
+TextField.displayName = 'TextField';
 
 interface PasswordFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
 }
 
-export function PasswordField({ label, error, id, ...rest }: PasswordFieldProps) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <div>
-      <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          id={id}
-          type={visible ? 'text' : 'password'}
-          className={clsx(
-            'h-12 w-full rounded-xl border bg-white/70 px-4 pr-12 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
-            error
-              ? 'border-rose-500/60 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
-              : 'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
-          )}
-          {...rest}
-        />
-        <button
-          type="button"
-          onClick={() => setVisible((value) => !value)}
-          aria-label={visible ? 'Hide password' : 'Show password'}
-          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-navy-900 dark:hover:text-white"
-        >
-          {visible ? <EyeOff size={19} /> : <Eye size={19} />}
-        </button>
+export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldProps>(
+  ({ label, error, id, ...rest }, ref) => {
+    const [visible, setVisible] = useState(false);
+    return (
+      <div>
+        <label htmlFor={id} className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
+          {label}
+        </label>
+        <div className="relative">
+          <input
+            ref={ref}
+            id={id}
+            type={visible ? 'text' : 'password'}
+            className={clsx(
+              'h-12 w-full rounded-xl border bg-white/70 px-4 pr-12 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
+              error
+                ? 'border-rose-500/60 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10'
+                : 'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
+            )}
+            {...rest}
+          />
+          <button
+            type="button"
+            onClick={() => setVisible((value) => !value)}
+            aria-label={visible ? 'Hide password' : 'Show password'}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-navy-900 dark:hover:text-white"
+          >
+            {visible ? <EyeOff size={19} /> : <Eye size={19} />}
+          </button>
+        </div>
+        {error && <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>}
       </div>
-      {error && <p className="mt-1.5 text-xs font-medium text-rose-500">{error}</p>}
-    </div>
-  );
-}
+    );
+  }
+);
+PasswordField.displayName = 'PasswordField';
 
 export function GoogleButton({ onClick, disabled, label = 'Continue with Google' }: { onClick: () => void; disabled?: boolean; label?: string }) {
   return (
