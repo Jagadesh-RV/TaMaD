@@ -45,31 +45,30 @@ const problems = [
 export function ProblemSection() {
   return (
     <section className="relative py-24 md:py-32">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/[0.05] blur-[140px] dark:bg-brand-600/10" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="The problem"
-          title={<>Why great teams feel <span className="font-serif italic text-brand-600 dark:text-brand-300">disconnected</span></>}
+          title={<>Why great teams feel <span className="font-serif italic text-foreground-secondary">disconnected</span></>}
           subtitle="The modern stack looks powerful — until you count the tabs, the logins, and the work lost between them."
         />
 
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {problems.map((problem, index) => (
             <Reveal key={problem.title} delay={(index % 3) * 0.07}>
-              <div className="group flex h-full flex-col rounded-3xl border border-navy-900/[0.07] bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(15,23,42,0.25)] dark:border-white/[0.07] dark:bg-white/[0.03]">
+              <div className="card group flex h-full flex-col p-6 hover:-translate-y-1 transition-transform duration-300">
                 <div className="mb-4 flex items-center justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 transition-colors duration-300 group-hover:bg-rose-50 group-hover:text-rose-500 dark:bg-white/5 dark:text-slate-400">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-surface-active text-foreground-secondary transition-colors duration-300 group-hover:bg-foreground group-hover:text-background">
                     <problem.icon size={21} />
                   </div>
-                  <Badge tone="neutral" className="hidden sm:inline-flex">Problem</Badge>
+                  <Badge className="hidden sm:inline-flex badge-neutral">Problem</Badge>
                 </div>
-                <h3 className="text-[15px] font-bold text-navy-900 dark:text-white">{problem.title}</h3>
-                <p className="mt-2 flex-1 text-[13px] leading-relaxed text-slate-500 dark:text-slate-400">{problem.problem}</p>
-                <div className="mt-5 flex items-start gap-2.5 rounded-2xl bg-emerald-500/[0.07] p-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
+                <h3 className="text-[15px] font-bold text-foreground">{problem.title}</h3>
+                <p className="mt-2 flex-1 text-[13px] leading-relaxed text-foreground-secondary">{problem.problem}</p>
+                <div className="mt-5 flex items-start gap-2.5 rounded-lg bg-[var(--color-success-light)] p-3">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-white">
                     <Check size={12} strokeWidth={3} />
                   </span>
-                  <p className="text-[12px] font-semibold leading-snug text-emerald-700 dark:text-emerald-300">{problem.solution}</p>
+                  <p className="text-[12px] font-semibold leading-snug text-success">{problem.solution}</p>
                 </div>
               </div>
             </Reveal>
@@ -77,9 +76,9 @@ export function ProblemSection() {
         </div>
 
         <Reveal delay={0.15}>
-          <div className="mx-auto mt-14 flex max-w-2xl items-center justify-center gap-3 rounded-full border border-brand-500/20 bg-white/70 px-6 py-3.5 text-center shadow-sm backdrop-blur-md dark:border-brand-400/20 dark:bg-white/[0.04]">
-            <Workflow size={18} className="shrink-0 text-brand-600 dark:text-brand-300" />
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          <div className="mx-auto mt-14 flex max-w-2xl items-center justify-center gap-3 rounded-full border border-border bg-surface px-6 py-3.5 text-center shadow-sm">
+            <Workflow size={18} className="shrink-0 text-foreground-secondary" />
+            <p className="text-sm font-medium text-foreground">
               That’s why TaMaD was built — <strong className="font-bold">one platform instead of a pile of apps.</strong>
             </p>
           </div>

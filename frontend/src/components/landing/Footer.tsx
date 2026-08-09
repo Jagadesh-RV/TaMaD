@@ -35,12 +35,12 @@ function scrollTo(id: string) {
 
 export function Footer() {
   return (
-    <footer id="docs" className="relative border-t border-navy-900/[0.07] bg-white/60 dark:border-white/[0.07] dark:bg-navy-900/40">
+    <footer id="docs" className="relative border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-20">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr]">
           <div>
             <Logo size={40} />
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            <p className="mt-5 max-w-xs text-sm leading-relaxed text-foreground-secondary">
               One workspace for personal productivity, team collaboration, AI, automation, and Agile project
               management.
             </p>
@@ -50,7 +50,7 @@ export function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-navy-900/10 text-slate-500 transition-all hover:-translate-y-0.5 hover:border-brand-500/40 hover:text-brand-600 dark:border-white/10 dark:text-slate-400 dark:hover:text-brand-300"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border text-foreground-secondary transition-all hover:-translate-y-0.5 hover:border-foreground-tertiary hover:text-foreground"
                 >
                   <social.icon size={17} />
                 </a>
@@ -64,7 +64,7 @@ export function Footer() {
                 key={link.label}
                 type="button"
                 onClick={() => link.id && scrollTo(link.id)}
-                className="text-left text-sm text-slate-600 transition-colors hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
+                className="text-left text-sm text-foreground-secondary transition-colors hover:text-foreground"
               >
                 {link.label}
               </button>
@@ -78,7 +78,7 @@ export function Footer() {
                   key={link.label}
                   type="button"
                   onClick={() => link.id && scrollTo(link.id)}
-                  className="text-left text-sm text-slate-600 transition-colors hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
+                  className="text-left text-sm text-foreground-secondary transition-colors hover:text-foreground"
                 >
                   {link.label}
                 </button>
@@ -86,7 +86,7 @@ export function Footer() {
                 <Link
                   key={link.label}
                   to={link.href!}
-                  className="text-sm text-slate-600 transition-colors hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
+                  className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
                 >
                   {link.label}
                 </Link>
@@ -98,7 +98,7 @@ export function Footer() {
             {legalLinks.map((link) => (
               <span
                 key={link.label}
-                className="text-sm text-slate-600 transition-colors hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
+                className="text-sm text-foreground-secondary transition-colors hover:text-foreground"
               >
                 {link.label}
               </span>
@@ -108,19 +108,19 @@ export function Footer() {
           <FooterColumn title="Contact">
             <a
               href="mailto:support@tamad.app"
-              className="inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-300"
+              className="inline-flex items-center gap-2 text-sm text-foreground-secondary transition-colors hover:text-foreground"
             >
               <Mail size={15} /> support@tamad.app
             </a>
-            <span className="text-sm text-slate-600 dark:text-slate-400">Mon–Fri, 9:00–18:00 UTC</span>
+            <span className="text-sm text-foreground-tertiary">Mon–Fri, 9:00–18:00 UTC</span>
           </FooterColumn>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-navy-900/[0.07] pt-8 dark:border-white/[0.07] sm:flex-row">
-          <p className="text-sm text-slate-500 dark:text-slate-500">
+        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-border-light pt-8 sm:flex-row">
+          <p className="text-sm text-foreground-tertiary">
             © {new Date().getFullYear()} TaMaD. All rights reserved.
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-500">
+          <p className="text-sm text-foreground-tertiary">
             Organize your universe — everything in one workspace.
           </p>
         </div>
@@ -132,7 +132,7 @@ export function Footer() {
 function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
-      <h3 className="text-sm font-bold tracking-wide text-navy-900 dark:text-white">{title}</h3>
+      <h3 className="text-sm font-bold tracking-wide text-foreground">{title}</h3>
       {children}
     </div>
   );

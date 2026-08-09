@@ -92,6 +92,7 @@ export const initSocket = (server: HttpServer) => {
 
     // Handle typing indicators
     socket.on('typing_start', ({ workspaceId, taskId }) => {
+      if (!joinedWorkspaces.has(workspaceId)) return;
       socket.to(`workspace_${workspaceId}`).emit('user_typing', {
         userId,
         taskId
@@ -99,6 +100,7 @@ export const initSocket = (server: HttpServer) => {
     });
 
     socket.on('typing_end', ({ workspaceId, taskId }) => {
+      if (!joinedWorkspaces.has(workspaceId)) return;
       socket.to(`workspace_${workspaceId}`).emit('user_stopped_typing', {
         userId,
         taskId

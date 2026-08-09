@@ -30,7 +30,7 @@ setup('authenticate', async ({ page }) => {
     await page.getByLabel('Email').fill(email);
     await page.getByLabel('Password', { exact: true }).fill(password);
     await page.getByLabel('Confirm Password', { exact: true }).fill(password);
-    await page.getByRole('button', { name: 'Create Account', exact: true }).click();
+    await page.getByRole('button', { name: 'Create account', exact: true }).click();
     await page.waitForURL('**/dashboard', { timeout: 10000 });
   }
 

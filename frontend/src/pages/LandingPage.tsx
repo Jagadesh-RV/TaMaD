@@ -35,7 +35,7 @@ export default function LandingPage() {
         />
       </Helmet>
 
-      <div className="min-h-screen bg-white font-sans text-navy-900 antialiased selection:bg-brand-500/20 dark:bg-navy-950 dark:text-white">
+      <div className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/20">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"

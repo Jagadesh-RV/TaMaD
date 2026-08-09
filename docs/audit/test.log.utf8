@@ -1,0 +1,73 @@
+﻿node.exe : $ pnpm --filter tamad-backend test && pnpm --filter tamad-frontend test
+At C:\Users\jagad\AppData\Roaming\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ pnpm --filter...d-frontend test:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/TaMaD/backend[39m
+
+ [32mΓ£ô[39m src/__tests__/validation.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/health.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/taskController.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32mΓ£ô[39m src/__tests__/projectController.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 15[2mms[22m[39m
+[90mstdout[2m | src/__tests__/auth.test.ts
+[22m[39m[32minfo[39m: Redis connected successfully at redis://localhost:6379 {"timestamp":"2026-08-08T16:57:25.369Z"}
+
+ [32mΓ£ô[39m src/__tests__/auth.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m      Tests [22m [1m[32m32 passed[39m[22m[90m (32)[39m
+[2m   Start at [22m 22:27:24
+[2m   Duration [22m 859ms[2m (transform 478ms, setup 0ms, import 1.07s, tests 71ms, environment 1ms)[22m
+
+$ vitest run
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.10 [39m[90mD:/TaMaD/frontend[39m
+
+ [32mΓ£ô[39m src/lib/__tests__/theme.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/authStore.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/habitStore.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/projectStore.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/goalStore.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/noteStore.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/documentStore.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+ [32mΓ£ô[39m src/store/__tests__/taskStore.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+[90mstderr[2m | src/components/ui/SelectDropdown.test.tsx[2m > [22m[2mSelectDropdown[2m > [22m[2mopens 
+dropdown and allows selecting an option
+[22m[39mWarning: An update to _t inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at 
+https://reactjs.org/link/wrap-tests-with-act
+    at _t (file:///D:/TaMaD/node_modules/.pnpm/@headlessui+react@2.2.10_re_44640fcfef63f9e025942a6a3707cb6d/node_module
+s/@headlessui/react/dist/components/listbox/listbox.js:1:7001)
+    at c (file:///D:/TaMaD/node_modules/.pnpm/@headlessui+react@2.2.10_re_44640fcfef63f9e025942a6a3707cb6d/node_modules
+/@headlessui/react/dist/internal/open-closed.js:1:263)
+    at Ae (file:///D:/TaMaD/node_modules/.pnpm/@headlessui+react@2.2.10_re_44640fcfef63f9e025942a6a3707cb6d/node_module
+s/@headlessui/react/dist/internal/floating.js:1:1331)
+    at file:///D:/TaMaD/node_modules/.pnpm/@headlessui+react@2.2.10_re_44640fcfef63f9e025942a6a3707cb6d/node_modules/@h
+eadlessui/react/dist/components/label/label.js:1:1150
+    at gt (file:///D:/TaMaD/node_modules/.pnpm/@headlessui+react@2.2.10_re_44640fcfef63f9e025942a6a3707cb6d/node_module
+s/@headlessui/react/dist/components/listbox/listbox.js:1:3734)
+    at div
+    at SelectDropdown (D:/TaMaD/frontend/src/components/ui/SelectDropdown.tsx:14:3)
+
+ [32mΓ£ô[39m src/components/ui/SelectDropdown.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 381[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/Button.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[32m 221[2mms[22m[39m
+ [32mΓ£ô[39m src/components/ui/ConfirmDialog.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 394[2mms[22m[39m
+ [32mΓ£ô[39m src/components/tasks/TaskModal.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 247[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m      Tests [22m [1m[32m63 passed[39m[22m[90m (63)[39m
+[2m   Start at [22m 22:27:26
+[2m   Duration [22m 8.10s[2m (transform 2.35s, setup 11.89s, import 8.97s, tests 1.36s, environment 40.39s)[22m
+

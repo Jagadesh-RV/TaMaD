@@ -5,27 +5,30 @@ import {
   startSprint, completeSprint
 } from '../controllers/agileController';
 import { protect } from '../middleware/auth';
-import { requireWorkspaceMember } from '../middleware/workspaceAuth';
+import Epic from '../models/Epic';
+import Sprint from '../models/Sprint';
+import { requireWorkspaceMember, requireEntityWorkspaceMember } from '../middleware/workspaceAuth';
 
 const router = Router();
 router.use(protect);
-router.use(requireWorkspaceMember);
 
 router.route('/epics')
-  .get(getEpics)
-  .post(createEpic);
+  .get(requireWorkspaceMember, getEpics)
+  .post(requireWorkspaceMember, createEpic);
 router.route('/epics/:id')
-  .put(updateEpic)
-  .delete(deleteEpic);
+  .put(requireEntityWorkspaceMember(Epic), updateEpic)
+  .delete(requireEntityWorkspaceMember(Epic), deleteEpic);
 
 router.route('/sprints')
-  .get(getSprints)
-  .post(createSprint);
+  .get(requireWorkspaceMember, getSprints)
+  .post(requireWorkspaceMember, createSprint);
 router.route('/sprints/:id')
-  .put(updateSprint)
-  .delete(deleteSprint);
+  .put(requireEntityWorkspaceMember(Sprint), updateSprint)
+  .delete(requireEntityWorkspaceMember(Sprint), deleteSprint);
 
-router.post('/sprints/:id/start', startSprint);
-router.post('/sprints/:id/complete', completeSprint);
+router.post('/sprints/:id/start', requireEntityWorkspaceMember(Sprint), startSprint);
+router.post('/sprints/:id/complete', requireEntityWorkspaceMember(Sprint), completeSprint);
+
+
 
 export default router;

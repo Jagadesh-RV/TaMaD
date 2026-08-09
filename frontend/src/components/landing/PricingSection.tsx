@@ -71,18 +71,17 @@ export function PricingSection() {
 
   return (
     <section id="pricing" className="relative py-24 md:py-32">
-      <div className="pointer-events-none absolute left-1/2 top-24 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-brand-500/[0.05] blur-[150px] dark:bg-brand-500/[0.1]" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="Pricing"
-          title={<>Simple pricing. <span className="font-serif italic text-brand-600 dark:text-brand-300">Serious value.</span></>}
+          title={<>Simple pricing. <span className="font-serif italic text-foreground-secondary">Serious value.</span></>}
           subtitle="Start free, upgrade when your team does. No credit card required, cancel anytime."
         />
 
         <Reveal>
           <div className="mb-12 flex items-center justify-center gap-4">
-            <span className={clsx('text-sm font-semibold transition-colors', !annual ? 'text-navy-900 dark:text-white' : 'text-slate-400')}>
+            <span className={clsx('text-sm font-semibold transition-colors', !annual ? 'text-foreground' : 'text-foreground-tertiary')}>
               Monthly
             </span>
             <button
@@ -92,8 +91,8 @@ export function PricingSection() {
               aria-label="Toggle annual billing"
               onClick={() => setAnnual((value) => !value)}
               className={clsx(
-                'relative h-7 w-13 rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950',
-                annual ? 'bg-brand-600' : 'bg-slate-300 dark:bg-slate-700',
+                'relative h-7 w-13 rounded-full transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2',
+                annual ? 'bg-foreground' : 'bg-surface-active border border-border',
               )}
               style={{ width: '52px' }}
             >
@@ -104,10 +103,10 @@ export function PricingSection() {
                 )}
               />
             </button>
-            <span className={clsx('text-sm font-semibold transition-colors', annual ? 'text-navy-900 dark:text-white' : 'text-slate-400')}>
+            <span className={clsx('text-sm font-semibold transition-colors', annual ? 'text-foreground' : 'text-foreground-tertiary')}>
               Annual
             </span>
-            <Badge tone="success">
+            <Badge className="badge-success">
               <Sparkles size={11} /> Save 22%
             </Badge>
           </div>
@@ -120,42 +119,42 @@ export function PricingSection() {
               <Reveal key={plan.name} delay={index * 0.08}>
                 <div
                   className={clsx(
-                    'relative flex h-full flex-col rounded-3xl p-7 transition-all duration-300',
+                    'card relative flex h-full flex-col p-7 transition-all duration-300 hover:-translate-y-1',
                     plan.popular
-                      ? 'border-2 border-brand-600/60 bg-gradient-to-b from-brand-600/[0.08] via-white to-white shadow-[0_36px_90px_-40px_rgba(37,99,235,0.45)] dark:from-brand-500/[0.12] dark:via-slate-900 dark:to-slate-900'
-                      : 'border border-navy-900/[0.08] bg-white hover:-translate-y-1 hover:shadow-[0_24px_60px_-32px_rgba(15,23,42,0.3)] dark:border-white/[0.08] dark:bg-white/[0.03]',
+                      ? 'border-foreground shadow-lg'
+                      : '',
                   )}
                 >
                   {plan.popular && (
-                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-brand-600 to-violet-600 px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-lg">
+                    <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-foreground px-4 py-1.5 text-[11px] font-bold uppercase tracking-wider text-background shadow-lg">
                       Most popular
                     </span>
                   )}
 
-                  <h3 className="text-lg font-extrabold tracking-tight text-navy-900 dark:text-white">{plan.name}</h3>
-                  <p className="mt-1 text-[13px] text-slate-500 dark:text-slate-400">{plan.tagline}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-foreground">{plan.name}</h3>
+                  <p className="mt-1 text-[13px] text-foreground-secondary">{plan.tagline}</p>
 
                   <div className="mt-6 flex items-baseline gap-1.5">
                     {price === null ? (
-                      <span className="text-4xl font-extrabold tracking-tight text-navy-900 dark:text-white">Custom</span>
+                      <span className="text-4xl font-extrabold tracking-tight text-foreground">Custom</span>
                     ) : (
                       <>
-                        <span className="text-4xl font-extrabold tracking-tight text-navy-900 dark:text-white">${price}</span>
-                        <span className="text-sm font-medium text-slate-400">/ month</span>
+                        <span className="text-4xl font-extrabold tracking-tight text-foreground">${price}</span>
+                        <span className="text-sm font-medium text-foreground-tertiary">/ month</span>
                       </>
                     )}
                   </div>
-                  <p className="mt-1 h-4 text-[11.5px] text-slate-400">
+                  <p className="mt-1 h-4 text-[11.5px] text-foreground-tertiary">
                     {price !== null && price > 0 && annual ? 'billed annually' : price !== null && price > 0 ? 'billed monthly' : price === 0 ? 'free forever' : ''}
                   </p>
 
                   <ul className="mt-6 flex-1 space-y-3">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2.5 text-[13.5px] text-slate-600 dark:text-slate-300">
+                      <li key={feature} className="flex items-start gap-2.5 text-[13.5px] text-foreground-secondary">
                         <span
                           className={clsx(
                             'mt-0.5 flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full',
-                            plan.popular ? 'bg-brand-600 text-white' : 'bg-brand-500/12 text-brand-600 dark:text-brand-300',
+                            plan.popular ? 'bg-foreground text-background' : 'bg-surface-active border border-border text-foreground-secondary',
                           )}
                           style={{ width: 18, height: 18 }}
                         >
@@ -166,14 +165,12 @@ export function PricingSection() {
                     ))}
                   </ul>
 
-                  <Button
-                    to={plan.name === 'Enterprise' ? '/contact' : '/register'}
-                    variant={plan.popular ? 'primary' : 'secondary'}
-                    className="mt-8 w-full"
-                    size="lg"
+                  <a
+                    href={plan.name === 'Enterprise' ? '/contact' : '/register'}
+                    className={clsx("btn mt-8 w-full btn-lg", plan.popular ? "btn-primary" : "btn-secondary")}
                   >
                     {plan.cta}
-                  </Button>
+                  </a>
                 </div>
               </Reveal>
             );
@@ -181,7 +178,7 @@ export function PricingSection() {
         </div>
 
         <Reveal delay={0.1}>
-          <p className="mx-auto mt-10 max-w-xl text-center text-xs leading-relaxed text-slate-400 dark:text-slate-500">
+          <p className="mx-auto mt-10 max-w-xl text-center text-xs leading-relaxed text-foreground-tertiary">
             All prices in USD. Student & nonprofit discounts available — just ask. Enterprise plans include
             annual-only billing.
           </p>
