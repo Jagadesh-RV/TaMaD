@@ -204,6 +204,12 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* Fix for landing page scrolling */
+  html.landing-scroll body {
+    overflow: auto;
+    overflow-x: hidden;
+  }
 }
 
 /* ==========================================================================
