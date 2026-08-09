@@ -30,6 +30,7 @@ const suggestions = [
 export function AISection() {
   return (
     <section id="ai" className="relative py-24 md:py-32">
+      <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <div className="grid items-center gap-14 lg:grid-cols-2 lg:gap-20">
           <div>
             <SectionHeading
