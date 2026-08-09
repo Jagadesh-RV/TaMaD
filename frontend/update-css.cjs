@@ -1,8 +1,7 @@
-@import "tailwindcss";
+const fs = require('fs');
+let css = fs.readFileSync('src/index.css', 'utf8');
 
-@custom-variant dark (&:where(.dark, .dark *));
-
-
+const replacement = `
 /* ==========================================================================
    EDITORIAL DESIGN SYSTEM TOKENS
    Product-design driven, restrained, and authentic.
@@ -537,3 +536,8 @@
     border: 2px solid var(--color-surface);
   }
 }
+`;
+
+const startIdx = css.indexOf('/* ==========================================================================');
+const topPart = css.substring(0, startIdx);
+fs.writeFileSync('src/index.css', topPart + replacement);
