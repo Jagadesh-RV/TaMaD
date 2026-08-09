@@ -76,32 +76,31 @@ export function TestimonialsSection() {
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="Testimonials"
-          title={<>Loved by teams who <span className="font-serif italic text-brand-600 dark:text-brand-300">hated the clutter</span></>}
+          title={<>Loved by teams who <span className="font-serif italic text-foreground-secondary">hated the clutter</span></>}
           subtitle="Hundreds of teams have consolidated their stack on TaMaD. Here's what they say when we ask why."
         />
 
         <Reveal>
-          <figure className="relative mx-auto mb-8 max-w-4xl overflow-hidden rounded-3xl border border-brand-500/20 bg-gradient-to-br from-brand-500/[0.08] via-white to-white p-8 shadow-[0_30px_80px_-45px_rgba(37,99,235,0.35)] md:p-12 dark:border-brand-400/15 dark:from-brand-500/[0.12] dark:via-slate-900 dark:to-slate-900">
-            <Quote size={96} className="absolute -right-4 -top-4 text-brand-500/10" aria-hidden="true" />
-            <blockquote className="relative text-balance text-xl font-semibold leading-relaxed text-navy-900 md:text-2xl dark:text-white">
+          <figure className="card relative mx-auto mb-8 max-w-4xl overflow-hidden p-8 md:p-12">
+            <Quote size={96} className="absolute -right-4 -top-4 text-border" aria-hidden="true" />
+            <blockquote className="relative text-balance text-xl font-semibold leading-relaxed text-foreground md:text-2xl">
               “{featured.quote}”
             </blockquote>
             <figcaption className="mt-8 flex items-center gap-4">
               <div
-                className="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-white"
-                style={{ background: `linear-gradient(135deg, hsl(${featured.hue} 70% 50%), hsl(${featured.hue + 40} 70% 42%))` }}
+                className="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold text-background bg-foreground"
               >
                 AN
               </div>
               <div>
-                <p className="text-sm font-bold text-navy-900 dark:text-white">{featured.name}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-sm font-bold text-foreground">{featured.name}</p>
+                <p className="text-xs text-foreground-secondary">
                   {featured.role} · {featured.company}
                 </p>
               </div>
               <div className="ml-auto hidden items-center gap-1 sm:flex">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={16} className="fill-amber-400 text-amber-400" />
+                  <Star key={i} size={16} className="fill-foreground text-foreground" />
                 ))}
               </div>
             </figcaption>
@@ -111,19 +110,18 @@ export function TestimonialsSection() {
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((testimonial, index) => (
             <Reveal key={testimonial.name} delay={(index % 3) * 0.07}>
-              <figure className="flex h-full flex-col rounded-3xl border border-navy-900/[0.07] bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_50px_-24px_rgba(15,23,42,0.22)] dark:border-white/[0.07] dark:bg-white/[0.03]">
+              <figure className="card flex h-full flex-col p-6 hover:-translate-y-1 transition-transform duration-300">
                 <div className="mb-4 flex items-center gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
+                    <Star key={i} size={13} className="fill-foreground text-foreground" />
                   ))}
                 </div>
-                <blockquote className="flex-1 text-[13.5px] leading-relaxed text-slate-600 dark:text-slate-300">
+                <blockquote className="flex-1 text-[13.5px] leading-relaxed text-foreground-secondary">
                   “{testimonial.quote}”
                 </blockquote>
-                <figcaption className="mt-6 flex items-center gap-3 border-t border-navy-900/[0.05] pt-5 dark:border-white/[0.06]">
+                <figcaption className="mt-6 flex items-center gap-3 border-t border-border-light pt-5">
                   <div
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-                    style={{ background: `linear-gradient(135deg, hsl(${testimonial.hue} 70% 50%), hsl(${testimonial.hue + 40} 70% 42%))` }}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-background bg-foreground"
                   >
                     {testimonial.name
                       .split(' ')
@@ -131,8 +129,8 @@ export function TestimonialsSection() {
                       .join('')}
                   </div>
                   <div>
-                    <p className="text-[13px] font-bold text-navy-900 dark:text-white">{testimonial.name}</p>
-                    <p className="text-[11.5px] text-slate-500 dark:text-slate-400">
+                    <p className="text-[13px] font-bold text-foreground">{testimonial.name}</p>
+                    <p className="text-[11.5px] text-foreground-secondary">
                       {testimonial.role} · {testimonial.company}
                     </p>
                   </div>
