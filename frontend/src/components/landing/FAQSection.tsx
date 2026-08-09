@@ -40,7 +40,7 @@ export function FAQSection() {
       <div className="mx-auto max-w-3xl px-5 md:px-8">
         <SectionHeading
           eyebrow="FAQ"
-          title={<>Questions, <span className="font-serif italic text-brand-600 dark:text-brand-300">answered</span></>}
+          title={<>Questions, <span className="font-serif italic text-foreground-secondary">answered</span></>}
           subtitle="Everything teams usually ask before making the switch."
         />
 
@@ -51,25 +51,25 @@ export function FAQSection() {
               <Reveal key={faq.q} delay={index * 0.04}>
                 <div
                   className={clsx(
-                    'overflow-hidden rounded-2xl border transition-colors duration-300',
+                    'card overflow-hidden rounded-2xl transition-colors duration-300',
                     isOpen
-                      ? 'border-brand-500/30 bg-white shadow-[0_16px_44px_-28px_rgba(37,99,235,0.35)] dark:border-brand-400/25 dark:bg-white/[0.05]'
-                      : 'border-navy-900/[0.08] bg-white hover:border-navy-900/[0.14] dark:border-white/[0.08] dark:bg-white/[0.03] dark:hover:border-white/[0.14]',
+                      ? 'border-foreground shadow-sm'
+                      : 'border-border hover:border-foreground-tertiary',
                   )}
                 >
                   <button
                     type="button"
                     onClick={() => setOpen(isOpen ? null : index)}
                     aria-expanded={isOpen}
-                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950"
+                    className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground focus-visible:ring-offset-2"
                   >
-                    <span className="text-[15px] font-bold text-navy-900 dark:text-white">{faq.q}</span>
+                    <span className="text-[15px] font-bold text-foreground">{faq.q}</span>
                     <motion.span
                       animate={{ rotate: isOpen ? 45 : 0 }}
                       transition={{ duration: 0.25 }}
                       className={clsx(
                         'flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-colors',
-                        isOpen ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-500 dark:bg-white/10 dark:text-slate-300',
+                        isOpen ? 'bg-foreground text-background' : 'bg-surface-active text-foreground-secondary',
                       )}
                     >
                       <Plus size={16} />
@@ -83,7 +83,7 @@ export function FAQSection() {
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                       >
-                        <p className="px-6 pb-6 text-[13.5px] leading-relaxed text-slate-500 dark:text-slate-400">{faq.a}</p>
+                        <p className="px-6 pb-6 text-[13.5px] leading-relaxed text-foreground-secondary">{faq.a}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>

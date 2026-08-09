@@ -59,7 +59,7 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="Capabilities"
-          title={<>Twenty modules. <span className="font-serif italic text-brand-600 dark:text-brand-300">Zero sprawl.</span></>}
+          title={<>Twenty modules. <span className="font-serif italic text-foreground-secondary">Zero sprawl.</span></>}
           subtitle="Every module is built to work together — your notes surface in tasks, your meetings create action items, your AI knows the whole picture."
         />
 
@@ -68,23 +68,23 @@ export function FeaturesSection() {
             <div key={group.label}>
               <Reveal>
                 <div className="mb-7 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                  <h3 className="text-lg font-extrabold tracking-tight text-navy-900 dark:text-white">{group.label}</h3>
-                  <span className="h-1 w-1 self-center rounded-full bg-slate-300 dark:bg-slate-600" aria-hidden="true" />
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{group.blurb}</p>
+                  <h3 className="text-lg font-extrabold tracking-tight text-foreground">{group.label}</h3>
+                  <span className="h-1 w-1 self-center rounded-full bg-border" aria-hidden="true" />
+                  <p className="text-sm text-foreground-secondary">{group.blurb}</p>
                 </div>
               </Reveal>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
                 {group.modules.map((module, index) => (
                   <Reveal key={module.title} delay={(index % 4) * 0.06}>
-                    <div className="group relative h-full overflow-hidden rounded-2xl border border-navy-900/[0.07] bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-500/35 hover:shadow-[0_18px_44px_-22px_rgba(37,99,235,0.3)] dark:border-white/[0.07] dark:bg-white/[0.03]">
+                    <div className="card group relative h-full overflow-hidden p-5 hover:-translate-y-1 transition-transform duration-300">
                       <div className="mb-3 flex items-center justify-between">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/[0.08] text-brand-600 transition-all duration-300 group-hover:scale-110 group-hover:bg-brand-600 group-hover:text-white dark:bg-brand-400/10 dark:text-brand-300">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-active text-foreground transition-all duration-300 group-hover:bg-foreground group-hover:text-background">
                           <module.icon size={19} />
                         </div>
-                        <ArrowUpRight size={15} className="text-slate-300 opacity-0 transition-all duration-300 group-hover:opacity-100 dark:text-slate-600" />
+                        <ArrowUpRight size={15} className="text-border opacity-0 transition-all duration-300 group-hover:opacity-100" />
                       </div>
-                      <h4 className="text-sm font-bold text-navy-900 dark:text-white">{module.title}</h4>
-                      <p className="mt-1 text-[12.5px] leading-relaxed text-slate-500 dark:text-slate-400">{module.text}</p>
+                      <h4 className="text-sm font-bold text-foreground">{module.title}</h4>
+                      <p className="mt-1 text-[12.5px] leading-relaxed text-foreground-secondary">{module.text}</p>
                     </div>
                   </Reveal>
                 ))}

@@ -1,0 +1,82 @@
+﻿node.exe : $ pnpm --filter tamad-frontend build && pnpm --filter tamad-backend build
+At C:\Users\jagad\AppData\Roaming\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/pnpm/bin/pnpm.mjs" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ pnpm --filter...d-backend build:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+$ vite build
+[36mvite v7.3.6 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 3440 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                    [39m[1m[2m  3.94 kB[22m[1m[22m[2m Γöé gzip:   1.40 kB[22m
+[2mdist/[22m[35massets/MeetingRoom-Dy7OomHQ.css               [39m[1m[2m 19.90 kB[22m[1m[22m[2m Γöé gzip:   4.36 kB[22m
+[2mdist/[22m[35massets/index-PTLt6ICs.css                     [39m[1m[2m141.12 kB[22m[1m[22m[2m Γöé gzip:  22.24 kB[22m
+[2mdist/[22m[36massets/isBefore-B_SFevwB.js                   [39m[1m[2m  0.10 kB[22m[1m[22m[2m Γöé gzip:   0.12 kB[22m
+[2mdist/[22m[36massets/addDays-Chj2u_a1.js                    [39m[1m[2m  0.15 kB[22m[1m[22m[2m Γöé gzip:   0.15 kB[22m
+[2mdist/[22m[36massets/isToday-ByaJAw9L.js                    [39m[1m[2m  0.18 kB[22m[1m[22m[2m Γöé gzip:   0.15 kB[22m
+[2mdist/[22m[36massets/endOfWeek-BW4rT2Bz.js                  [39m[1m[2m  0.30 kB[22m[1m[22m[2m Γöé gzip:   0.22 kB[22m
+[2mdist/[22m[36massets/startOfMonth-Bp-btLR5.js               [39m[1m[2m  0.35 kB[22m[1m[22m[2m Γöé gzip:   0.24 kB[22m
+[2mdist/[22m[36massets/LoadingSpinner-D-kg2u5L.js             [39m[1m[2m  0.47 kB[22m[1m[22m[2m Γöé gzip:   0.30 kB[22m
+[2mdist/[22m[36massets/Button-CV4Sn5W4.js                     [39m[1m[2m  0.51 kB[22m[1m[22m[2m Γöé gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/toast-BkLGd5xC.js                      [39m[1m[2m  0.52 kB[22m[1m[22m[2m Γöé gzip:   0.34 kB[22m
+[2mdist/[22m[36massets/NotFoundPage-CMAqBcOl.js               [39m[1m[2m  0.98 kB[22m[1m[22m[2m Γöé gzip:   0.49 kB[22m
+[2mdist/[22m[36massets/tamadMeetStore-DaBQ898a.js             [39m[1m[2m  1.03 kB[22m[1m[22m[2m Γöé gzip:   0.47 kB[22m
+[2mdist/[22m[36massets/ErrorState-DHhIANcG.js                 [39m[1m[2m  1.09 kB[22m[1m[22m[2m Γöé gzip:   0.55 kB[22m
+[2mdist/[22m[36massets/theme-BG5Uqk1x.js                      [39m[1m[2m  1.14 kB[22m[1m[22m[2m Γöé gzip:   0.66 kB[22m
+[2mdist/[22m[36massets/EmptyState-CT-HstXq.js                 [39m[1m[2m  2.10 kB[22m[1m[22m[2m Γöé gzip:   0.85 kB[22m
+[2mdist/[22m[36massets/ForgotPasswordPage-DGeBTyCK.js         [39m[1m[2m  2.46 kB[22m[1m[22m[2m Γöé gzip:   1.22 kB[22m
+[2mdist/[22m[36massets/parseISO-p8guE2Ga.js                   [39m[1m[2m  2.67 kB[22m[1m[22m[2m Γöé gzip:   1.18 kB[22m
+[2mdist/[22m[36massets/ResetPasswordPage-C5x13cvE.js          [39m[1m[2m  2.88 kB[22m[1m[22m[2m Γöé gzip:   1.34 kB[22m
+[2mdist/[22m[36massets/VerifyEmailPage-aWKSVeTI.js            [39m[1m[2m  3.02 kB[22m[1m[22m[2m Γöé gzip:   1.35 kB[22m
+[2mdist/[22m[36massets/LoginPage-Bm114e0w.js                  [39m[1m[2m  3.65 kB[22m[1m[22m[2m Γöé gzip:   1.64 kB[22m
+[2mdist/[22m[36massets/RegisterPage-sUoUTP9C.js               [39m[1m[2m  3.74 kB[22m[1m[22m[2m Γöé gzip:   1.75 kB[22m
+[2mdist/[22m[36massets/ProjectModal-N78rCQH3.js               [39m[1m[2m  4.16 kB[22m[1m[22m[2m Γöé gzip:   1.30 kB[22m
+[2mdist/[22m[36massets/TeamSettingsPage-B62hwIAR.js           [39m[1m[2m  4.17 kB[22m[1m[22m[2m Γöé gzip:   1.38 kB[22m
+[2mdist/[22m[36massets/RoadmapPage-h-A_2sOK.js                [39m[1m[2m  4.17 kB[22m[1m[22m[2m Γöé gzip:   1.70 kB[22m
+[2mdist/[22m[36massets/OrganizationDashboardPage-DzrOgRnJ.js  [39m[1m[2m  4.21 kB[22m[1m[22m[2m Γöé gzip:   1.24 kB[22m
+[2mdist/[22m[36massets/AuthFields-BL-RQiPw.js                 [39m[1m[2m  4.57 kB[22m[1m[22m[2m Γöé gzip:   1.56 kB[22m
+[2mdist/[22m[36massets/AuthLayout-DzXABrEv.js                 [39m[1m[2m  4.79 kB[22m[1m[22m[2m Γöé gzip:   1.83 kB[22m
+[2mdist/[22m[36massets/PhoneLoginPage-BPqph7YU.js             [39m[1m[2m  4.84 kB[22m[1m[22m[2m Γöé gzip:   2.04 kB[22m
+[2mdist/[22m[36massets/AgileBoardPage-DH2DxJKM.js             [39m[1m[2m  5.52 kB[22m[1m[22m[2m Γöé gzip:   2.06 kB[22m
+[2mdist/[22m[36massets/TamadMeetRoom-Bdo2FbsA.js              [39m[1m[2m  5.88 kB[22m[1m[22m[2m Γöé gzip:   2.21 kB[22m
+[2mdist/[22m[36massets/TamadMeetDashboard-KxNzadUg.js         [39m[1m[2m  6.36 kB[22m[1m[22m[2m Γöé gzip:   2.30 kB[22m
+[2mdist/[22m[36massets/FocusPage-BVCFmpPn.js                  [39m[1m[2m  6.40 kB[22m[1m[22m[2m Γöé gzip:   2.27 kB[22m
+[2mdist/[22m[36massets/sortable.esm-jX101c3r.js               [39m[1m[2m  6.63 kB[22m[1m[22m[2m Γöé gzip:   2.78 kB[22m
+[2mdist/[22m[36massets/DocumentsPage-CFLNXGZe.js              [39m[1m[2m  6.74 kB[22m[1m[22m[2m Γöé gzip:   2.64 kB[22m
+[2mdist/[22m[36massets/TemplatesPage-SDBK6D7u.js              [39m[1m[2m  6.76 kB[22m[1m[22m[2m Γöé gzip:   2.33 kB[22m
+[2mdist/[22m[36massets/NotificationsPage-vWwetvXO.js          [39m[1m[2m  7.02 kB[22m[1m[22m[2m Γöé gzip:   2.48 kB[22m
+[2mdist/[22m[36massets/MembersPage-COQqIGR8.js                [39m[1m[2m  7.10 kB[22m[1m[22m[2m Γöé gzip:   2.21 kB[22m
+[2mdist/[22m[36massets/WhiteboardPage-LETPD45d.js             [39m[1m[2m  8.25 kB[22m[1m[22m[2m Γöé gzip:   2.82 kB[22m
+[2mdist/[22m[36massets/OnboardingPage-D2eHTOSZ.js             [39m[1m[2m  8.44 kB[22m[1m[22m[2m Γöé gzip:   2.42 kB[22m
+[2mdist/[22m[36massets/NotesPage-DsCy6JRh.js                  [39m[1m[2m  9.08 kB[22m[1m[22m[2m Γöé gzip:   2.96 kB[22m
+[2mdist/[22m[36massets/AnalyticsPage-CHLfV8Lw.js              [39m[1m[2m 10.29 kB[22m[1m[22m[2m Γöé gzip:   3.19 kB[22m
+[2mdist/[22m[36massets/ProjectsPage-asaYosHS.js               [39m[1m[2m 10.52 kB[22m[1m[22m[2m Γöé gzip:   3.45 kB[22m
+[2mdist/[22m[36massets/ProfilePage-B2NU0DiE.js                [39m[1m[2m 11.02 kB[22m[1m[22m[2m Γöé gzip:   2.97 kB[22m
+[2mdist/[22m[36massets/MeetingsDashboard-Bb6TDWkT.js          [39m[1m[2m 11.99 kB[22m[1m[22m[2m Γöé gzip:   3.13 kB[22m
+[2mdist/[22m[36massets/ReportsPage-kEVIQHDe.js                [39m[1m[2m 12.29 kB[22m[1m[22m[2m Γöé gzip:   3.42 kB[22m
+[2mdist/[22m[36massets/AIAssistantPage-BvkZnZZk.js            [39m[1m[2m 13.43 kB[22m[1m[22m[2m Γöé gzip:   3.87 kB[22m
+[2mdist/[22m[36massets/SettingsPage-zNeBrpIX.js               [39m[1m[2m 13.57 kB[22m[1m[22m[2m Γöé gzip:   3.84 kB[22m
+[2mdist/[22m[36massets/CalendarPage-BS7ZcA3W.js               [39m[1m[2m 13.91 kB[22m[1m[22m[2m Γöé gzip:   4.18 kB[22m
+[2mdist/[22m[36massets/PlannerPage-DdfAVwUU.js                [39m[1m[2m 15.46 kB[22m[1m[22m[2m Γöé gzip:   3.68 kB[22m
+[2mdist/[22m[36massets/SprintPlanningPage-DAXlw5zn.js         [39m[1m[2m 15.92 kB[22m[1m[22m[2m Γöé gzip:   3.90 kB[22m
+[2mdist/[22m[36massets/TasksPage-Cy2OPcDA.js                  [39m[1m[2m 18.55 kB[22m[1m[22m[2m Γöé gzip:   5.67 kB[22m
+[2mdist/[22m[36massets/format-Bj5HdWKT.js                     [39m[1m[2m 19.54 kB[22m[1m[22m[2m Γöé gzip:   5.58 kB[22m
+[2mdist/[22m[36massets/FilesPage-Ccx4z7O2.js                  [39m[1m[2m 20.90 kB[22m[1m[22m[2m Γöé gzip:   5.58 kB[22m
+[2mdist/[22m[36massets/DashboardPage-CbzY3wBT.js              [39m[1m[2m 36.11 kB[22m[1m[22m[2m Γöé gzip:   9.58 kB[22m
+[2mdist/[22m[36massets/core.esm-paZEiUrB.js                   [39m[1m[2m 43.57 kB[22m[1m[22m[2m Γöé gzip:  14.49 kB[22m
+[2mdist/[22m[36massets/Dialog-CC2FhsVw.js                     [39m[1m[2m 45.78 kB[22m[1m[22m[2m Γöé gzip:  16.33 kB[22m
+[2mdist/[22m[36massets/IssueDetailModal-DvKGrhOY.js           [39m[1m[2m 85.39 kB[22m[1m[22m[2m Γöé gzip:  28.08 kB[22m
+[2mdist/[22m[36massets/schemas-BU1pf5U1.js                    [39m[1m[2m 92.40 kB[22m[1m[22m[2m Γöé gzip:  27.68 kB[22m
+[2mdist/[22m[36massets/LandingPage-ivBEU85a.js                [39m[1m[2m111.86 kB[22m[1m[22m[2m Γöé gzip:  27.28 kB[22m
+[2mdist/[22m[36massets/firebase-CJWbXRgq.js                   [39m[1m[2m119.16 kB[22m[1m[22m[2m Γöé gzip:  35.22 kB[22m
+[2mdist/[22m[36massets/ContactPage-BExq-89N.js                [39m[1m[2m126.93 kB[22m[1m[22m[2m Γöé gzip:  31.63 kB[22m
+[2mdist/[22m[36massets/ui-y7OMYzu9.js                         [39m[1m[2m167.17 kB[22m[1m[22m[2m Γöé gzip:  54.91 kB[22m
+[2mdist/[22m[36massets/vendor-Cxr1cagg.js                     [39m[1m[2m179.99 kB[22m[1m[22m[2m Γöé gzip:  59.38 kB[22m
+[2mdist/[22m[36massets/index-BLIsZ0Qn.js                      [39m[1m[2m266.70 kB[22m[1m[22m[2m Γöé gzip:  80.25 kB[22m
+[2mdist/[22m[36massets/charts-Cgk47Qap.js                     [39m[1m[2m400.38 kB[22m[1m[22m[2m Γöé gzip: 115.32 kB[22m
+[2mdist/[22m[36massets/MeetingRoom-BWQ5NpKR.js                [39m[1m[2m660.77 kB[22m[1m[22m[2m Γöé gzip: 179.81 kB[22m
+[32mΓ£ô built in 12.88s[39m
+$ tsc

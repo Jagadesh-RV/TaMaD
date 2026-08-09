@@ -4,10 +4,12 @@ import {
   getTagDistribution, exportCSV, getWeeklyReport,
 } from '../controllers/analyticsController';
 import { protect } from '../middleware/auth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
 
 const router = Router();
 
 router.use(protect);
+router.use(requireWorkspaceMember);
 
 router.get('/summary', getSummary);
 router.get('/trend', getTrend);

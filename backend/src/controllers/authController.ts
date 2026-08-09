@@ -467,6 +467,7 @@ export const getWorkspace = async (req: any, res: Response) => {
       workspace = await Workspace.create({
         name: 'Personal Workspace',
         description: 'Your default personal workspace',
+        type: 'personal',
         ownerId: req.user._id,
         members: [{ userId: req.user._id, role: 'owner' }],
       });

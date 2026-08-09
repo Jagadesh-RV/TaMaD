@@ -7,8 +7,10 @@ dotenv.config();
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 export const redis = new Redis(redisUrl, {
-  maxRetriesPerRequest: null,
+  maxRetriesPerRequest: 1,
   enableReadyCheck: true,
+  enableOfflineQueue: false, // Fail fast when disconnected
+  commandTimeout: 2000,      // Fail fast on slow commands
   retryStrategy: (times: number) => {
     return Math.min(times * 50, 2000);
   },

@@ -61,11 +61,10 @@ export function ShowcaseSection() {
 
   return (
     <section id="tour" className="relative overflow-hidden py-24 md:py-32">
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-brand-500/[0.07] blur-[120px] dark:bg-brand-600/10" aria-hidden="true" />
       <div className="relative mx-auto max-w-7xl px-5 md:px-8">
         <SectionHeading
           eyebrow="Product Tour"
-          title={<>One workspace. <span className="font-serif italic text-brand-600 dark:text-brand-300">Every screen.</span></>}
+          title={<>One workspace. <span className="font-serif italic text-foreground-secondary">Every screen.</span></>}
           subtitle="From personal dashboards to team boards, sprints and meetings — see the surfaces that keep TaMaD connected."
         />
 
@@ -86,8 +85,8 @@ export function ShowcaseSection() {
                 className={clsx(
                   'rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all duration-300',
                   index === active
-                    ? 'border-brand-600 bg-brand-600 text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)]'
-                    : 'border-navy-900/10 bg-white/70 text-slate-600 hover:border-brand-500/40 hover:text-brand-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-300 dark:hover:text-brand-300',
+                    ? 'border-foreground bg-foreground text-background shadow-sm'
+                    : 'border-border bg-surface text-foreground-secondary hover:border-foreground-tertiary hover:text-foreground',
                 )}
               >
                 {screen.label}
@@ -114,7 +113,7 @@ export function ShowcaseSection() {
         </div>
 
         <Reveal delay={0.15}>
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-foreground-secondary">
             {entry.description}
           </p>
         </Reveal>

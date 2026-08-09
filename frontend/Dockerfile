@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:18-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY . .
 RUN npm run build
 
 # Stage 1.5: Development (Vite dev server)
-FROM node:18-alpine AS development
+FROM node:22-alpine AS development
 
 WORKDIR /app
 
@@ -35,16 +35,16 @@ EXPOSE 5173
 CMD ["npm", "run", "dev", "--", "--host"]
 
 # Stage 2: Serve with Nginx
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
 
-# Copy custom nginx config
+# Copy custom nginx config (make sure nginx.conf listens on 8080)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port
-EXPOSE 80
+# Expose port (unprivileged cannot bind to 80)
+EXPOSE 8080
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]

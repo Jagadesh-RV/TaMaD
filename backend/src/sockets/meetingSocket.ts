@@ -2,25 +2,42 @@ import { Server, Socket } from 'socket.io';
 import MeetingChat from '../models/MeetingChat';
 import MeetingReaction from '../models/MeetingReaction';
 
+import MeetingParticipant from '../models/MeetingParticipant';
+
 const meetingPresence = new Map<string, Set<string>>(); // meetingId -> Set of userIds
 
 export const handleMeetingSockets = (io: Server, socket: Socket) => {
-  socket.on('meeting_join', (data: { meetingId: string, userId: string }) => {
-    const { meetingId, userId } = data;
-    socket.join(`meeting_${meetingId}`);
-    
-    if (!meetingPresence.has(meetingId)) {
-      meetingPresence.set(meetingId, new Set());
+  const userId = (socket as any).user.id;
+  const joinedMeetings = new Set<string>();
+
+  socket.on('meeting_join', async (data: { meetingId: string }) => {
+    try {
+      const { meetingId } = data;
+      
+      const participant = await MeetingParticipant.findOne({ meetingId, userId, status: { $in: ['joined', 'accepted'] } });
+      if (!participant) {
+        console.log(`User ${userId} attempted to join unauthorized meeting ${meetingId}`);
+        return;
+      }
+
+      socket.join(`meeting_${meetingId}`);
+      joinedMeetings.add(meetingId);
+      
+      if (!meetingPresence.has(meetingId)) {
+        meetingPresence.set(meetingId, new Set());
+      }
+      meetingPresence.get(meetingId)!.add(userId);
+      
+      io.to(`meeting_${meetingId}`).emit('meeting_presence_update', Array.from(meetingPresence.get(meetingId)!));
+    } catch (e) {
+      console.error('Socket meeting join error', e);
     }
-    meetingPresence.get(meetingId)!.add(userId);
-    
-    // Broadcast updated presence list
-    io.to(`meeting_${meetingId}`).emit('meeting_presence_update', Array.from(meetingPresence.get(meetingId)!));
   });
 
-  socket.on('meeting_leave', (data: { meetingId: string, userId: string }) => {
-    const { meetingId, userId } = data;
+  socket.on('meeting_leave', (data: { meetingId: string }) => {
+    const { meetingId } = data;
     socket.leave(`meeting_${meetingId}`);
+    joinedMeetings.delete(meetingId);
     
     if (meetingPresence.has(meetingId)) {
       meetingPresence.get(meetingId)!.delete(userId);
@@ -28,11 +45,12 @@ export const handleMeetingSockets = (io: Server, socket: Socket) => {
     }
   });
 
-  socket.on('meeting_chat', async (data: { meetingId: string, senderId: string, message: string }) => {
+  socket.on('meeting_chat', async (data: { meetingId: string, message: string }) => {
+    if (!joinedMeetings.has(data.meetingId)) return;
     try {
       const chat = await MeetingChat.create({
         meetingId: data.meetingId,
-        senderId: data.senderId,
+        senderId: userId,
         message: data.message
       });
       io.to(`meeting_${data.meetingId}`).emit('meeting_chat_received', chat);
@@ -41,11 +59,12 @@ export const handleMeetingSockets = (io: Server, socket: Socket) => {
     }
   });
 
-  socket.on('meeting_reaction', async (data: { meetingId: string, userId: string, emoji: string }) => {
+  socket.on('meeting_reaction', async (data: { meetingId: string, emoji: string }) => {
+    if (!joinedMeetings.has(data.meetingId)) return;
     try {
       const reaction = await MeetingReaction.create({
         meetingId: data.meetingId,
-        userId: data.userId,
+        userId: userId,
         emoji: data.emoji
       });
       io.to(`meeting_${data.meetingId}`).emit('meeting_reaction_received', reaction);
@@ -55,7 +74,7 @@ export const handleMeetingSockets = (io: Server, socket: Socket) => {
   });
 
   socket.on('meeting_notes_update', (data: { meetingId: string, content: string }) => {
-    // Broadcast notes update to others in meeting, except sender
+    if (!joinedMeetings.has(data.meetingId)) return;
     socket.to(`meeting_${data.meetingId}`).emit('meeting_notes_updated', data);
   });
 };
