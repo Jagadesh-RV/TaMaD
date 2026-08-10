@@ -133,3 +133,6 @@ dist-ssr/
 
 # Gemini AI workspace data
 .gemini/
+
+frontend/.env
+backend/.env
