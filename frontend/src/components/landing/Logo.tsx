@@ -39,7 +39,6 @@ export function Logo({ className, showWordmark = true, size = 34, to = '/' }: Lo
       {showWordmark && (
         <span className="text-[1.15rem] font-extrabold tracking-tight text-foreground dark:text-white">
           TaMaD
-          <span className="font-normal text-muted">.app</span>
         </span>
       )}
     </Link>
