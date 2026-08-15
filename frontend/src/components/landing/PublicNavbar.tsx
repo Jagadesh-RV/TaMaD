@@ -114,7 +114,12 @@ export function PublicNavbar() {
               >
                 Login
               </Link>
-              <Button to="/register" size="sm" className="hidden sm:inline-flex">
+              <Button
+                to="/register"
+                variant="primary"
+                size="sm"
+                className="hidden bg-slate-900 text-white shadow-[0_12px_28px_rgba(15,23,42,0.18)] hover:bg-slate-800 sm:inline-flex"
+              >
                 Get Started
               </Button>
             </>
