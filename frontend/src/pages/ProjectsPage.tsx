@@ -189,10 +189,6 @@ export default function ProjectsPage() {
                     boxShadow: isExpanded ? 'var(--shadow-md)' : 'var(--shadow-xs)',
                   }}
                 >
-                  <div
-                    className="pointer-events-none absolute inset-x-8 top-0 h-[3px] rounded-b-full opacity-70 transition-all duration-300"
-                    style={{ background: `linear-gradient(90deg, transparent, ${project.color || 'var(--color-accent)'}, transparent)`, boxShadow: `0 0 12px ${project.color || 'var(--color-accent)'}` }}
-                  />
                   <div className="cursor-pointer p-6 hover:bg-[color:var(--color-surface-hover)] transition-colors" onClick={() => toggleExpand(project._id)}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-4">
