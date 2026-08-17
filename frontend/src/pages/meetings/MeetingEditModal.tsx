@@ -34,9 +34,9 @@ const MeetingEditModal: React.FC<Props> = ({ meeting, onClose }) => {
       <div className="modal max-w-md">
         <div className="modal-header">
           <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Edit Meeting</h2>
-          <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }}>
-            <X size={20} />
-          </button>
+           <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }} aria-label="Close dialog">
+             <X size={20} />
+           </button>
         </div>
         
         <form onSubmit={handleSubmit}>

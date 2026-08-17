@@ -10,13 +10,13 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
 
-function DroppableContainer({ id, children, className }: { id: string; children: React.ReactNode; className?: string }) {
+function DroppableContainer({ id, children, className, style }: { id: string; children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   const { setNodeRef, isOver } = useDroppable({
     id,
     data: { type: 'Container', containerId: id }
   });
   return (
-    <div ref={setNodeRef} id={id} className={`${className || ''} transition-colors ${isOver ? 'bg-black/5 dark:bg-white/5 rounded-lg' : ''}`}>
+    <div ref={setNodeRef} id={id} className={`${className || ''} transition-colors ${isOver ? 'bg-black/5 dark:bg-white/5 rounded-lg' : ''}`} style={style}>
       {children}
     </div>
   );

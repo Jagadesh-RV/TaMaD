@@ -52,9 +52,9 @@ const MeetingInviteModal: React.FC<Props> = ({ meeting, onClose }) => {
       <div className="modal max-w-md flex flex-col max-h-[80vh]">
         <div className="modal-header">
           <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Invite to {meeting.title}</h2>
-          <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }}>
-            <X size={20} />
-          </button>
+           <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }} aria-label="Close dialog">
+             <X size={20} />
+           </button>
         </div>
         
         <div className="p-4 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
@@ -65,10 +65,11 @@ const MeetingInviteModal: React.FC<Props> = ({ meeting, onClose }) => {
               value={inviteLink}
               className="input flex-1"
             />
-            <button
-              onClick={copyLink}
-              className="btn btn-secondary p-2"
-            >
+             <button
+               onClick={copyLink}
+               className="btn btn-secondary p-2"
+               aria-label="Copy invite link"
+             >
               {copied ? <Check size={18} style={{ color: 'var(--color-success)' }} /> : <Copy size={18} />}
             </button>
           </div>

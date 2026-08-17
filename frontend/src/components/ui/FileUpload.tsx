@@ -163,7 +163,7 @@ export default function FileUpload({
         >
           <AlertCircle size={14} />
           {error}
-          <button onClick={resetError} className="ml-auto"><X size={14} /></button>
+           <button onClick={resetError} className="ml-auto" aria-label="Dismiss error"><X size={14} /></button>
         </div>
       )}
 
@@ -205,13 +205,14 @@ export default function FileUpload({
                   )}
                   {item.status === 'done' && <CheckCircle2 size={16} style={{ color: 'var(--color-success)' }} />}
                   {item.status === 'error' && <AlertCircle size={16} style={{ color: 'var(--color-danger)' }} />}
-                  <button
-                    onClick={() => removeFile(item.path)}
-                    className="rounded p-1 transition-colors hover:bg-red-50"
-                    style={{ color: 'var(--color-muted)' }}
-                  >
-                    <X size={14} />
-                  </button>
+                   <button
+                     onClick={() => removeFile(item.path)}
+                     className="rounded p-1 transition-colors hover:bg-red-50"
+                     style={{ color: 'var(--color-muted)' }}
+                     aria-label="Remove file"
+                   >
+                     <X size={14} />
+                   </button>
                 </div>
               </motion.div>
             ))}

@@ -228,6 +228,9 @@
   @media (max-width: 1024px) {
     .main-content { padding: 24px 24px; }
   }
+  @media (max-width: 640px) {
+    .main-content { padding: 16px 16px; }
+  }
 
   .page {
     @apply min-h-full pb-20 max-w-7xl mx-auto;
@@ -514,6 +517,29 @@
   .empty-state-description {
     @apply text-[15px] mb-8 leading-relaxed;
     color: var(--color-foreground-secondary);
+  }
+
+  /* -- Glass Surface -- */
+  .glass {
+    background: var(--color-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* -- Luminous Card -- */
+  .card-luminous {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-luminous::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    opacity: 0.5;
   }
 
   /* -- Misc -- */

@@ -125,7 +125,7 @@ export default function AIInsightPanel({ tasks, projectsCount = 0, today }: AIIn
   }, [tasks, projectsCount, todayStr]);
 
   return (
-    <Card variant="luminous" className="p-6 overflow-hidden">
+    <Card className="p-6 overflow-hidden">
       {/* AI persona header */}
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-3">

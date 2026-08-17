@@ -116,7 +116,7 @@ export default function DocumentsPage() {
             <Archive size={14} />
             Archived {archivedCount > 0 && `(${archivedCount})`}
           </button>
-          <button onClick={toggleSortDir} className="btn btn-ghost btn-sm" title="Toggle sort">
+           <button onClick={toggleSortDir} className="btn btn-ghost btn-sm" title="Toggle sort" aria-label="Toggle sort direction">
             {sortDir === 'asc' ? <SortAsc size={16} /> : <SortDesc size={16} />}
           </button>
           <select
@@ -192,16 +192,17 @@ export default function DocumentsPage() {
                     </div>
                   </div>
                   <div className="relative">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveMenu(activeMenu === doc._id ? null : doc._id);
-                      }}
-                      className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-[var(--color-surface-active)]"
-                      style={{ color: 'var(--color-muted)' }}
-                    >
-                      <MoreVertical size={16} />
-                    </button>
+                     <button
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         setActiveMenu(activeMenu === doc._id ? null : doc._id);
+                       }}
+                       className="rounded-lg p-1.5 opacity-0 transition-all group-hover:opacity-100 hover:bg-[var(--color-surface-active)]"
+                       style={{ color: 'var(--color-muted)' }}
+                       aria-label="Document actions"
+                     >
+                       <MoreVertical size={16} />
+                     </button>
                     {activeMenu === doc._id && (
                       <div
                         className="absolute right-0 top-8 z-50 min-w-[160px] rounded-xl border py-1 shadow-float"

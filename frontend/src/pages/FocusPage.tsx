@@ -171,7 +171,7 @@ export default function FocusPage() {
 
           {/* Controls */}
           <div className="flex items-center gap-6">
-            <button onClick={resetTimer} className="p-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+            <button onClick={resetTimer} className="p-4 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors" aria-label="Reset timer">
               <RotateCcw size={24} />
             </button>
             <button
@@ -180,6 +180,7 @@ export default function FocusPage() {
                 'w-20 h-20 rounded-full flex items-center justify-center text-white shadow-lg transition-transform active:scale-95 hover:scale-105',
                 mode === 'work' ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/30' : 'bg-green-500 hover:bg-green-600 shadow-green-500/30'
               )}
+              aria-label={running ? 'Pause timer' : 'Start timer'}
             >
               {running ? <Pause size={32} /> : <Play size={32} className="ml-1" />}
             </button>

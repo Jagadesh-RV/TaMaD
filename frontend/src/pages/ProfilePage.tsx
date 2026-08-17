@@ -190,13 +190,14 @@ export default function ProfilePage() {
               <div className="flex items-center gap-3">
                 {isEditing ? (
                   <div className="flex items-center gap-2">
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="input-field"
-                      style={{ width: 200 }}
-                      autoFocus
-                    />
+                     <input
+                       value={editName}
+                       onChange={(e) => setEditName(e.target.value)}
+                       className="input-field"
+                       style={{ width: 200 }}
+                       autoFocus
+                       aria-label="Display name"
+                     />
                     <button
                       onClick={handleSaveProfile}
                       disabled={isSaving}
@@ -555,21 +556,24 @@ export default function ProfilePage() {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="mt-4 flex flex-col gap-3"
               >
-                <input
-                  type="password"
-                  placeholder="Current password"
-                  className="input"
-                />
-                <input
-                  type="password"
-                  placeholder="New password"
-                  className="input"
-                />
-                <input
-                  type="password"
-                  placeholder="Confirm new password"
-                  className="input"
-                />
+                 <input
+                   type="password"
+                   placeholder="Current password"
+                   className="input"
+                   aria-label="Current password"
+                 />
+                 <input
+                   type="password"
+                   placeholder="New password"
+                   className="input"
+                   aria-label="New password"
+                 />
+                 <input
+                   type="password"
+                   placeholder="Confirm new password"
+                   className="input"
+                   aria-label="Confirm new password"
+                 />
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowChangePassword(false)}
