@@ -57,15 +57,15 @@ export default function TeamDashboardPage() {
           <div className="flex items-center gap-3">
             {isEditing ? (
               <>
-                <Button variant="secondary" onClick={() => setIsEditing(false)} className="rounded-xl px-5">
+                <Button variant="secondary" onClick={() => setIsEditing(false)}>
                   <X size={16} className="mr-2" /> Cancel
                 </Button>
-                <Button onClick={handleSave} className="rounded-xl px-5 shadow-sm">
+                <Button onClick={handleSave}>
                   <Save size={16} className="mr-2" /> Save Layout
                 </Button>
               </>
             ) : (
-              <Button variant="secondary" onClick={() => setIsEditing(true)} className="rounded-xl px-5">
+              <Button variant="secondary" onClick={() => setIsEditing(true)}>
                 <Settings size={16} className="mr-2" /> Customize
               </Button>
             )}
