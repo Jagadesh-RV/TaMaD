@@ -56,9 +56,12 @@ export default function NotesPage() {
 
   return (
     <div className="page flex h-[calc(100vh-80px)] overflow-hidden">
-      <div className="flex w-full overflow-hidden rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] shadow-sm">
-        {/* Sidebar: Document List */}
-        <aside className="flex w-80 shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-background-secondary)]">
+      <div className="flex w-full overflow-hidden rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
+        {/* Sidebar: Document List — hidden on mobile, shown when activeDoc is null */}
+        <aside className={clsx(
+          "flex shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-background-secondary)]",
+          activeDoc ? "hidden md:flex md:w-80" : "w-full md:w-80"
+        )}>
           <div className="border-b border-[color:var(--color-border)] p-4">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="flex items-center gap-2 text-[15px] font-bold tracking-tight text-[color:var(--color-foreground)]">
@@ -142,17 +145,29 @@ export default function NotesPage() {
         </aside>
 
         {/* Main Editor Area */}
-        <div className="relative flex min-w-0 flex-1 flex-col bg-[color:var(--color-background)]">
+        <div className={clsx(
+          "relative flex min-w-0 flex-1 flex-col bg-[color:var(--color-background)]",
+          !activeDoc && "hidden md:flex"
+        )}>
           {activeDoc ? (
             <>
               {/* Editor Toolbar */}
-              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)]/80 px-6 backdrop-blur-xl">
-                <div className="flex items-center gap-1 border-r border-[color:var(--color-border-light)] pr-3">
-                  {[Bold, Italic].map((Icon, idx) => (
-                    <button key={idx} title={idx === 0 ? 'Bold' : 'Italic'} className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]">
-                      <Icon size={16} />
-                    </button>
-                  ))}
+              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)]/80 px-4 md:px-6 backdrop-blur-md">
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setActiveDoc(null)}
+                    className="mr-2 rounded-lg p-2 text-[color:var(--color-muted)] hover:bg-[color:var(--color-surface-active)] md:hidden"
+                    aria-label="Back to notes list"
+                  >
+                    <FileText size={16} />
+                  </button>
+                  <div className="hidden sm:flex items-center gap-1 border-r border-[color:var(--color-border-light)] pr-3">
+                    {[Bold, Italic].map((Icon, idx) => (
+                      <button key={idx} title={idx === 0 ? 'Bold' : 'Italic'} className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]">
+                        <Icon size={16} />
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1 pl-3">
                   {[List, CheckSquare].map((Icon, idx) => (

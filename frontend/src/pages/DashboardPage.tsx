@@ -223,7 +223,7 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className="relative mb-8 overflow-hidden rounded-xl border border-border bg-[color:var(--color-surface)] px-8 py-8"
+        className="relative mb-8 overflow-hidden rounded-xl border border-border bg-[color:var(--color-surface)] px-6 py-6 sm:px-8 sm:py-8"
       >
         <div className="relative z-10">
           <div className="mb-4 flex flex-wrap items-center gap-2">

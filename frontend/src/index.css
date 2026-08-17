@@ -228,6 +228,9 @@
   @media (max-width: 1024px) {
     .main-content { padding: 24px 24px; }
   }
+  @media (max-width: 640px) {
+    .main-content { padding: 16px 16px; }
+  }
 
   .page {
     @apply min-h-full pb-20 max-w-7xl mx-auto;
