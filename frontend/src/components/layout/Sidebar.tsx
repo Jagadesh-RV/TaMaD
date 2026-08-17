@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
-  FileText, PenTool, BarChart3, Bell, Settings, ChevronLeft,
+  FileText, PenTool, BarChart3, Settings, ChevronLeft,
   ChevronRight, LogOut, FolderKanban, Users, Brain, HardDrive, Video,
-  Pin, Clock, Star,
+  Pin, Clock, Star, Briefcase, User, Building2, Rocket,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,26 +38,21 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
 
   const isTeam = currentWorkspace?.type === 'team';
 
-  const sections = [
+  const personalSections = [
     {
-      label: 'MAIN',
+      label: 'WORKSPACE',
       links: [
         { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { label: 'Tasks', path: '/tasks', icon: CheckSquare },
         { label: 'Calendar', path: '/calendar', icon: CalendarDays },
         { label: 'Projects', path: '/projects', icon: FolderKanban },
         { label: 'Roadmap', path: '/roadmap', icon: Map },
-        ...(isTeam ? [
-          { label: 'Active Sprint', path: '/agile/board', icon: Target },
-          { label: 'Backlog', path: '/agile/planning', icon: Map },
-        ] : [
-          { label: 'Focus', path: '/focus', icon: Zap },
-          { label: 'Planner', path: '/planner', icon: Target },
-        ]),
+        { label: 'Focus', path: '/focus', icon: Zap },
+        { label: 'Planner', path: '/planner', icon: Target },
       ],
     },
     {
-      label: 'CREATIVE',
+      label: 'CREATE',
       links: [
         { label: 'Notes', path: '/notes', icon: FileText },
         { label: 'Documents', path: '/documents', icon: FileText },
@@ -65,15 +60,58 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
       ],
     },
-    ...(isTeam ? [{
+    {
+      label: 'INSIGHTS',
+      links: [
+        { label: 'Analytics', path: '/analytics', icon: BarChart3 },
+        { label: 'Reports', path: '/reports', icon: BarChart3 },
+      ],
+    },
+    {
+      label: 'TOOLS',
+      links: [
+        { label: 'AI Assistant', path: '/ai', icon: Brain },
+        { label: 'Templates', path: '/templates', icon: FileText },
+      ],
+    },
+  ];
+
+  const teamSections = [
+    {
+      label: 'OVERVIEW',
+      links: [
+        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+        { label: 'Tasks', path: '/tasks', icon: CheckSquare },
+        { label: 'Calendar', path: '/calendar', icon: CalendarDays },
+        { label: 'Projects', path: '/projects', icon: FolderKanban },
+        { label: 'Roadmap', path: '/roadmap', icon: Map },
+      ],
+    },
+    {
+      label: 'AGILE',
+      links: [
+        { label: 'Active Sprint', path: '/agile/board', icon: Rocket },
+        { label: 'Backlog', path: '/agile/planning', icon: Target },
+      ],
+    },
+    {
+      label: 'COLLABORATE',
+      links: [
+        { label: 'Notes', path: '/notes', icon: FileText },
+        { label: 'Documents', path: '/documents', icon: FileText },
+        { label: 'Files', path: '/files', icon: HardDrive },
+        { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
+      ],
+    },
+    {
       label: 'TEAM',
       links: [
         { label: 'Members', path: '/team/members', icon: Users },
         { label: 'Meetings', path: `/team/${currentWorkspace?.teamId}/meetings`, icon: Video },
         { label: 'TaMaD Meet', path: '/team/tamad-meet', icon: Video },
-        { label: 'Team Settings', path: '/team/settings', icon: Settings },
-      ]
-    }] : []),
+        { label: 'Settings', path: '/team/settings', icon: Settings },
+      ],
+    },
     {
       label: 'ANALYTICS',
       links: [
@@ -82,13 +120,15 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       ],
     },
     {
-      label: 'AI & TOOLS',
+      label: 'TOOLS',
       links: [
         { label: 'AI Assistant', path: '/ai', icon: Brain },
         { label: 'Templates', path: '/templates', icon: FileText },
       ],
     },
   ];
+
+  const sections = isTeam ? teamSections : personalSections;
 
   const handleLogout = async () => {
     await logout();
@@ -106,24 +146,41 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
+      {/* Logo + Workspace Type Indicator */}
       <div className={clsx('flex items-center mt-3', collapsed ? 'justify-center px-2' : 'gap-3 px-4')}>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
           <span className="font-bold text-lg leading-none">T</span>
         </div>
         {!collapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0 flex-1">
             <p className="text-sm font-semibold tracking-tight text-[color:var(--color-foreground)]">TaMaD</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              {isTeam ? (
+                <>
+                  <Building2 size={10} className="text-[color:var(--color-success)]" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-success)]">Team</span>
+                </>
+              ) : (
+                <>
+                  <User size={10} className="text-[color:var(--color-accent)]" />
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-muted)]">Personal</span>
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </div>
 
+      {/* Workspace Switcher */}
       {!collapsed && (
-        <div className="mt-6 mb-2 px-4">
+        <div className="mt-4 mb-2 px-4">
           <WorkspaceSwitcher />
         </div>
       )}
 
+      {/* Navigation */}
       <nav className="mt-4 flex-1 overflow-y-auto px-3 pb-4" style={{ scrollbarWidth: 'none' }}>
+        {/* Pinned & Recent */}
         {!collapsed && (pinned.length > 0 || recents.length > 0) && (
           <div className="mb-5 space-y-5">
             {pinned.length > 0 && (
@@ -155,7 +212,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                         <button
                           onClick={() => togglePin(href)}
                           className="absolute right-1.5 z-20 rounded-md p-1 text-[color:var(--color-accent)] opacity-0 transition-opacity hover:bg-[color:var(--color-surface-active)] group-hover:opacity-100"
-                          title="Unpin"
+                          aria-label="Unpin"
                         >
                           <Star size={12} fill="currentColor" />
                         </button>
@@ -198,7 +255,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                             'absolute right-1.5 z-20 rounded-md p-1 transition-opacity hover:bg-[color:var(--color-surface-active)]',
                             isPinned ? 'text-[color:var(--color-accent)] opacity-100' : 'text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100'
                           )}
-                          title={isPinned ? 'Unpin' : 'Pin'}
+                          aria-label={isPinned ? 'Unpin' : 'Pin'}
                         >
                           <Star size={12} fill={isPinned ? 'currentColor' : 'none'} />
                         </button>
@@ -211,7 +268,8 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
           </div>
         )}
 
-        {sections.map((section, idx) => (
+        {/* Main Sections */}
+        {sections.map((section) => (
           <div key={section.label} className={clsx("mb-4", collapsed && "flex flex-col items-center")}>
             {!collapsed && (
               <p className="mb-2 px-3 text-[11px] font-semibold text-[color:var(--color-foreground-tertiary)] tracking-wider">
@@ -245,7 +303,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                     {isActive && (
                       <motion.div
                         layoutId="sidebar-active-bar"
-                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-accent)] z-0 shadow-[0_0_12px_var(--color-accent)]"
+                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-accent)] z-0"
                         initial={false}
                         transition={{ type: "spring", stiffness: 400, damping: 30 }}
                       />
@@ -262,11 +320,13 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         ))}
       </nav>
 
+      {/* User Profile & Controls */}
       <div className="px-4 pb-4">
         {!isMobile && onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
             className="flex w-full items-center justify-center rounded-md p-2 hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-foreground-tertiary)] transition-colors mb-2"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
@@ -291,7 +351,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
             </div>
           )}
           {!collapsed && (
-            <button onClick={handleLogout} className="text-[color:var(--color-foreground-tertiary)] hover:text-danger transition-colors p-1 rounded-md hover:bg-danger-light">
+            <button onClick={handleLogout} className="text-[color:var(--color-foreground-tertiary)] hover:text-danger transition-colors p-1 rounded-md hover:bg-danger-light" aria-label="Sign out">
               <LogOut size={14} />
             </button>
           )}
@@ -317,7 +377,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
             >
               <div className="flex items-center justify-between p-4 pb-0">
                 <div />
-                <button ref={closeButtonRef} onClick={onClose} className="rounded-lg p-1.5 text-[color:var(--color-muted)]">
+                <button ref={closeButtonRef} onClick={onClose} className="rounded-lg p-1.5 text-[color:var(--color-muted)]" aria-label="Close sidebar">
                   <ChevronLeft size={20} />
                 </button>
               </div>

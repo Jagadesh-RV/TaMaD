@@ -28,8 +28,7 @@ export default function WorkspaceSwitcher() {
   // Set default workspace if none selected
   useEffect(() => {
     if (!currentWorkspace && workspaces.length > 0) {
-      // Prefer personal workspace as default if available
-      const personal = workspaces.find(w => w.type === 'personal');
+      const personal = workspaces.find(w => w.type === 'personal' || !w.teamId);
       setCurrentWorkspace(personal || workspaces[0]);
     }
   }, [currentWorkspace, workspaces, setCurrentWorkspace]);
@@ -46,20 +45,25 @@ export default function WorkspaceSwitcher() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-        style={{ background: 'var(--color-surface-hover)', color: 'var(--color-foreground)' }}
+        className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-[color:var(--color-surface-hover)]"
+        style={{ color: 'var(--color-foreground)' }}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
         <div className="flex items-center gap-2 overflow-hidden">
           {currentWorkspace.type === 'personal' || !currentWorkspace.teamId ? (
             <User size={16} className="shrink-0 text-[var(--color-accent)]" />
           ) : currentWorkspace.organizationId ? (
-            <Building size={16} className="shrink-0 text-purple-500" />
+            <Building size={16} className="shrink-0 text-[var(--color-info)]" />
           ) : (
             <Building2 size={16} className="shrink-0 text-[var(--color-success)]" />
           )}
           <span className="truncate">{currentWorkspace.name}</span>
         </div>
-        <ChevronDown size={14} className="shrink-0 text-[var(--color-muted)]" />
+        <ChevronDown size={14} className={clsx(
+          "shrink-0 text-[var(--color-muted)] transition-transform",
+          isOpen && "rotate-180"
+        )} />
       </button>
 
       {isOpen && (
@@ -71,30 +75,38 @@ export default function WorkspaceSwitcher() {
               background: 'var(--color-surface)',
               borderColor: 'var(--color-border)',
             }}
+            role="listbox"
+            aria-label="Workspaces"
           >
             <div className="max-h-[60vh] overflow-y-auto py-2">
               {/* Personal Section */}
-              <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
-                Personal
-              </div>
-              {personalWorkspaces.map((ws) => (
-                <button
-                  key={ws._id}
-                  onClick={() => {
-                    setCurrentWorkspace(ws);
-                    setIsOpen(false);
-                  }}
-                  className="flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-[var(--color-surface-hover)]"
-                >
-                  <div className="flex items-center gap-2 truncate">
-                    <User size={14} className="shrink-0 text-[var(--color-muted)]" />
-                    <span className={clsx('truncate', currentWorkspace._id === ws._id && 'font-bold')}>
-                      {ws.name}
-                    </span>
+              {personalWorkspaces.length > 0 && (
+                <>
+                  <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted)]">
+                    Personal
                   </div>
-                  {currentWorkspace._id === ws._id && <Check size={14} className="shrink-0 text-[var(--color-accent)]" />}
-                </button>
-              ))}
+                  {personalWorkspaces.map((ws) => (
+                    <button
+                      key={ws._id}
+                      onClick={() => {
+                        setCurrentWorkspace(ws);
+                        setIsOpen(false);
+                      }}
+                      className="flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-[var(--color-surface-hover)]"
+                      role="option"
+                      aria-selected={currentWorkspace._id === ws._id}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <User size={14} className="shrink-0 text-[var(--color-muted)]" />
+                        <span className={clsx('truncate', currentWorkspace._id === ws._id && 'font-bold')}>
+                          {ws.name}
+                        </span>
+                      </div>
+                      {currentWorkspace._id === ws._id && <Check size={14} className="shrink-0 text-[var(--color-accent)]" />}
+                    </button>
+                  ))}
+                </>
+              )}
 
               {/* Organizations Section */}
               {organizations.map(org => {
@@ -103,7 +115,7 @@ export default function WorkspaceSwitcher() {
                 
                 return (
                   <div key={org._id}>
-                    <div className="mt-2 px-3 py-1 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-purple-500">
+                    <div className="mt-2 px-3 py-1 flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[var(--color-info)]">
                       <Building size={12} />
                       {org.name}
                     </div>
@@ -117,6 +129,8 @@ export default function WorkspaceSwitcher() {
                             setIsOpen(false);
                           }}
                           className="flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-[var(--color-surface-hover)]"
+                          role="option"
+                          aria-selected={currentWorkspace._id === ws._id}
                         >
                           <div className="flex items-center gap-2 truncate pl-2 border-l-2" style={{ borderColor: team.color || 'var(--color-success)' }}>
                             <span className={clsx('truncate', currentWorkspace._id === ws._id && 'font-bold')}>
@@ -147,6 +161,8 @@ export default function WorkspaceSwitcher() {
                           setIsOpen(false);
                         }}
                         className="flex w-full items-center justify-between px-3 py-2 text-sm transition-colors hover:bg-[var(--color-surface-hover)]"
+                        role="option"
+                        aria-selected={currentWorkspace._id === ws._id}
                       >
                         <div className="flex items-center gap-2 truncate pl-2 border-l-2" style={{ borderColor: team.color || 'var(--color-success)' }}>
                           <span className={clsx('truncate', currentWorkspace._id === ws._id && 'font-bold')}>
@@ -161,13 +177,14 @@ export default function WorkspaceSwitcher() {
               )}
             </div>
             
+            {/* Actions */}
             <div className="border-t border-[var(--color-border-light)] p-1">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   setShowCreateOrg(true);
                 }}
-                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors hover:bg-[var(--color-surface-hover)] text-purple-500 font-medium"
+                className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm transition-colors hover:bg-[var(--color-surface-hover)] text-[var(--color-info)] font-medium"
               >
                 <Plus size={14} />
                 Create Organization

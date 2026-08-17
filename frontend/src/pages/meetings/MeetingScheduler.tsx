@@ -39,9 +39,9 @@ const MeetingScheduler: React.FC<Props> = ({ onClose, teamId }) => {
       <div className="modal max-w-lg">
         <div className="modal-header">
           <h2 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Schedule Meeting</h2>
-          <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
+           <button onClick={onClose} className="p-1 rounded-lg" style={{ color: 'var(--color-muted)' }} aria-label="Close dialog">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+           </button>
         </div>
 
         <form onSubmit={handleSubmit}>

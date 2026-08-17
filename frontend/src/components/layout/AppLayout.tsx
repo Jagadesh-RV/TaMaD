@@ -7,7 +7,7 @@ import { CommandPalette } from '../ui/CommandPalette';
 import { QuickCreate } from '../ui/QuickCreate';
 import { Inspector } from '../ui/Inspector';
 import { ShortcutsSheet, GNavHud } from '../ui/ShortcutsSheet';
-import AmbientEnvironment from '../ui/AmbientEnvironment';
+import RouteErrorBoundary from '../ui/RouteErrorBoundary';
 import { pageVariants } from '../../utils/motion';
 import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
 import { pageLabelFor, iconNameFor } from '../../lib/navigation';
@@ -110,9 +110,6 @@ export default function AppLayout() {
 
   return (
     <div className="layout">
-      {/* Living atmosphere behind everything */}
-      <AmbientEnvironment />
-
       {/* Desktop sidebar */}
       <div className="hidden lg:block">
         <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(p => !p)} />
@@ -144,7 +141,9 @@ export default function AppLayout() {
               exit="exit"
               className="min-h-full"
             >
-              <Outlet />
+              <RouteErrorBoundary>
+                <Outlet />
+              </RouteErrorBoundary>
             </motion.div>
           </AnimatePresence>
         </main>

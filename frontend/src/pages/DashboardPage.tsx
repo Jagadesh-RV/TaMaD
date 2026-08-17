@@ -222,17 +222,16 @@ export default function DashboardPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-        className="relative mb-8 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-[color:var(--color-surface)] via-[color:var(--color-surface)] to-[color:var(--color-accent-ghost)] px-8 py-8 shadow-md"
+        transition={{ duration: 0.2 }}
+        className="relative mb-8 overflow-hidden rounded-xl border border-border bg-[color:var(--color-surface)] px-6 py-6 sm:px-8 sm:py-8"
       >
-        <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[color:var(--color-accent-light)] blur-3xl animate-breathe" />
         <div className="relative z-10">
           <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[color:var(--color-muted)] shadow-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
               <Zap size={11} className="text-[color:var(--color-accent)]" />
               Command center
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[color:var(--color-foreground-secondary)] shadow-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-foreground-secondary)]">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full rounded-full bg-[color:var(--color-success)] opacity-60 animate-ping" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--color-success)]" />
@@ -241,11 +240,11 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight text-[color:var(--color-foreground)] sm:text-5xl">
-            Good {greeting}, <span className="text-gradient-animated">{authName}</span>
+          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+            Good {greeting}, {authName}
           </h1>
-          <p className="mt-3 max-w-2xl text-[15px] font-medium leading-relaxed text-[color:var(--color-foreground-secondary)]">
-            {format(new Date(), 'EEEE, MMMM d, yyyy')} — <span className="text-[color:var(--color-foreground)] font-semibold">{storySentence}</span>
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[color:var(--color-foreground-secondary)]">
+            {format(new Date(), 'EEEE, MMMM d, yyyy')} — {storySentence}
           </p>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -267,51 +266,39 @@ export default function DashboardPage() {
 
       {/* ---------------- Live pulse strip ---------------- */}
       <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
         className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         {pulse.map((stat) => {
           const Icon = stat.icon;
           const critical = stat.label === 'Needs attention' && stat.value > 0;
           return (
-            <motion.div key={stat.label} variants={cardVariant}>
+            <div key={stat.label}>
               <Card
-                variant="luminous"
-                interactive
-                className="group relative overflow-hidden p-5"
+                className="group relative overflow-hidden p-5 cursor-pointer"
                 onClick={() => navigate(stat.label === 'In flight now' ? '/tasks' : stat.label === 'Needs attention' ? '/tasks' : '/reports')}
               >
-                <div
-                  className="absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-10 blur-2xl transition-opacity group-hover:opacity-25"
-                  style={{ background: stat.tone }}
-                />
-                {stat.live && (
-                  <span className="absolute right-4 top-4 flex h-2 w-2">
-                    <span className="absolute inline-flex h-full w-full rounded-full opacity-60 animate-ping" style={{ background: stat.tone }} />
-                    <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: stat.tone }} />
-                  </span>
-                )}
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-[color:var(--color-muted)]">{stat.label}</span>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl shadow-sm" style={{ background: `${stat.tone}1f`, color: stat.tone }}>
-                    <Icon size={18} strokeWidth={2.5} />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--color-muted)]">{stat.label}</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: `${stat.tone}15`, color: stat.tone }}>
+                    <Icon size={18} strokeWidth={2} />
                   </div>
                 </div>
                 <div
                   className={clsx(
-                    'text-4xl font-extrabold tracking-tight',
+                    'text-3xl font-bold tracking-tight',
                     critical ? 'text-danger' : 'text-[color:var(--color-foreground)]',
                   )}
                 >
                   {stat.value}{stat.label === 'Completion' ? '%' : ''}
                 </div>
-                <div className="mt-2 text-[11px] font-bold uppercase tracking-wide" style={{ color: stat.tone }}>
+                <div className="mt-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: stat.tone }}>
                   {stat.label === 'Needs attention' ? (critical ? 'Respond now' : 'All clear') : stat.label === 'Completion' ? 'of the week done' : 'live now'}
                 </div>
               </Card>
-            </motion.div>
+            </div>
           );
         })}
       </motion.div>
@@ -331,22 +318,15 @@ export default function DashboardPage() {
               key={tab.key}
               onClick={() => setStatusFilter(tab.key)}
               className={clsx(
-                'relative shrink-0 rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-300 overflow-hidden group border',
-                isActive ? 'border-transparent text-white' : 'border-border bg-surface text-[color:var(--color-foreground-secondary)] hover:border-[color:var(--color-foreground-tertiary)]'
+                'relative shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
+                isActive ? 'bg-[color:var(--color-accent)] text-white' : 'bg-surface border border-border text-[color:var(--color-foreground-secondary)] hover:border-[color:var(--color-foreground-tertiary)]'
               )}
             >
-              {isActive && (
-                <motion.div
-                  layoutId="dashboard-tab"
-                  className="absolute inset-0 bg-[color:var(--color-foreground)] z-0"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="flex items-center gap-2">
                 {tab.label}
                 <span className={clsx(
-                  "rounded-full px-1.5 py-0.5 text-[10px] transition-colors",
-                  isActive ? 'bg-white/20 text-white' : 'bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)] group-hover:bg-[color:var(--color-border-light)]'
+                  "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                  isActive ? 'bg-white/20 text-white' : 'bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]'
                 )}>
                   {count}
                 </span>
@@ -359,13 +339,13 @@ export default function DashboardPage() {
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
           {/* ---------------- Week at a glance ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card variant="luminous" className="p-6">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+            <Card className="p-6">
               <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">The week at a glance</h2>
+                  <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">The week at a glance</h2>
                   <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">
-                    {weekStory.done} closed &middot; {weekStory.created} opened — a story still being written
+                    {weekStory.done} closed &middot; {weekStory.created} opened
                   </p>
                 </div>
                 <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
@@ -404,15 +384,15 @@ export default function DashboardPage() {
 
           {/* ---------------- Focus today ---------------- */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
-            <Card variant="luminous" className="overflow-hidden">
+            <Card  className="overflow-hidden">
               <div className="p-6 border-b border-border flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Your focus today</h2>
-                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">Ordered by impact — start at the top and let momentum carry you</p>
+                  <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Your focus today</h2>
+                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">Ordered by priority — start at the top</p>
                 </div>
                 <button
                   onClick={() => navigate('/tasks')}
-                  className="text-xs font-bold text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-dark)] transition-colors px-3 py-1.5 rounded-full hover:bg-[color:var(--color-accent-ghost)]"
+                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors px-3 py-1.5 rounded-lg hover:bg-[color:var(--color-accent-ghost)]"
                 >
                   View all
                 </button>
@@ -489,11 +469,11 @@ export default function DashboardPage() {
 
           {/* ---------------- Attention radar ---------------- */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
-            <Card variant="luminous" className="p-6">
+            <Card  className="p-6">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Attention radar</h2>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Attention radar</h2>
                 <span className={clsx(
-                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider',
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
                   attentionTasks.length > 0 ? 'bg-[color:var(--color-danger-light)] text-danger' : 'bg-[color:var(--color-success-light)] text-[color:var(--color-success)]'
                 )}>
                   {attentionTasks.length > 0 ? `${attentionTasks.length} risk` : 'All clear'}
@@ -512,12 +492,12 @@ export default function DashboardPage() {
                   {attentionTasks.map(task => {
                     const pColor = getPriorityColor(task.priority);
                     return (
-                      <div key={task._id} onClick={() => navigate('/tasks')} className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-[color:var(--color-danger-light)] bg-[color:var(--color-danger-light)]/40 p-3 transition-all hover:border-danger/40 hover:bg-[color:var(--color-danger-light)]/70">
-                        <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-danger shadow-[0_0_10px_var(--color-danger)]" />
+                      <div key={task._id} onClick={() => navigate('/tasks')} className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color:var(--color-danger-light)] bg-[color:var(--color-danger-light)]/30 p-3 transition-colors hover:border-danger/30">
+                        <div className="h-2 w-2 shrink-0 rounded-full bg-danger" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-bold text-[color:var(--color-foreground)] group-hover:text-danger transition-colors">{task.title}</p>
-                          <p className="text-[11px] font-semibold text-danger mt-0.5">
-                            {format(new Date(task.dueDate!), 'MMM d')} &middot; {pColor.text === 'var(--color-muted)' ? 'Due' : task.priority}
+                          <p className="truncate text-[13px] font-medium text-[color:var(--color-foreground)] group-hover:text-danger transition-colors">{task.title}</p>
+                          <p className="text-[11px] font-medium text-danger mt-0.5">
+                            {format(new Date(task.dueDate!), 'MMM d')} &middot; {task.priority}
                           </p>
                         </div>
                       </div>
@@ -530,12 +510,12 @@ export default function DashboardPage() {
 
           {/* ---------------- Active projects ---------------- */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card variant="luminous" className="p-6">
+            <Card  className="p-6">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Active projects</h2>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Active projects</h2>
                 <button
                   onClick={() => navigate('/projects')}
-                  className="text-xs font-bold text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-dark)] transition-colors"
+                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors"
                 >
                   View all
                 </button>
@@ -554,17 +534,17 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {projects.slice(0, 4).map(project => (
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} key={project._id} onClick={() => navigate('/projects')} className="group flex items-center gap-4 cursor-pointer rounded-xl p-3 transition-colors bg-[color:var(--color-background)] hover:bg-[color:var(--color-surface-hover)] border border-transparent hover:border-border">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm text-white font-bold text-sm" style={{ background: project.color || 'var(--color-accent)' }}>
+                    <div key={project._id} onClick={() => navigate('/projects')} className="group flex items-center gap-4 cursor-pointer rounded-lg p-3 transition-colors hover:bg-[color:var(--color-surface-hover)]">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white font-semibold text-sm" style={{ background: project.color || 'var(--color-accent)' }}>
                         {project.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold truncate text-[color:var(--color-foreground)]">{project.name}</span>
+                        <span className="block text-sm font-medium truncate text-[color:var(--color-foreground)]">{project.name}</span>
                         {project.description && (
                           <span className="block text-[11px] font-medium mt-0.5 truncate text-[color:var(--color-muted)]">{project.description}</span>
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
@@ -572,13 +552,12 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* ---------------- Recent activity ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }}>
-            <Card variant="luminous" className="p-6">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="p-6">
               <div className="mb-5">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Recent activity</h2>
-                <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">The workspace in motion</p>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Recent activity</h2>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentActivities.length === 0 ? (
                   <EmptyState
                     icon={Activity}
@@ -587,13 +566,16 @@ export default function DashboardPage() {
                   />
                 ) : (
                   recentActivities.map(task => (
-                    <div key={task._id} className="relative pl-4 border-l-2 border-border-light before:absolute before:-left-[5px] before:top-1.5 before:h-2 before:w-2 before:rounded-full before:bg-[color:var(--color-border)] hover:border-[color:var(--color-accent)] hover:before:bg-[color:var(--color-accent)] transition-colors cursor-default">
-                      <p className="text-sm font-medium text-[color:var(--color-foreground)] leading-snug">
-                        Updated <span className="font-bold text-[color:var(--color-accent)]">{task.title}</span>
-                      </p>
-                      <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
-                        {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
-                      </p>
+                    <div key={task._id} className="flex items-start gap-3 py-2">
+                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[color:var(--color-border)]" />
+                      <div>
+                        <p className="text-sm text-[color:var(--color-foreground)] leading-snug">
+                          Updated <span className="font-medium">{task.title}</span>
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]">
+                          {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
                     </div>
                   ))
                 )}

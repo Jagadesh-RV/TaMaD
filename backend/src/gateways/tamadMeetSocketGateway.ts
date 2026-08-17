@@ -1,12 +1,14 @@
 import { Server, Socket } from 'socket.io';
 import { updateParticipantSocket, verifyRoomAccess } from '../services/tamad-meet/meetingRoomService';
 import { socketAuthMiddleware } from '../sockets/socketAuth';
+import { rateLimitMiddleware } from '../sockets/rateLimiter';
 import logger from '../utils/logger';
 
 export const initTamadMeetSocket = (io: Server) => {
   const namespace = io.of('/socket/tamad-meet');
 
   namespace.use(socketAuthMiddleware);
+  namespace.use(rateLimitMiddleware);
 
   namespace.on('connection', (socket: Socket) => {
     const userId = (socket as any).user?.id as string;

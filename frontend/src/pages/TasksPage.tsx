@@ -26,6 +26,7 @@ import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import { useInteractionStore } from '../store/interactionStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { SkeletonTable } from '../components/ui/Skeleton';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -208,7 +209,7 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
               <span
                 className={clsx(
                   'inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wide',
-                  isOverdue(task) && 'font-extrabold',
+                  isOverdue(task) && 'font-bold',
                 )}
                 style={{ color: isOverdue(task) ? 'var(--color-danger)' : 'var(--color-muted)' }}
               >
@@ -258,18 +259,11 @@ function KanbanColumn({
     <div className="flex min-w-[300px] max-w-[340px] flex-1 flex-col">
       <div className="mb-4 flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <span className="relative flex h-2.5 w-2.5">
-            <motion.span
-              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.25, 1] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-full shadow-sm"
-              style={{ background: color }}
-            />
-          </span>
-          <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{label}</h3>
+          <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+          <h3 className="text-sm font-semibold text-[color:var(--color-foreground)]">{label}</h3>
         </div>
         <span
-          className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border"
+          className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border"
         >
           {tasks.length}
         </span>
@@ -554,13 +548,8 @@ export default function TasksPage() {
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Tasks</h1>
-          <p className="mt-1 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--color-muted)' }}>
-            <motion.span
-              animate={{ scale: [1, 1.45, 1], opacity: [1, 0.55, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-success)]"
-            />
-            {filtered.length} task{filtered.length !== 1 ? 's' : ''} across your workflow
+          <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>
+            {filtered.length} task{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
 
@@ -609,9 +598,10 @@ export default function TasksPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="text-sm font-medium"
+            aria-label="Search tasks"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]">
+            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]" aria-label="Clear search">
               <X size={14} className="text-[color:var(--color-muted)]" />
             </button>
           )}
@@ -655,13 +645,14 @@ export default function TasksPage() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-accent-ghost)]">
           <Plus size={18} className="text-[color:var(--color-accent)]" />
         </div>
-        <input
-          value={quickTitle}
-          onChange={e => setQuickTitle(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
-          placeholder="Quick add a task... (Press Enter)"
-          className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
-        />
+         <input
+           value={quickTitle}
+           onChange={e => setQuickTitle(e.target.value)}
+           onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
+           placeholder="Quick add a task... (Press Enter)"
+           className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
+           aria-label="Quick add a task"
+         />
         <AnimatePresence>
           {quickTitle.trim() && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
@@ -679,7 +670,7 @@ export default function TasksPage() {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        {loading && <LoadingSpinner text="Loading tasks..." />}
+        {loading && <div className="p-4"><SkeletonTable rows={6} cols={4} /></div>}
 
         {!loading && view === 'kanban' && (
           filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :

@@ -109,16 +109,17 @@ const MeetingNotes: React.FC<Props> = ({ meetingId }) => {
             )}
           </div>
           <form onSubmit={sendChatMessage} className="p-3 border-t border-gray-200 dark:border-gray-800 flex gap-2">
-            <input
-              type="text"
-              value={newMessage}
-              onChange={e => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
-              className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-            />
-            <button type="submit" className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-              <Send size={18} />
-            </button>
+             <input
+               type="text"
+               value={newMessage}
+               onChange={e => setNewMessage(e.target.value)}
+               placeholder="Type a message..."
+               className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+               aria-label="Message input"
+             />
+             <button type="submit" className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors" aria-label="Send message">
+               <Send size={18} />
+             </button>
           </form>
         </div>
       )}

@@ -23,10 +23,10 @@ function SortableKanbanItem({ task, onClick }: { task: any, onClick: () => void 
     >
       <Card
         interactive
-        className={`p-3.5 border transition-all duration-300 ${isDragging ? 'shadow-float border-[color:var(--color-accent)] bg-[color:var(--color-surface-hover)] ring-2 ring-[color:var(--color-accent-ghost)]' : 'shadow-xs hover:shadow-soft border-[color:var(--color-border)] hover:border-[color:var(--color-border-hover)] bg-[color:var(--color-surface)]'}`}
+        className={`p-3.5 border transition-colors ${isDragging ? 'border-[color:var(--color-accent)] bg-[color:var(--color-surface-hover)] ring-2 ring-[color:var(--color-accent-ghost)]' : 'border-[color:var(--color-border)] hover:border-[color:var(--color-border-hover)] bg-[color:var(--color-surface)]'}`}
       >
         <div className="mb-3 flex justify-between items-center" {...attributes} {...listeners}>
-          <span className="text-[10px] font-extrabold uppercase tracking-widest text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-0.5 rounded-full">{task.taskType || 'Task'}</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-0.5 rounded-full">{task.taskType || 'Task'}</span>
           <span className="text-[11px] font-bold text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-1.5 py-0.5 rounded-md">{task.storyPoints ? `${task.storyPoints} pts` : ''}</span>
         </div>
         <h4 className="text-[13px] font-semibold leading-snug text-[color:var(--color-foreground)]">{task.title}</h4>
@@ -143,7 +143,7 @@ export default function AgileBoardPage() {
                 return (
                   <div key={col.id} className="flex w-[320px] flex-col">
                     <div className="mb-4 flex items-center justify-between px-2">
-                      <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{col.label}</h3>
+                      <h3 className="text-sm font-bold tracking-wide text-[color:var(--color-foreground)]">{col.label}</h3>
                       <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border">
                         {colTasks.length}
                       </span>

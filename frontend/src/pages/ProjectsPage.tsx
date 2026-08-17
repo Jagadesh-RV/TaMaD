@@ -17,6 +17,7 @@ import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { SkeletonGrid } from '../components/ui/Skeleton';
 import ErrorState from '../components/ui/ErrorState';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -135,11 +136,11 @@ export default function ProjectsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs" variant="luminous">
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
+            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-[color:var(--color-muted)]">
                 {stat.label}
               </p>
-              <p className="mt-2 text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">
+              <p className="mt-2 text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
                 {stat.value}
               </p>
             </Card>
@@ -148,7 +149,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Projects Grid */}
-      {isLoading && <LoadingSpinner text="Loading projects..." />}
+      {isLoading && <SkeletonGrid count={4} />}
 
       {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
 
@@ -189,15 +190,11 @@ export default function ProjectsPage() {
                     boxShadow: isExpanded ? 'var(--shadow-md)' : 'var(--shadow-xs)',
                   }}
                 >
-                  <div
-                    className="pointer-events-none absolute inset-x-8 top-0 h-[3px] rounded-b-full opacity-70 transition-all duration-300"
-                    style={{ background: `linear-gradient(90deg, transparent, ${project.color || 'var(--color-accent)'}, transparent)`, boxShadow: `0 0 12px ${project.color || 'var(--color-accent)'}` }}
-                  />
                   <div className="cursor-pointer p-6 hover:bg-[color:var(--color-surface-hover)] transition-colors" onClick={() => toggleExpand(project._id)}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-4">
                         <div
-                          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-lg font-extrabold text-white shadow-sm"
+                          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white"
                           style={{ background: project.color || 'var(--color-accent)' }}
                         >
                           {project.name?.charAt(0) || 'P'}
@@ -207,7 +204,7 @@ export default function ProjectsPage() {
                             <h3 className="text-base font-bold text-[color:var(--color-foreground)]">
                               {project.name}
                             </h3>
-                            <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider" style={{ background: statusStyle.bg, color: statusStyle.color }}>
+                            <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider" style={{ background: statusStyle.bg, color: statusStyle.color }}>
                               {project.status || 'active'}
                             </span>
                           </div>
@@ -237,10 +234,10 @@ export default function ProjectsPage() {
                     {/* Progress Bar */}
                     <div className="mt-6">
                       <div className="mb-2 flex items-center justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
+                        <span className="text-[11px] font-medium text-[color:var(--color-muted)]">
                           {stats.completedTasks} of {stats.totalTasks} tasks
                         </span>
-                        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: project.color || 'var(--color-accent)' }}>
+                        <span className="text-[11px] font-semibold" style={{ color: project.color || 'var(--color-accent)' }}>
                           {stats.progress}%
                         </span>
                       </div>
@@ -257,16 +254,16 @@ export default function ProjectsPage() {
 
                     {/* Meta Row */}
                     <div className="mt-5 flex items-center justify-between pt-4 border-t border-[color:var(--color-border-light)]">
-                      <div className="flex items-center gap-1.5 text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2.5 py-1 rounded-full">
+                      <div className="flex items-center gap-1.5 text-[color:var(--color-muted)]">
                         <Users size={14} />
-                        <span className="text-[11px] font-bold tracking-wide">
+                        <span className="text-[11px] font-medium">
                           {project.members?.length || 0} members
                         </span>
                       </div>
                       {project.dueDate && (
-                        <div className={clsx("flex items-center gap-1.5 px-2.5 py-1 rounded-full", isOverdue ? "bg-[color:var(--color-danger-light)] text-[color:var(--color-danger)]" : "bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]")}>
+                        <div className={clsx("flex items-center gap-1.5", isOverdue ? "text-[color:var(--color-danger)]" : "text-[color:var(--color-muted)]")}>
                           <Calendar size={14} />
-                          <span className="text-[11px] font-bold tracking-wide">
+                          <span className="text-[11px] font-medium">
                             {(() => { try { return format(parseISO(project.dueDate), 'MMM d, yyyy'); } catch { return project.dueDate; } })()}
                           </span>
                         </div>
@@ -287,16 +284,16 @@ export default function ProjectsPage() {
                         <div className="border-t border-[color:var(--color-border)] px-6 py-5">
                           {project.members && project.members.length > 0 && (
                             <>
-                              <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-[color:var(--color-muted)]">
+                              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[color:var(--color-muted)]">
                                 Team Members
                               </p>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 {project.members.map((memberId: string, i: number) => (
                                   <div
                                     key={i}
-                                    className="flex items-center gap-3 rounded-xl p-2.5 bg-[color:var(--color-surface)] border border-[color:var(--color-border-light)] shadow-xs hover:border-[color:var(--color-border)] transition-colors"
+                                    className="flex items-center gap-3 rounded-lg p-2.5 bg-[color:var(--color-surface)]"
                                   >
-                                    <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white shadow-sm" style={{ background: 'var(--color-accent)' }}>
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ background: 'var(--color-accent)' }}>
                                       {memberId?.charAt(0)?.toUpperCase() || '?'}
                                     </div>
                                     <div>

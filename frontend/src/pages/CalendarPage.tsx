@@ -330,13 +330,13 @@ export default function CalendarPage() {
           </button>
 
           <div className="inline-flex items-center rounded-xl p-1" style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}>
-            <button onClick={() => setCurrentDate(d => subMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }}>
+            <button onClick={() => setCurrentDate(d => subMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }} aria-label="Previous month">
               <ChevronLeft size={16} />
             </button>
             <span className="min-w-[140px] text-center text-[13px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-foreground)' }}>
               {format(currentDate, 'MMMM yyyy')}
             </span>
-            <button onClick={() => setCurrentDate(d => addMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }}>
+            <button onClick={() => setCurrentDate(d => addMonths(d, 1))} className="rounded-lg p-2 transition-colors" style={{ color: 'var(--color-muted)' }} aria-label="Next month">
               <ChevronRight size={16} />
             </button>
           </div>
