@@ -135,7 +135,7 @@ export default function ProjectsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs" variant="luminous">
+            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs">
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
                 {stat.label}
               </p>
