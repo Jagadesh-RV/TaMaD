@@ -492,12 +492,12 @@ export default function DashboardPage() {
                   {attentionTasks.map(task => {
                     const pColor = getPriorityColor(task.priority);
                     return (
-                      <div key={task._id} onClick={() => navigate('/tasks')} className="group flex cursor-pointer items-center gap-3 rounded-2xl border border-[color:var(--color-danger-light)] bg-[color:var(--color-danger-light)]/40 p-3 transition-all hover:border-danger/40 hover:bg-[color:var(--color-danger-light)]/70">
-                        <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-danger shadow-[0_0_10px_var(--color-danger)]" />
+                      <div key={task._id} onClick={() => navigate('/tasks')} className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color:var(--color-danger-light)] bg-[color:var(--color-danger-light)]/30 p-3 transition-colors hover:border-danger/30">
+                        <div className="h-2 w-2 shrink-0 rounded-full bg-danger" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-bold text-[color:var(--color-foreground)] group-hover:text-danger transition-colors">{task.title}</p>
-                          <p className="text-[11px] font-semibold text-danger mt-0.5">
-                            {format(new Date(task.dueDate!), 'MMM d')} &middot; {pColor.text === 'var(--color-muted)' ? 'Due' : task.priority}
+                          <p className="truncate text-[13px] font-medium text-[color:var(--color-foreground)] group-hover:text-danger transition-colors">{task.title}</p>
+                          <p className="text-[11px] font-medium text-danger mt-0.5">
+                            {format(new Date(task.dueDate!), 'MMM d')} &middot; {task.priority}
                           </p>
                         </div>
                       </div>
@@ -515,7 +515,7 @@ export default function DashboardPage() {
                 <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Active projects</h2>
                 <button
                   onClick={() => navigate('/projects')}
-                  className="text-xs font-bold text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-dark)] transition-colors"
+                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors"
                 >
                   View all
                 </button>
@@ -534,17 +534,17 @@ export default function DashboardPage() {
               ) : (
                 <div className="space-y-3">
                   {projects.slice(0, 4).map(project => (
-                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} key={project._id} onClick={() => navigate('/projects')} className="group flex items-center gap-4 cursor-pointer rounded-xl p-3 transition-colors bg-[color:var(--color-background)] hover:bg-[color:var(--color-surface-hover)] border border-transparent hover:border-border">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm text-white font-bold text-sm" style={{ background: project.color || 'var(--color-accent)' }}>
+                    <div key={project._id} onClick={() => navigate('/projects')} className="group flex items-center gap-4 cursor-pointer rounded-lg p-3 transition-colors hover:bg-[color:var(--color-surface-hover)]">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white font-semibold text-sm" style={{ background: project.color || 'var(--color-accent)' }}>
                         {project.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="block text-sm font-bold truncate text-[color:var(--color-foreground)]">{project.name}</span>
+                        <span className="block text-sm font-medium truncate text-[color:var(--color-foreground)]">{project.name}</span>
                         {project.description && (
                           <span className="block text-[11px] font-medium mt-0.5 truncate text-[color:var(--color-muted)]">{project.description}</span>
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
