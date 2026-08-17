@@ -165,7 +165,7 @@ export default function AIAssistantPage() {
                     >
                       <Sparkles size={32} />
                     </div>
-                    <h3 className="mb-3 text-2xl font-extrabold text-[color:var(--color-foreground)]">AI Workspace Assistant</h3>
+                    <h3 className="mb-3 text-2xl font-bold text-[color:var(--color-foreground)]">AI Workspace Assistant</h3>
                     <p className="mb-10 text-sm text-center max-w-md text-[color:var(--color-foreground-secondary)] leading-relaxed">
                       Ask questions about your {currentWorkspace?.type === 'team' ? 'team workspace' : 'personal workspace'}, get insights on tasks, or generate reports.
                     </p>

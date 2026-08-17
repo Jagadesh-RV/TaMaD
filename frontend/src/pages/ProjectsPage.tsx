@@ -139,7 +139,7 @@ export default function ProjectsPage() {
               <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[color:var(--color-muted)]">
                 {stat.label}
               </p>
-              <p className="mt-2 text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">
+              <p className="mt-2 text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
                 {stat.value}
               </p>
             </Card>
@@ -193,7 +193,7 @@ export default function ProjectsPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-4">
                         <div
-                          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl text-lg font-extrabold text-white shadow-sm"
+                          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white"
                           style={{ background: project.color || 'var(--color-accent)' }}
                         >
                           {project.name?.charAt(0) || 'P'}
@@ -283,7 +283,7 @@ export default function ProjectsPage() {
                         <div className="border-t border-[color:var(--color-border)] px-6 py-5">
                           {project.members && project.members.length > 0 && (
                             <>
-                              <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.15em] text-[color:var(--color-muted)]">
+                              <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-[color:var(--color-muted)]">
                                 Team Members
                               </p>
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

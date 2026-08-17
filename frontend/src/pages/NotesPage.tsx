@@ -61,7 +61,7 @@ export default function NotesPage() {
         <aside className="flex w-80 shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-background-secondary)]">
           <div className="border-b border-[color:var(--color-border)] p-4">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-[15px] font-extrabold tracking-tight text-[color:var(--color-foreground)]">
+              <h2 className="flex items-center gap-2 text-[15px] font-bold tracking-tight text-[color:var(--color-foreground)]">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)]">
                   <FileText size={16} />
                 </span>

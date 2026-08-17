@@ -2,7 +2,7 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 import { Card } from '../ui/Card';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444'];
 
 export const BurndownWidget = () => {
   const data = [
@@ -14,9 +14,9 @@ export const BurndownWidget = () => {
     { day: 'Sat', ideal: 0, actual: 5 },
   ];
   return (
-    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
-      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Sprint Burndown</h3>
-      <div className="flex-1">
+    <Card className="w-full h-full flex flex-col p-6">
+      <h3 className="text-sm font-semibold text-[color:var(--color-foreground-secondary)] mb-4">Sprint Burndown</h3>
+      <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
@@ -41,9 +41,9 @@ export const VelocityWidget = () => {
     { sprint: 'Sprint 5', points: 42 },
   ];
   return (
-    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
-      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Team Velocity</h3>
-      <div className="flex-1">
+    <Card className="w-full h-full flex flex-col p-6">
+      <h3 className="text-sm font-semibold text-[color:var(--color-foreground-secondary)] mb-4">Team Velocity</h3>
+      <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" />
@@ -66,9 +66,9 @@ export const WorkloadWidget = () => {
     { name: 'Jordan', tasks: 5 },
   ];
   return (
-    <Card className="w-full h-full flex flex-col p-6 shadow-sm">
-      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-6">Workload Distribution</h3>
-      <div className="flex-1">
+    <Card className="w-full h-full flex flex-col p-6">
+      <h3 className="text-sm font-semibold text-[color:var(--color-foreground-secondary)] mb-4">Workload Distribution</h3>
+      <div className="flex-1 min-h-[200px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -94,17 +94,17 @@ export const WorkloadWidget = () => {
 
 export const ActiveSprintWidget = () => {
   return (
-    <Card className="w-full h-full flex flex-col p-6 shadow-sm justify-between">
-      <h3 className="text-[13px] font-extrabold uppercase tracking-widest text-[color:var(--color-foreground)] mb-2">Active Sprint Progress</h3>
+    <Card className="w-full h-full flex flex-col p-6 justify-between">
+      <h3 className="text-sm font-semibold text-[color:var(--color-foreground-secondary)] mb-2">Active Sprint Progress</h3>
       <div className="flex-1 flex flex-col justify-center">
         <div className="flex items-end justify-between mb-4">
-          <span className="text-5xl font-extrabold tracking-tighter text-[color:var(--color-foreground)]">65%</span>
-          <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-1 rounded-full">3 days remaining</span>
+          <span className="text-5xl font-bold tracking-tighter text-[color:var(--color-foreground)]">65%</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-1 rounded-full">3 days remaining</span>
         </div>
-        <div className="w-full h-4 bg-[color:var(--color-surface-active)] rounded-full overflow-hidden shadow-inner">
-          <div className="h-full bg-[color:var(--color-accent)] rounded-full shadow-sm" style={{ width: '65%' }}></div>
+        <div className="w-full h-3 bg-[color:var(--color-surface-active)] rounded-full overflow-hidden">
+          <div className="h-full bg-[color:var(--color-accent)] rounded-full" style={{ width: '65%' }}></div>
         </div>
-        <div className="mt-5 flex justify-between text-xs font-semibold text-[color:var(--color-muted)] uppercase tracking-wider">
+        <div className="mt-4 flex justify-between text-xs font-medium text-[color:var(--color-muted)]">
           <span>42/65 pts completed</span>
           <span>12 issues open</span>
         </div>

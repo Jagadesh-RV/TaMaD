@@ -71,15 +71,15 @@ function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) 
       {...attributes}
       {...listeners}
     >
-      {/* Priority light edge */}
+      {/* Priority edge */}
       <span
         className="absolute left-0 top-3 bottom-3 w-[3px] rounded-r-full"
-        style={{ background: pc.edge, boxShadow: pc.glow }}
+        style={{ background: pc.edge }}
       />
 
       {/* AI hint — the task knows it could help */}
       {aiWorthy && (
-        <span className="pointer-events-none absolute right-2 top-2 flex items-center gap-1 rounded-full bg-gradient-to-r from-[color:var(--color-accent)] to-[color:var(--color-info)] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
+        <span className="pointer-events-none absolute right-2 top-2 flex items-center gap-1 rounded-full bg-[color:var(--color-accent)] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
           <Sparkles size={9} /> AI can help
         </span>
       )}

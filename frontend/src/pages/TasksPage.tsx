@@ -208,7 +208,7 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
               <span
                 className={clsx(
                   'inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wide',
-                  isOverdue(task) && 'font-extrabold',
+                  isOverdue(task) && 'font-bold',
                 )}
                 style={{ color: isOverdue(task) ? 'var(--color-danger)' : 'var(--color-muted)' }}
               >
