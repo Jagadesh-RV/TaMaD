@@ -26,6 +26,7 @@ import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import { useInteractionStore } from '../store/interactionStore';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { SkeletonTable } from '../components/ui/Skeleton';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -669,7 +670,7 @@ export default function TasksPage() {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
-        {loading && <LoadingSpinner text="Loading tasks..." />}
+        {loading && <div className="p-4"><SkeletonTable rows={6} cols={4} /></div>}
 
         {!loading && view === 'kanban' && (
           filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :

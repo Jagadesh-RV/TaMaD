@@ -17,6 +17,7 @@ import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { SkeletonGrid } from '../components/ui/Skeleton';
 import ErrorState from '../components/ui/ErrorState';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -148,7 +149,7 @@ export default function ProjectsPage() {
       </div>
 
       {/* Projects Grid */}
-      {isLoading && <LoadingSpinner text="Loading projects..." />}
+      {isLoading && <SkeletonGrid count={4} />}
 
       {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
 
