@@ -250,13 +250,14 @@ export default function AIAssistantPage() {
                     className="flex-1 resize-none rounded-2xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-5 py-4 text-[15px] font-medium outline-none transition-colors focus:border-[color:var(--color-foreground)] focus:ring-1 focus:ring-[color:var(--color-foreground)]"
                     style={{ minHeight: '56px', maxHeight: '140px' }}
                   />
-                  <button
-                    onClick={handleSendChat}
-                    disabled={!chatInput.trim() || chatLoading}
-                    className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-2xl bg-[color:var(--color-foreground)] text-[color:var(--color-background)] transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
-                  >
-                    <Send size={20} />
-                  </button>
+                   <button
+                     onClick={handleSendChat}
+                     disabled={!chatInput.trim() || chatLoading}
+                     className="flex h-[56px] w-[56px] shrink-0 items-center justify-center rounded-2xl bg-[color:var(--color-foreground)] text-[color:var(--color-background)] transition-all hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                     aria-label="Send message"
+                   >
+                     <Send size={20} />
+                   </button>
                 </div>
               </div>
             </Card>
@@ -344,11 +345,12 @@ export default function AIAssistantPage() {
                         <h4 className="text-sm font-bold" style={{ color: 'var(--color-foreground)' }}>
                           {parsedTask.title}
                         </h4>
-                        <button
-                          onClick={() => handleCopy(parsedTask.title)}
-                          className="rounded p-1 transition-colors hover:bg-[var(--color-surface-active)]"
-                          style={{ color: 'var(--color-muted)' }}
-                        >
+                         <button
+                           onClick={() => handleCopy(parsedTask.title)}
+                           className="rounded p-1 transition-colors hover:bg-[var(--color-surface-active)]"
+                           style={{ color: 'var(--color-muted)' }}
+                           aria-label="Copy to clipboard"
+                         >
                           {copied ? <Check size={14} /> : <Copy size={14} />}
                         </button>
                       </div>

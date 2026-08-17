@@ -70,23 +70,25 @@ export default function NotesPage() {
                 </span>
                 Knowledge Base
               </h2>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                title="New note"
-                className="btn btn-icon-sm bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent-light)]"
-              >
+               <button
+                 onClick={() => setIsModalOpen(true)}
+                 title="New note"
+                 className="btn btn-icon-sm bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent-light)]"
+                 aria-label="New note"
+               >
                 <Plus size={18} />
               </button>
             </div>
             <div className="search-input bg-[color:var(--color-surface)]">
               <Search size={15} className="text-[color:var(--color-muted)]" />
-              <input
-                type="text"
-                placeholder="Search docs..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="text-sm font-medium"
-              />
+               <input
+                 type="text"
+                 placeholder="Search docs..."
+                 value={search}
+                 onChange={e => setSearch(e.target.value)}
+                 className="text-sm font-medium"
+                 aria-label="Search notes"
+               />
             </div>
           </div>
 
@@ -181,22 +183,23 @@ export default function NotesPage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
                     Auto-saved
                   </span>
-                  <button className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]">
-                    <MoreVertical size={16} />
-                  </button>
+                   <button className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]" aria-label="More options">
+                     <MoreVertical size={16} />
+                   </button>
                 </div>
               </div>
 
               {/* Editor Canvas */}
               <div className="flex flex-1 justify-center overflow-y-auto p-6 md:p-10">
                 <div className="h-fit w-full max-w-3xl rounded-2xl border border-[color:var(--color-border-light)] bg-[color:var(--color-surface)] p-8 shadow-sm md:p-10">
-                  <input
-                    type="text"
-                    value={activeDoc.title || ''}
-                    onChange={(e) => handleUpdateTitle(e.target.value)}
-                    className="mb-6 w-full border-none bg-transparent text-3xl font-bold tracking-tight text-[color:var(--color-foreground)] outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
-                    placeholder="Untitled Document"
-                  />
+                   <input
+                     type="text"
+                     value={activeDoc.title || ''}
+                     onChange={(e) => handleUpdateTitle(e.target.value)}
+                     className="mb-6 w-full border-none bg-transparent text-3xl font-bold tracking-tight text-[color:var(--color-foreground)] outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
+                     placeholder="Untitled Document"
+                     aria-label="Document title"
+                   />
                   <textarea
                     value={activeDoc.content || ''}
                     onChange={(e) => handleUpdateContent(e.target.value)}

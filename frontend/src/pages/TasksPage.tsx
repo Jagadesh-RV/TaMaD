@@ -597,9 +597,10 @@ export default function TasksPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="text-sm font-medium"
+            aria-label="Search tasks"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]">
+            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]" aria-label="Clear search">
               <X size={14} className="text-[color:var(--color-muted)]" />
             </button>
           )}
@@ -643,13 +644,14 @@ export default function TasksPage() {
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-accent-ghost)]">
           <Plus size={18} className="text-[color:var(--color-accent)]" />
         </div>
-        <input
-          value={quickTitle}
-          onChange={e => setQuickTitle(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
-          placeholder="Quick add a task... (Press Enter)"
-          className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
-        />
+         <input
+           value={quickTitle}
+           onChange={e => setQuickTitle(e.target.value)}
+           onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
+           placeholder="Quick add a task... (Press Enter)"
+           className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
+           aria-label="Quick add a task"
+         />
         <AnimatePresence>
           {quickTitle.trim() && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>

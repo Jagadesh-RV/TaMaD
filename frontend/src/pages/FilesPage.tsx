@@ -240,6 +240,7 @@ export default function FilesPage() {
             onClick={() => setViewMode('grid')}
             className={clsx('p-2 transition-colors', viewMode === 'grid' ? 'btn-primary' : '')}
             style={viewMode !== 'grid' ? { background: 'var(--color-surface)', color: 'var(--color-muted)' } : {}}
+            aria-label="Grid view"
           >
             <Grid3X3 size={14} />
           </button>
@@ -247,6 +248,7 @@ export default function FilesPage() {
             onClick={() => setViewMode('list')}
             className={clsx('p-2 transition-colors', viewMode === 'list' ? 'btn-primary' : '')}
             style={viewMode !== 'list' ? { background: 'var(--color-surface)', color: 'var(--color-muted)' } : {}}
+            aria-label="List view"
           >
             <List size={14} />
           </button>
@@ -303,7 +305,7 @@ export default function FilesPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold" style={{ color: 'var(--color-foreground)' }}>Upload Files</h3>
-                <button onClick={() => setShowUploadModal(false)} className="rounded p-1" style={{ color: 'var(--color-muted)' }}>
+                <button onClick={() => setShowUploadModal(false)} className="rounded p-1" style={{ color: 'var(--color-muted)' }} aria-label="Close">
                   <X size={18} />
                 </button>
               </div>
@@ -345,7 +347,7 @@ export default function FilesPage() {
                   <a href={previewFile.url} download target="_blank" rel="noreferrer" className="btn btn-ghost text-xs gap-1">
                     <Download size={14} /> Download
                   </a>
-                  <button onClick={() => setPreviewFile(null)} className="rounded p-1" style={{ color: 'var(--color-muted)' }}>
+                   <button onClick={() => setPreviewFile(null)} className="rounded p-1" style={{ color: 'var(--color-muted)' }} aria-label="Close">
                     <X size={18} />
                   </button>
                 </div>
@@ -432,13 +434,14 @@ export default function FilesPage() {
                     </p>
                   </div>
                   <div className="mt-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setPreviewFile(file); }}
-                      className="rounded p-1.5 transition-colors hover:bg-[var(--color-surface-active)]"
-                      style={{ color: 'var(--color-muted)' }}
-                    >
-                      <Eye size={14} />
-                    </button>
+                     <button
+                       onClick={(e) => { e.stopPropagation(); setPreviewFile(file); }}
+                       className="rounded p-1.5 transition-colors hover:bg-[var(--color-surface-active)]"
+                       style={{ color: 'var(--color-muted)' }}
+                       aria-label="Preview file"
+                     >
+                       <Eye size={14} />
+                     </button>
                     <a
                       href={file.url}
                       download
@@ -450,30 +453,33 @@ export default function FilesPage() {
                     >
                       <Download size={14} />
                     </a>
-                    {file.isArchived ? (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleRestore(file._id); }}
-                        className="rounded p-1.5 transition-colors hover:bg-[var(--color-success-light)]"
-                        style={{ color: 'var(--color-success)' }}
-                      >
-                        <RotateCcw size={14} />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleArchive(file._id); }}
-                        className="rounded p-1.5 transition-colors hover:bg-[var(--color-warning-light)]"
-                        style={{ color: 'var(--color-warning)' }}
-                      >
-                        <Archive size={14} />
-                      </button>
-                    )}
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDelete(file._id); }}
-                      className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
-                      style={{ color: 'var(--color-danger)' }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                     {file.isArchived ? (
+                       <button
+                         onClick={(e) => { e.stopPropagation(); handleRestore(file._id); }}
+                         className="rounded p-1.5 transition-colors hover:bg-[var(--color-success-light)]"
+                         style={{ color: 'var(--color-success)' }}
+                         aria-label="Restore file"
+                       >
+                         <RotateCcw size={14} />
+                       </button>
+                     ) : (
+                       <button
+                         onClick={(e) => { e.stopPropagation(); handleArchive(file._id); }}
+                         className="rounded p-1.5 transition-colors hover:bg-[var(--color-warning-light)]"
+                         style={{ color: 'var(--color-warning)' }}
+                         aria-label="Archive file"
+                       >
+                         <Archive size={14} />
+                       </button>
+                     )}
+                     <button
+                       onClick={(e) => { e.stopPropagation(); handleDelete(file._id); }}
+                       className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
+                       style={{ color: 'var(--color-danger)' }}
+                       aria-label="Delete file"
+                     >
+                       <Trash2 size={14} />
+                     </button>
                   </div>
                 </div>
               </motion.div>
@@ -522,20 +528,22 @@ export default function FilesPage() {
                   <a href={file.url} download target="_blank" rel="noreferrer" className="rounded p-1.5 transition-colors hover:bg-[var(--color-surface-active)]" style={{ color: 'var(--color-muted)' }}>
                     <Download size={14} />
                   </a>
-                  <button
-                    onClick={() => setPreviewFile(file)}
-                    className="rounded p-1.5 transition-colors hover:bg-[var(--color-surface-active)]"
-                    style={{ color: 'var(--color-muted)' }}
-                  >
-                    <Eye size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(file._id)}
-                    className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
-                    style={{ color: 'var(--color-danger)' }}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                   <button
+                     onClick={() => setPreviewFile(file)}
+                     className="rounded p-1.5 transition-colors hover:bg-[var(--color-surface-active)]"
+                     style={{ color: 'var(--color-muted)' }}
+                     aria-label="Preview file"
+                   >
+                     <Eye size={14} />
+                   </button>
+                   <button
+                     onClick={() => handleDelete(file._id)}
+                     className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
+                     style={{ color: 'var(--color-danger)' }}
+                     aria-label="Delete file"
+                   >
+                     <Trash2 size={14} />
+                   </button>
                 </div>
               </div>
             );

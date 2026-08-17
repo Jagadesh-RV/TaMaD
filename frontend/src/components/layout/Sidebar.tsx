@@ -212,7 +212,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                         <button
                           onClick={() => togglePin(href)}
                           className="absolute right-1.5 z-20 rounded-md p-1 text-[color:var(--color-accent)] opacity-0 transition-opacity hover:bg-[color:var(--color-surface-active)] group-hover:opacity-100"
-                          title="Unpin"
+                          aria-label="Unpin"
                         >
                           <Star size={12} fill="currentColor" />
                         </button>
@@ -255,7 +255,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                             'absolute right-1.5 z-20 rounded-md p-1 transition-opacity hover:bg-[color:var(--color-surface-active)]',
                             isPinned ? 'text-[color:var(--color-accent)] opacity-100' : 'text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100'
                           )}
-                          title={isPinned ? 'Unpin' : 'Pin'}
+                          aria-label={isPinned ? 'Unpin' : 'Pin'}
                         >
                           <Star size={12} fill={isPinned ? 'currentColor' : 'none'} />
                         </button>
@@ -326,6 +326,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
           <button
             onClick={onToggleCollapse}
             className="flex w-full items-center justify-center rounded-md p-2 hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-foreground-tertiary)] transition-colors mb-2"
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
@@ -350,7 +351,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
             </div>
           )}
           {!collapsed && (
-            <button onClick={handleLogout} className="text-[color:var(--color-foreground-tertiary)] hover:text-danger transition-colors p-1 rounded-md hover:bg-danger-light">
+            <button onClick={handleLogout} className="text-[color:var(--color-foreground-tertiary)] hover:text-danger transition-colors p-1 rounded-md hover:bg-danger-light" aria-label="Sign out">
               <LogOut size={14} />
             </button>
           )}
@@ -376,7 +377,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
             >
               <div className="flex items-center justify-between p-4 pb-0">
                 <div />
-                <button ref={closeButtonRef} onClick={onClose} className="rounded-lg p-1.5 text-[color:var(--color-muted)]">
+                <button ref={closeButtonRef} onClick={onClose} className="rounded-lg p-1.5 text-[color:var(--color-muted)]" aria-label="Close sidebar">
                   <ChevronLeft size={20} />
                 </button>
               </div>
