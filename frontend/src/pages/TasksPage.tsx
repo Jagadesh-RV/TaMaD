@@ -258,18 +258,11 @@ function KanbanColumn({
     <div className="flex min-w-[300px] max-w-[340px] flex-1 flex-col">
       <div className="mb-4 flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <span className="relative flex h-2.5 w-2.5">
-            <motion.span
-              animate={{ opacity: [0.6, 1, 0.6], scale: [1, 1.25, 1] }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute inset-0 rounded-full shadow-sm"
-              style={{ background: color }}
-            />
-          </span>
-          <h3 className="text-sm font-extrabold tracking-wide text-[color:var(--color-foreground)]">{label}</h3>
+          <span className="h-2.5 w-2.5 rounded-full" style={{ background: color }} />
+          <h3 className="text-sm font-semibold text-[color:var(--color-foreground)]">{label}</h3>
         </div>
         <span
-          className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border"
+          className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border"
         >
           {tasks.length}
         </span>
@@ -554,13 +547,8 @@ export default function TasksPage() {
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Tasks</h1>
-          <p className="mt-1 flex items-center gap-2 text-sm font-medium" style={{ color: 'var(--color-muted)' }}>
-            <motion.span
-              animate={{ scale: [1, 1.45, 1], opacity: [1, 0.55, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-success)]"
-            />
-            {filtered.length} task{filtered.length !== 1 ? 's' : ''} across your workflow
+          <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>
+            {filtered.length} task{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
 
