@@ -387,12 +387,12 @@ export default function DashboardPage() {
             <Card  className="overflow-hidden">
               <div className="p-6 border-b border-border flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Your focus today</h2>
-                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">Ordered by impact — start at the top and let momentum carry you</p>
+                  <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Your focus today</h2>
+                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">Ordered by priority — start at the top</p>
                 </div>
                 <button
                   onClick={() => navigate('/tasks')}
-                  className="text-xs font-bold text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-dark)] transition-colors px-3 py-1.5 rounded-full hover:bg-[color:var(--color-accent-ghost)]"
+                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors px-3 py-1.5 rounded-lg hover:bg-[color:var(--color-accent-ghost)]"
                 >
                   View all
                 </button>
@@ -471,9 +471,9 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
             <Card  className="p-6">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Attention radar</h2>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Attention radar</h2>
                 <span className={clsx(
-                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider',
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
                   attentionTasks.length > 0 ? 'bg-[color:var(--color-danger-light)] text-danger' : 'bg-[color:var(--color-success-light)] text-[color:var(--color-success)]'
                 )}>
                   {attentionTasks.length > 0 ? `${attentionTasks.length} risk` : 'All clear'}
@@ -512,7 +512,7 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Card  className="p-6">
               <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Active projects</h2>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Active projects</h2>
                 <button
                   onClick={() => navigate('/projects')}
                   className="text-xs font-bold text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-dark)] transition-colors"
@@ -555,7 +555,7 @@ export default function DashboardPage() {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }}>
             <Card  className="p-6">
               <div className="mb-5">
-                <h2 className="text-lg font-bold text-[color:var(--color-foreground)]">Recent activity</h2>
+                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Recent activity</h2>
                 <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">The workspace in motion</p>
               </div>
               <div className="space-y-4">
