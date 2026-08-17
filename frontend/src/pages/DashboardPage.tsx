@@ -552,13 +552,12 @@ export default function DashboardPage() {
           </motion.div>
 
           {/* ---------------- Recent activity ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.48 }}>
-            <Card  className="p-6">
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="p-6">
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Recent activity</h2>
-                <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">The workspace in motion</p>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentActivities.length === 0 ? (
                   <EmptyState
                     icon={Activity}
@@ -567,13 +566,16 @@ export default function DashboardPage() {
                   />
                 ) : (
                   recentActivities.map(task => (
-                    <div key={task._id} className="relative pl-4 border-l-2 border-border-light before:absolute before:-left-[5px] before:top-1.5 before:h-2 before:w-2 before:rounded-full before:bg-[color:var(--color-border)] hover:border-[color:var(--color-accent)] hover:before:bg-[color:var(--color-accent)] transition-colors cursor-default">
-                      <p className="text-sm font-medium text-[color:var(--color-foreground)] leading-snug">
-                        Updated <span className="font-bold text-[color:var(--color-accent)]">{task.title}</span>
-                      </p>
-                      <p className="mt-1 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
-                        {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
-                      </p>
+                    <div key={task._id} className="flex items-start gap-3 py-2">
+                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[color:var(--color-border)]" />
+                      <div>
+                        <p className="text-sm text-[color:var(--color-foreground)] leading-snug">
+                          Updated <span className="font-medium">{task.title}</span>
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]">
+                          {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
+                        </p>
+                      </div>
                     </div>
                   ))
                 )}
