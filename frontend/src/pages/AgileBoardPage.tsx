@@ -3,174 +3,343 @@ import { useWorkspaceStore } from '../store/workspaceStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAgileStore } from '../store/agileStore';
 import IssueDetailModal from '../components/tasks/IssueDetailModal';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor,
+  useSensor, useSensors, DragEndEvent,
+} from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import toast from 'react-hot-toast';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import {
+  CheckSquare, Zap, AlertTriangle, Flag, GripVertical, Plus,
+  ChevronRight, Rocket,
+} from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { SkeletonKanban } from '../components/ui/Skeleton';
+import { EmptyState } from '../components/ui/EmptyState';
+import { useNavigate } from 'react-router-dom';
+import clsx from 'clsx';
 
-function SortableKanbanItem({ task, onClick }: { task: any, onClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task._id });
-  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+const PRIORITY_COLORS: Record<string, { dot: string; label: string }> = {
+  urgent: { dot: 'priority-dot-urgent', label: 'Urgent' },
+  high:   { dot: 'priority-dot-high',   label: 'High' },
+  medium: { dot: 'priority-dot-medium', label: 'Medium' },
+  low:    { dot: 'priority-dot-low',    label: 'Low' },
+};
+
+const COLUMNS = [
+  { id: 'todo',        label: 'To Do',       color: 'var(--color-foreground-tertiary)' },
+  { id: 'in-progress', label: 'In Progress', color: 'var(--color-info)' },
+  { id: 'review',      label: 'In Review',   color: 'var(--color-warning)' },
+  { id: 'done',        label: 'Done',        color: 'var(--color-success)' },
+];
+
+function SortableKanbanItem({ task, onClick }: { task: any; onClick: () => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: task._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  const pConf = PRIORITY_COLORS[task.priority] || PRIORITY_COLORS.low;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const isOverdue = task.dueDate && task.dueDate < today && task.status !== 'done';
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
-      style={style}
-      className={`mb-2.5 transition-all outline-none ${isDragging ? 'z-50 scale-[1.02]' : ''}`}
+      className={clsx('kanban-card group', isDragging && 'z-50 scale-[1.02]')}
+      style={{
+        ...style,
+        borderLeft: `2.5px solid ${
+          task.priority === 'urgent' ? 'var(--color-danger)' :
+          task.priority === 'high'   ? 'var(--color-warning)' :
+          task.priority === 'medium' ? 'var(--color-accent)' :
+          'var(--color-border)'
+        }`,
+        boxShadow: isDragging ? 'var(--shadow-lg)' : undefined,
+      }}
       onClick={onClick}
     >
-      <Card
-        interactive
-        className={`p-3.5 border transition-colors ${isDragging ? 'border-[color:var(--color-accent)] bg-[color:var(--color-surface-hover)] ring-2 ring-[color:var(--color-accent-ghost)]' : 'border-[color:var(--color-border)] hover:border-[color:var(--color-border-hover)] bg-[color:var(--color-surface)]'}`}
-      >
-        <div className="mb-3 flex justify-between items-center" {...attributes} {...listeners}>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-2 py-0.5 rounded-full">{task.taskType || 'Task'}</span>
-          <span className="text-[11px] font-bold text-[color:var(--color-muted)] bg-[color:var(--color-surface-active)] px-1.5 py-0.5 rounded-md">{task.storyPoints ? `${task.storyPoints} pts` : ''}</span>
+      {/* Drag handle + type */}
+      <div className="flex items-center justify-between mb-2.5" {...attributes} {...listeners}>
+        <div className="flex items-center gap-1.5">
+          <GripVertical
+            size={13}
+            className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0"
+            style={{ color: 'var(--color-foreground-tertiary)' }}
+          />
+          {task.taskType && (
+            <span className="text-[10px] font-bold uppercase tracking-wider"
+              style={{
+                background: 'var(--color-surface-active)',
+                color: 'var(--color-foreground-tertiary)',
+                padding: '1px 5px',
+                borderRadius: 'var(--radius-xs)',
+              }}>
+              {task.taskType}
+            </span>
+          )}
         </div>
-        <h4 className="text-[13px] font-semibold leading-snug text-[color:var(--color-foreground)]">{task.title}</h4>
+        {task.storyPoints > 0 && (
+          <span className="text-[11px] font-bold"
+            style={{
+              background: 'var(--color-accent-ghost)',
+              color: 'var(--color-accent)',
+              padding: '1px 6px',
+              borderRadius: 'var(--radius-sm)',
+            }}>
+            {task.storyPoints}sp
+          </span>
+        )}
+      </div>
+
+      {/* Title */}
+      <h4 className="text-[13px] font-medium leading-snug mb-2.5"
+        style={{ color: 'var(--color-foreground)' }}>
+        {task.title}
+      </h4>
+
+      {/* Bottom: due date + assignees + priority */}
+      <div className="flex items-center justify-between gap-2 mt-auto pt-2"
+        style={{ borderTop: '1px solid var(--color-border-light)' }}>
+        <div className="flex items-center gap-2">
+          {/* Priority dot */}
+          <span className={clsx('priority-dot shrink-0', pConf.dot)} />
+          {/* Due date */}
+          {task.dueDate && (
+            <span className="text-[11px] font-medium"
+              style={{ color: isOverdue ? 'var(--color-danger)' : 'var(--color-foreground-tertiary)' }}>
+              {isOverdue ? 'Overdue' : format(parseISO(task.dueDate), 'MMM d')}
+            </span>
+          )}
+        </div>
+        {/* Assignee avatars */}
         {task.assignees && task.assignees.length > 0 && (
-          <div className="mt-3.5 flex -space-x-1.5 pt-3 border-t border-[color:var(--color-border-light)]">
-            {task.assignees.map((a: any) => (
-              <div key={a.email} className="h-6 w-6 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-[10px] font-bold border-2 border-[color:var(--color-surface)] shadow-xs" title={a.name}>
-                {a.name.charAt(0)}
+          <div className="avatar-stack">
+            {task.assignees.slice(0, 3).map((a: any) => (
+              <div
+                key={a.email}
+                className="avatar avatar-xs"
+                title={a.name}
+                style={{ background: 'var(--color-accent)', color: '#fff', border: '1.5px solid var(--color-surface)' }}
+              >
+                {a.name.charAt(0).toUpperCase()}
               </div>
             ))}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
 
 export default function AgileBoardPage() {
+  const navigate = useNavigate();
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
-  const { tasks, fetchTasks, updateTask } = useTaskStore();
-  const { sprints, fetchSprints, completeSprint } = useAgileStore();
+  const { tasks, loading: tasksLoading, fetchTasks, updateTask } = useTaskStore();
+  const { sprints, loading: sprintsLoading, fetchSprints, completeSprint } = useAgileStore();
   const [selectedTask, setSelectedTask] = useState<any>(null);
+
+  const isLoading = !currentWorkspace || tasksLoading || sprintsLoading;
 
   useEffect(() => {
     if (currentWorkspace?._id) {
       fetchTasks(currentWorkspace._id);
       fetchSprints(currentWorkspace._id, '');
     }
-  }, [currentWorkspace?._id]);
+  }, [currentWorkspace?._id, fetchTasks, fetchSprints]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
-  if (!currentWorkspace) return <div className="p-8">Loading...</div>;
-
   const activeSprint = sprints.find(s => s.status === 'active');
-  
-  // Show tasks in active sprint. If no active sprint, maybe show an empty state.
   const activeTasks = activeSprint ? tasks.filter(t => t.sprintId === activeSprint._id) : [];
+  const doneCount = activeTasks.filter(t => t.status === 'done').length;
+  const progress = activeTasks.length > 0 ? Math.round((doneCount / activeTasks.length) * 100) : 0;
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const overdueTasks = activeTasks.filter(t => t.dueDate && t.dueDate < today && t.status !== 'done').length;
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over || !currentWorkspace) return;
 
     const taskId = active.id as string;
-    const overId = over.id as string; // Will be the column ID (e.g. 'todo') or a task in the column
-
-    // Find the task
+    const overId = over.id as string;
     const task = tasks.find(t => t._id === taskId);
     if (!task) return;
 
-    // Determine target column
+    const colIds = COLUMNS.map(c => c.id);
     let targetStatus = overId;
-    const columns = ['todo', 'in-progress', 'review', 'done'];
-    if (!columns.includes(overId)) {
-      // dropped over another task, find its status
+    if (!colIds.includes(overId)) {
       const targetTask = tasks.find(t => t._id === overId);
       if (targetTask) targetStatus = targetTask.status;
     }
 
-    if (task.status === targetStatus || !columns.includes(targetStatus)) return; // No change
+    if (task.status === targetStatus || !colIds.includes(targetStatus)) return;
 
-    // Optimistic Update
     try {
       await updateTask(taskId, { status: targetStatus });
     } catch {
-      fetchTasks(currentWorkspace._id); // Revert on failure
+      fetchTasks(currentWorkspace._id);
     }
   };
 
-  const columns = [
-    { id: 'todo', label: 'To Do' },
-    { id: 'in-progress', label: 'In Progress' },
-    { id: 'review', label: 'In Review' },
-    { id: 'done', label: 'Done' }
-  ];
+  if (isLoading) {
+    return (
+      <div className="page pb-20">
+        <div className="mb-6">
+          <div className="skeleton rounded h-7 w-48 mb-2" />
+          <div className="skeleton rounded h-4 w-64" />
+        </div>
+        <SkeletonKanban columns={4} cardsPerCol={3} />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-[var(--color-border-light)] p-6">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Active Sprint</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            {activeSprint ? activeSprint.name : 'No active sprint'}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {activeSprint && (
-            <button 
-              onClick={() => completeSprint(activeSprint._id)}
-              className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90 text-white" 
-              style={{ background: 'var(--color-accent)' }}>
-              Complete Sprint
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-x-auto p-6">
-        {!activeSprint ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-xl font-bold text-[color:var(--color-foreground)]">No Active Sprint</h2>
-              <p className="mt-2 text-[color:var(--color-muted)]">Go to Sprint Planning to start a sprint.</p>
+    <div className="page pb-4">
+      {/* Sprint header */}
+      <div className="mb-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="page-title">Active Sprint</h1>
+              {activeSprint && (
+                <span className="badge badge-accent">{activeSprint.name}</span>
+              )}
             </div>
+            <p className="page-subtitle">
+              {activeSprint
+                ? `${activeTasks.length} tasks in sprint`
+                : 'No active sprint'}
+              {overdueTasks > 0 && (
+                <span style={{ color: 'var(--color-danger)' }}>
+                  {' '}· {overdueTasks} overdue
+                </span>
+              )}
+            </p>
           </div>
-        ) : (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <div className="flex h-full min-w-max gap-6">
-              {columns.map((col) => {
-                const colTasks = activeTasks.filter(t => t.status === col.id);
-                return (
-                  <div key={col.id} className="flex w-[320px] flex-col">
-                    <div className="mb-4 flex items-center justify-between px-2">
-                      <h3 className="text-sm font-bold tracking-wide text-[color:var(--color-foreground)]">{col.label}</h3>
-                      <span className="flex h-6 min-w-[24px] items-center justify-center rounded-full px-2 text-[11px] font-bold shadow-xs bg-[color:var(--color-surface)] text-[color:var(--color-muted)] border border-border">
-                        {colTasks.length}
-                      </span>
-                    </div>
-                    
-                    <SortableContext items={colTasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
-                      <div className="flex-1 rounded-3xl border-2 border-transparent bg-[color:var(--color-surface-active)] p-2.5 flex flex-col gap-1 min-h-[400px]" id={col.id}>
-                        {colTasks.length === 0 ? (
-                          <div className="flex h-full min-h-[100px] items-center justify-center border-2 border-dashed rounded-2xl opacity-50 m-1 bg-[color:var(--color-background)] border-[color:var(--color-border-light)]">
-                            <p className="text-xs font-bold uppercase tracking-widest text-[color:var(--color-muted)]">Drop tasks here</p>
-                          </div>
-                        ) : (
-                          colTasks.map(task => (
-                            <SortableKanbanItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
-                          ))
-                        )}
-                      </div>
-                    </SortableContext>
-                  </div>
-                );
-              })}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => navigate('/agile/planning')}
+              className="btn btn-sm btn-secondary"
+            >
+              Backlog
+            </button>
+            {activeSprint && (
+              <button
+                onClick={() => completeSprint(activeSprint._id)}
+                className="btn btn-sm btn-primary"
+              >
+                Complete Sprint
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Sprint progress bar */}
+        {activeSprint && activeTasks.length > 0 && (
+          <div className="flex items-center gap-3">
+            <div className="progress-bar flex-1" style={{ height: 6 }}>
+              <div
+                className="progress-bar-fill"
+                style={{
+                  width: `${progress}%`,
+                  background: progress === 100
+                    ? 'var(--color-success)'
+                    : 'var(--color-accent)',
+                }}
+              />
             </div>
-          </DndContext>
+            <span className="text-[12px] font-semibold shrink-0" style={{ color: 'var(--color-foreground-secondary)' }}>
+              {doneCount}/{activeTasks.length} done · {progress}%
+            </span>
+          </div>
         )}
       </div>
-      
-      <IssueDetailModal 
+
+      {/* Board */}
+      {!activeSprint ? (
+        <EmptyState
+          icon={Rocket}
+          title="No Active Sprint"
+          description="Start a sprint in the Backlog to see tasks here."
+          action={{ label: 'Go to Backlog', onClick: () => navigate('/agile/planning') }}
+        />
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <div className="flex gap-5 overflow-x-auto pb-6" style={{ alignItems: 'flex-start' }}>
+            {COLUMNS.map((col) => {
+              const colTasks = activeTasks.filter(t => t.status === col.id);
+              return (
+                <div key={col.id} className="shrink-0" style={{ width: 300, minWidth: 300 }}>
+                  {/* Column header */}
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="inline-block rounded-full"
+                        style={{ width: 8, height: 8, background: col.color }}
+                      />
+                      <span className="kanban-column-title" style={{ color: col.color }}>
+                        {col.label}
+                      </span>
+                      <span className="kanban-column-count">{colTasks.length}</span>
+                    </div>
+                    <button
+                      className="btn-icon-xs btn-ghost"
+                      style={{ color: 'var(--color-foreground-tertiary)' }}
+                      aria-label={`Add task to ${col.label}`}
+                    >
+                      <Plus size={13} />
+                    </button>
+                  </div>
+
+                  {/* Column drop zone */}
+                  <SortableContext items={colTasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
+                    <div
+                      className="flex flex-col gap-2.5 rounded-xl p-2.5"
+                      id={col.id}
+                      style={{
+                        background: 'var(--color-surface-active)',
+                        minHeight: 320,
+                        border: '1px solid var(--color-border-light)',
+                      }}
+                    >
+                      {colTasks.length === 0 ? (
+                        <div
+                          className="flex items-center justify-center rounded-lg m-1"
+                          style={{
+                            minHeight: 80,
+                            border: '1.5px dashed var(--color-border)',
+                            color: 'var(--color-foreground-tertiary)',
+                          }}
+                        >
+                          <span className="text-[11px] font-medium">Drop tasks here</span>
+                        </div>
+                      ) : (
+                        colTasks.map(task => (
+                          <SortableKanbanItem
+                            key={task._id}
+                            task={task}
+                            onClick={() => setSelectedTask(task)}
+                          />
+                        ))
+                      )}
+                    </div>
+                  </SortableContext>
+                </div>
+              );
+            })}
+          </div>
+        </DndContext>
+      )}
+
+      <IssueDetailModal
         isOpen={!!selectedTask}
         onClose={() => setSelectedTask(null)}
         initialData={selectedTask}
