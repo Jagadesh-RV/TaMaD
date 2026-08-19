@@ -80,7 +80,7 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="page" style={{ padding: '0 32px 40px' }}>
+    <div className="page flex flex-col min-h-[calc(100vh-64px)] p-6 lg:p-8">
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--color-muted)' }}>
