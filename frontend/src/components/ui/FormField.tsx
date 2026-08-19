@@ -43,13 +43,13 @@ interface TextInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   hint?: string;
   error?: string;
-  size?: 'sm' | 'md';
+  inputSize?: 'sm' | 'md';
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
 }
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
-  ({ label, hint, error, size = 'md', leftIcon, rightIcon, className, id, required, ...props }, ref) => {
+  ({ label, hint, error, inputSize = 'md', leftIcon, rightIcon, className, id, required, ...props }, ref) => {
     const inputId = id || (label ? `input-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 
     return (
@@ -65,7 +65,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
             ref={ref}
             id={inputId}
             className={clsx(
-              size === 'sm' ? 'input input-sm' : 'input',
+              inputSize === 'sm' ? 'input input-sm' : 'input',
               error && 'input-error',
               leftIcon && 'pl-9',
               rightIcon && 'pr-9',

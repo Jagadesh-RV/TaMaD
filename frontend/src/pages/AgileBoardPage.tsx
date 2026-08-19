@@ -50,7 +50,6 @@ function SortableKanbanItem({ task, onClick }: { task: any; onClick: () => void 
   return (
     <div
       ref={setNodeRef}
-      style={style}
       className={clsx('kanban-card group', isDragging && 'z-50 scale-[1.02]')}
       style={{
         ...style,

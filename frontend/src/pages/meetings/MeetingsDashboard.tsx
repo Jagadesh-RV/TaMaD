@@ -287,10 +287,10 @@ const MeetingsDashboard: React.FC = () => {
                       <Clock size={12} />
                       {format(new Date(meeting.startTime), 'h:mm a')}
                     </div>
-                    {meeting.participants?.length > 0 && (
+                    {(meeting as any).participants?.length > 0 && (
                       <div className="flex items-center gap-2 text-[12px]" style={{ color: 'var(--color-foreground-tertiary)' }}>
                         <Users size={12} />
-                        {meeting.participants.length} participant{meeting.participants.length !== 1 ? 's' : ''}
+                        {(meeting as any).participants.length} participant{(meeting as any).participants.length !== 1 ? 's' : ''}
                       </div>
                     )}
                   </div>
