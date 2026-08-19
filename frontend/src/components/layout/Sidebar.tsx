@@ -1,10 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, CheckSquare, CalendarDays, Map, Zap, Target,
-  FileText, PenTool, BarChart3, Settings, ChevronLeft,
-  ChevronRight, LogOut, FolderKanban, Users, Brain, HardDrive, Video,
-  Pin, Clock, Star, Briefcase, User, Building2, Rocket,
+  ChevronLeft, ChevronRight, LogOut,
+  Pin, Star, User, Building2, X, Bell, Settings,
 } from 'lucide-react';
 import clsx from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +13,7 @@ import { useInteractionStore } from '../../store/interactionStore';
 import { pageLabelFor, pageIconFor, iconForName } from '../../lib/navigation';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
 import { useWorkspaceStore } from '../../store/workspaceStore';
+import type { LucideIcon } from 'lucide-react';
 
 interface SidebarProps {
   collapsed?: boolean;
@@ -22,6 +21,130 @@ interface SidebarProps {
   isMobile?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+}
+
+interface NavItemProps {
+  path: string;
+  icon: LucideIcon;
+  label: string;
+  collapsed: boolean;
+  isMobile?: boolean;
+  onClose?: () => void;
+  badge?: number;
+  onPinToggle?: (href: string) => void;
+  isPinned?: boolean;
+  showPin?: boolean;
+}
+
+function NavItem({
+  path,
+  icon: Icon,
+  label,
+  collapsed,
+  isMobile,
+  onClose,
+  badge,
+  onPinToggle,
+  isPinned,
+  showPin,
+}: NavItemProps) {
+  const location = useLocation();
+  const isActive = location.pathname === path || 
+    (path !== '/' && location.pathname.startsWith(path + '/'));
+
+  return (
+    <div className="group relative flex items-center">
+      <NavLink
+        to={path}
+        onClick={isMobile ? onClose : undefined}
+        title={collapsed ? label : undefined}
+        aria-current={isActive ? 'page' : undefined}
+        className={clsx(
+          'relative z-10 flex flex-1 items-center gap-2.5 rounded-md transition-all',
+          collapsed
+            ? 'justify-center w-10 h-9 mx-auto'
+            : 'py-1.5 pl-2.5 pr-8',
+          isActive
+            ? 'text-[color:var(--color-accent)]'
+            : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
+        )}
+      >
+        {/* Active background */}
+        {isActive && (
+          <motion.span
+            layoutId="sidebar-active-bg"
+            className="absolute inset-0 rounded-md"
+            style={{ background: 'var(--color-accent-ghost)' }}
+            initial={false}
+            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+          />
+        )}
+        {/* Active indicator bar */}
+        {isActive && (
+          <motion.span
+            layoutId="sidebar-active-bar"
+            className="absolute left-0 top-1/2 -translate-y-1/2 rounded-r-full"
+            style={{ width: 2.5, height: 16, background: 'var(--color-accent)' }}
+            initial={false}
+            transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+          />
+        )}
+
+        <Icon
+          size={16}
+          className="relative z-10 shrink-0"
+          strokeWidth={isActive ? 2.5 : 2}
+        />
+        {!collapsed && (
+          <span className="relative z-10 truncate text-[13px] font-medium leading-none">
+            {label}
+          </span>
+        )}
+        {!collapsed && badge !== undefined && badge > 0 && (
+          <span
+            className="relative z-10 ml-auto flex items-center justify-center rounded-full text-[10px] font-bold leading-none"
+            style={{
+              minWidth: 18,
+              height: 18,
+              padding: '0 5px',
+              background: 'var(--color-danger)',
+              color: '#fff',
+            }}
+          >
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+        {!collapsed && badge === 0 && null}
+      </NavLink>
+
+      {/* Pin button — appears on hover */}
+      {!collapsed && showPin && (
+        <button
+          onClick={() => onPinToggle?.(path)}
+          className={clsx(
+            'absolute right-1 z-20 rounded-md p-1 transition-all',
+            isPinned
+              ? 'text-[color:var(--color-accent)] opacity-100'
+              : 'text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100',
+            'hover:bg-[color:var(--color-surface-active)]'
+          )}
+          aria-label={isPinned ? `Unpin ${label}` : `Pin ${label}`}
+        >
+          <Star size={11} fill={isPinned ? 'currentColor' : 'none'} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
+  if (collapsed) return <div className="my-2 h-px mx-2" style={{ background: 'var(--color-border-light)' }} />;
+  return (
+    <p className="mb-1 mt-4 px-2.5 text-[10px] font-semibold tracking-wider"
+      style={{ color: 'var(--color-foreground-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+      {label}
+    </p>
+  );
 }
 
 export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile, isOpen, onClose }: SidebarProps) {
@@ -38,98 +161,6 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
 
   const isTeam = currentWorkspace?.type === 'team';
 
-  const personalSections = [
-    {
-      label: 'WORKSPACE',
-      links: [
-        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { label: 'Tasks', path: '/tasks', icon: CheckSquare },
-        { label: 'Calendar', path: '/calendar', icon: CalendarDays },
-        { label: 'Projects', path: '/projects', icon: FolderKanban },
-        { label: 'Roadmap', path: '/roadmap', icon: Map },
-        { label: 'Focus', path: '/focus', icon: Zap },
-        { label: 'Planner', path: '/planner', icon: Target },
-      ],
-    },
-    {
-      label: 'CREATE',
-      links: [
-        { label: 'Notes', path: '/notes', icon: FileText },
-        { label: 'Documents', path: '/documents', icon: FileText },
-        { label: 'Files', path: '/files', icon: HardDrive },
-        { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
-      ],
-    },
-    {
-      label: 'INSIGHTS',
-      links: [
-        { label: 'Analytics', path: '/analytics', icon: BarChart3 },
-        { label: 'Reports', path: '/reports', icon: BarChart3 },
-      ],
-    },
-    {
-      label: 'TOOLS',
-      links: [
-        { label: 'AI Assistant', path: '/ai', icon: Brain },
-        { label: 'Templates', path: '/templates', icon: FileText },
-      ],
-    },
-  ];
-
-  const teamSections = [
-    {
-      label: 'OVERVIEW',
-      links: [
-        { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { label: 'Tasks', path: '/tasks', icon: CheckSquare },
-        { label: 'Calendar', path: '/calendar', icon: CalendarDays },
-        { label: 'Projects', path: '/projects', icon: FolderKanban },
-        { label: 'Roadmap', path: '/roadmap', icon: Map },
-      ],
-    },
-    {
-      label: 'AGILE',
-      links: [
-        { label: 'Active Sprint', path: '/agile/board', icon: Rocket },
-        { label: 'Backlog', path: '/agile/planning', icon: Target },
-      ],
-    },
-    {
-      label: 'COLLABORATE',
-      links: [
-        { label: 'Notes', path: '/notes', icon: FileText },
-        { label: 'Documents', path: '/documents', icon: FileText },
-        { label: 'Files', path: '/files', icon: HardDrive },
-        { label: 'Whiteboard', path: '/whiteboard', icon: PenTool },
-      ],
-    },
-    {
-      label: 'TEAM',
-      links: [
-        { label: 'Members', path: '/team/members', icon: Users },
-        { label: 'Meetings', path: `/team/${currentWorkspace?.teamId}/meetings`, icon: Video },
-        { label: 'TaMaD Meet', path: '/team/tamad-meet', icon: Video },
-        { label: 'Settings', path: '/team/settings', icon: Settings },
-      ],
-    },
-    {
-      label: 'ANALYTICS',
-      links: [
-        { label: 'Analytics', path: '/analytics', icon: BarChart3 },
-        { label: 'Reports', path: '/reports', icon: BarChart3 },
-      ],
-    },
-    {
-      label: 'TOOLS',
-      links: [
-        { label: 'AI Assistant', path: '/ai', icon: Brain },
-        { label: 'Templates', path: '/templates', icon: FileText },
-      ],
-    },
-  ];
-
-  const sections = isTeam ? teamSections : personalSections;
-
   const handleLogout = async () => {
     await logout();
     navigate('/login', { replace: true });
@@ -144,28 +175,158 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     }
   }, [isMobile, isOpen]);
 
+  // Navigation sections
+  const personalSections = [
+    {
+      label: undefined,
+      links: [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'My Tasks', path: '/tasks' },
+        { label: 'Projects', path: '/projects' },
+        { label: 'Calendar', path: '/calendar' },
+        { label: 'Planner', path: '/planner' },
+      ],
+    },
+    {
+      label: 'Personal',
+      links: [
+        { label: 'Focus', path: '/focus' },
+        { label: 'Roadmap', path: '/roadmap' },
+      ],
+    },
+    {
+      label: 'Knowledge',
+      links: [
+        { label: 'Notes', path: '/notes' },
+        { label: 'Documents', path: '/documents' },
+        { label: 'Files', path: '/files' },
+        { label: 'Whiteboard', path: '/whiteboard' },
+      ],
+    },
+    {
+      label: 'Insights',
+      links: [
+        { label: 'Analytics', path: '/analytics' },
+        { label: 'Reports', path: '/reports' },
+      ],
+    },
+    {
+      label: 'Tools',
+      links: [
+        { label: 'AI Assistant', path: '/ai' },
+        { label: 'Templates', path: '/templates' },
+      ],
+    },
+  ];
+
+  const teamSections = [
+    {
+      label: undefined,
+      links: [
+        { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Tasks', path: '/tasks' },
+        { label: 'Projects', path: '/projects' },
+        { label: 'Calendar', path: '/calendar' },
+        { label: 'Roadmap', path: '/roadmap' },
+      ],
+    },
+    {
+      label: 'Agile',
+      links: [
+        { label: 'Active Sprint', path: '/agile/board' },
+        { label: 'Backlog', path: '/agile/planning' },
+      ],
+    },
+    {
+      label: 'Collaborate',
+      links: [
+        { label: 'Notes', path: '/notes' },
+        { label: 'Documents', path: '/documents' },
+        { label: 'Files', path: '/files' },
+        { label: 'Whiteboard', path: '/whiteboard' },
+      ],
+    },
+    {
+      label: 'Team',
+      links: [
+        { label: 'Members', path: '/team/members' },
+        { label: 'Meetings', path: currentWorkspace?.teamId ? `/team/${currentWorkspace.teamId}/meetings` : '/team/tamad-meet' },
+        { label: 'TaMaD Meet', path: '/team/tamad-meet' },
+        { label: 'Team Settings', path: '/team/settings' },
+      ],
+    },
+    {
+      label: 'Insights',
+      links: [
+        { label: 'Analytics', path: '/analytics' },
+        { label: 'Reports', path: '/reports' },
+      ],
+    },
+    {
+      label: 'Tools',
+      links: [
+        { label: 'AI Assistant', path: '/ai' },
+        { label: 'Templates', path: '/templates' },
+      ],
+    },
+  ];
+
+  const sections = isTeam ? teamSections : personalSections;
+
+  // User initials
+  const userInitials = user?.name
+    ? user.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+    : 'U';
+
   const sidebarContent = (
-    <div className="flex h-full flex-col">
-      {/* Logo + Workspace Type Indicator */}
-      <div className={clsx('flex items-center mt-3', collapsed ? 'justify-center px-2' : 'gap-3 px-4')}>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
-          <span className="font-bold text-lg leading-none">T</span>
+    <div className="flex h-full flex-col" style={{ minHeight: 0 }}>
+
+      {/* Brand + Workspace mode */}
+      <div className={clsx(
+        'flex items-center border-b shrink-0',
+        collapsed ? 'justify-center py-3 px-2' : 'gap-2.5 px-4 py-3',
+      )}
+        style={{ borderColor: 'var(--color-border-light)', minHeight: 52 }}
+      >
+        {/* Logo mark */}
+        <div
+          className="flex shrink-0 items-center justify-center rounded-lg font-bold text-[15px] leading-none text-white"
+          style={{
+            width: 30,
+            height: 30,
+            background: 'var(--color-accent)',
+            boxShadow: '0 1px 3px rgba(59,78,246,0.3)',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          T
         </div>
+
         {!collapsed && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-w-0 flex-1">
-            <p className="text-sm font-semibold tracking-tight text-[color:var(--color-foreground)]">TaMaD</p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {isTeam ? (
-                <>
-                  <Building2 size={10} className="text-[color:var(--color-success)]" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-success)]">Team</span>
-                </>
-              ) : (
-                <>
-                  <User size={10} className="text-[color:var(--color-accent)]" />
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[color:var(--color-muted)]">Personal</span>
-                </>
-              )}
+          <motion.div
+            initial={{ opacity: 0, x: -4 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="min-w-0 flex-1"
+          >
+            <div className="flex items-center gap-1.5">
+              <p className="text-[13px] font-semibold tracking-tight"
+                style={{ color: 'var(--color-foreground)', letterSpacing: '-0.02em' }}>
+                TaMaD
+              </p>
+              <span
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                style={{
+                  background: isTeam ? 'var(--color-success-ghost)' : 'var(--color-accent-ghost)',
+                  color: isTeam ? 'var(--color-success)' : 'var(--color-accent)',
+                  letterSpacing: '0.04em',
+                }}
+              >
+                {isTeam ? (
+                  <><Building2 size={8} />{currentWorkspace?.name?.slice(0, 12) || 'Team'}</>
+                ) : (
+                  <><User size={8} />Personal</>
+                )}
+              </span>
             </div>
           </motion.div>
         )}
@@ -173,146 +334,101 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
 
       {/* Workspace Switcher */}
       {!collapsed && (
-        <div className="mt-4 mb-2 px-4">
+        <div className="px-3 pt-3 pb-1 shrink-0">
           <WorkspaceSwitcher />
         </div>
       )}
 
       {/* Navigation */}
-      <nav className="mt-4 flex-1 overflow-y-auto px-3 pb-4" style={{ scrollbarWidth: 'none' }}>
-        {/* Pinned & Recent */}
-        {!collapsed && (pinned.length > 0 || recents.length > 0) && (
-          <div className="mb-5 space-y-5">
-            {pinned.length > 0 && (
-              <div>
-                <p className="mb-2 flex items-center gap-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
-                  <Pin size={10} /> Pinned
-                </p>
-                <div className="space-y-0.5">
-                  {pinned.map((href) => {
-                    const Icon = pageIconFor(href);
-                    const label = pageLabelFor(href);
-                    const isActive = location.pathname === href;
-                    return (
-                      <div key={href} className="group relative flex items-center">
-                        <NavLink
-                          to={href}
-                          onClick={isMobile ? onClose : undefined}
-                          className={clsx(
-                            'relative z-10 flex flex-1 items-center gap-3 rounded-md py-2 pl-3 pr-8 transition-colors',
-                            isActive ? 'text-[color:var(--color-accent)]' : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
-                          )}
-                        >
-                          {isActive && (
-                            <span className="absolute inset-0 rounded-md bg-[color:var(--color-accent-ghost)]" />
-                          )}
-                          <Icon size={17} className="relative z-10 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
-                          <span className="relative z-10 truncate text-[13px] font-medium">{label}</span>
-                        </NavLink>
-                        <button
-                          onClick={() => togglePin(href)}
-                          className="absolute right-1.5 z-20 rounded-md p-1 text-[color:var(--color-accent)] opacity-0 transition-opacity hover:bg-[color:var(--color-surface-active)] group-hover:opacity-100"
-                          aria-label="Unpin"
-                        >
-                          <Star size={12} fill="currentColor" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {recents.length > 0 && (
-              <div>
-                <p className="mb-2 flex items-center gap-1.5 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
-                  <Clock size={10} /> Recent
-                </p>
-                <div className="space-y-0.5">
-                  {recents.slice(0, 4).map((r) => {
-                    const Icon = iconForName(r.icon);
-                    const isActive = location.pathname === r.href;
-                    const isPinned = pinned.includes(r.href);
-                    return (
-                      <div key={r.id} className="group relative flex items-center">
-                        <NavLink
-                          to={r.href}
-                          onClick={isMobile ? onClose : undefined}
-                          className={clsx(
-                            'relative z-10 flex flex-1 items-center gap-3 rounded-md py-2 pl-3 pr-8 transition-colors',
-                            isActive ? 'text-[color:var(--color-accent)]' : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
-                          )}
-                        >
-                          {isActive && (
-                            <span className="absolute inset-0 rounded-md bg-[color:var(--color-accent-ghost)]" />
-                          )}
-                          <Icon size={17} className="relative z-10 shrink-0" strokeWidth={isActive ? 2.5 : 2} />
-                          <span className="relative z-10 truncate text-[13px] font-medium">{r.label}</span>
-                        </NavLink>
-                        <button
-                          onClick={() => togglePin(r.href)}
-                          className={clsx(
-                            'absolute right-1.5 z-20 rounded-md p-1 transition-opacity hover:bg-[color:var(--color-surface-active)]',
-                            isPinned ? 'text-[color:var(--color-accent)] opacity-100' : 'text-[color:var(--color-muted)] opacity-0 group-hover:opacity-100'
-                          )}
-                          aria-label={isPinned ? 'Unpin' : 'Pin'}
-                        >
-                          <Star size={12} fill={isPinned ? 'currentColor' : 'none'} />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+      <nav
+        className="flex-1 overflow-y-auto px-2 pt-2 pb-3"
+        style={{ scrollbarWidth: 'none' }}
+        aria-label="Main navigation"
+      >
+        {/* Pinned items */}
+        {!collapsed && pinned.length > 0 && (
+          <div className="mb-4">
+            <p className="mb-1 px-2.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-wider"
+              style={{ color: 'var(--color-foreground-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+              <Pin size={9} />Pinned
+            </p>
+            <div className="space-y-0.5">
+              {pinned.map((href) => {
+                const Icon = pageIconFor(href);
+                const label = pageLabelFor(href);
+                const isPinned = true;
+                return (
+                  <NavItem
+                    key={href}
+                    path={href}
+                    icon={Icon}
+                    label={label}
+                    collapsed={false}
+                    isMobile={isMobile}
+                    onClose={onClose}
+                    onPinToggle={togglePin}
+                    isPinned={isPinned}
+                    showPin
+                  />
+                );
+              })}
+            </div>
           </div>
         )}
 
-        {/* Main Sections */}
-        {sections.map((section) => (
-          <div key={section.label} className={clsx("mb-4", collapsed && "flex flex-col items-center")}>
-            {!collapsed && (
-              <p className="mb-2 px-3 text-[11px] font-semibold text-[color:var(--color-foreground-tertiary)] tracking-wider">
-                {section.label}
-              </p>
-            )}
-            <div className="space-y-1 relative">
-              {section.links.map((link) => {
-                const Icon = link.icon;
-                const isActive = location.pathname === link.path || (link.path === '/' && location.pathname === '/dashboard');
-                
+        {/* Recent items */}
+        {!collapsed && recents.length > 0 && pinned.length === 0 && (
+          <div className="mb-4">
+            <p className="mb-1 px-2.5 text-[10px] font-semibold tracking-wider"
+              style={{ color: 'var(--color-foreground-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+              Recent
+            </p>
+            <div className="space-y-0.5">
+              {recents.slice(0, 3).map((r) => {
+                const Icon = iconForName(r.icon);
+                const isPinned = pinned.includes(r.href);
                 return (
-                  <NavLink
+                  <NavItem
+                    key={r.id}
+                    path={r.href}
+                    icon={Icon}
+                    label={r.label}
+                    collapsed={false}
+                    isMobile={isMobile}
+                    onClose={onClose}
+                    onPinToggle={togglePin}
+                    isPinned={isPinned}
+                    showPin
+                  />
+                );
+              })}
+            </div>
+            <div className="my-3 mx-2.5 h-px" style={{ background: 'var(--color-border-light)' }} />
+          </div>
+        )}
+
+        {/* Main nav sections */}
+        {sections.map((section, sectionIdx) => (
+          <div key={sectionIdx} className={clsx(collapsed && 'flex flex-col items-center')}>
+            {section.label && <SectionLabel label={section.label} collapsed={collapsed} />}
+            <div className="space-y-0.5">
+              {section.links.map((link) => {
+                const Icon = pageIconFor(link.path);
+                const isPinnedLink = pinned.includes(link.path);
+                return (
+                  <NavItem
                     key={link.path}
-                    to={link.path}
-                    onClick={isMobile ? onClose : undefined}
-                    className={clsx(
-                      'group relative flex items-center gap-3 rounded-md py-2 transition-colors z-10',
-                      collapsed ? 'justify-center px-0 w-10 h-10 mx-auto' : 'px-3',
-                      isActive ? 'text-[color:var(--color-accent)]' : 'text-[color:var(--color-foreground-secondary)] hover:text-[color:var(--color-foreground)]'
-                    )}
-                  >
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-bg"
-                        className="absolute inset-0 bg-[color:var(--color-accent-ghost)] rounded-md z-0"
-                        initial={false}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                    {isActive && (
-                      <motion.div
-                        layoutId="sidebar-active-bar"
-                        className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-accent)] z-0"
-                        initial={false}
-                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                      />
-                    )}
-                    <Icon size={18} className="shrink-0 relative z-10" strokeWidth={isActive ? 2.5 : 2} />
-                    {!collapsed && (
-                      <span className="truncate text-[13px] font-medium relative z-10">{link.label}</span>
-                    )}
-                  </NavLink>
+                    path={link.path}
+                    icon={Icon}
+                    label={link.label}
+                    collapsed={collapsed}
+                    isMobile={isMobile}
+                    onClose={onClose}
+                    badge={link.path === '/notifications' ? unread : undefined}
+                    onPinToggle={togglePin}
+                    isPinned={isPinnedLink}
+                    showPin={!collapsed}
+                  />
                 );
               })}
             </div>
@@ -320,68 +436,157 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         ))}
       </nav>
 
-      {/* User Profile & Controls */}
-      <div className="px-4 pb-4">
+      {/* Bottom: User card + controls */}
+      <div className="px-2 pb-3 pt-2 shrink-0 space-y-1" style={{ borderTop: '1px solid var(--color-border-light)' }}>
+        {/* Collapse toggle (desktop only) */}
         {!isMobile && onToggleCollapse && (
           <button
             onClick={onToggleCollapse}
-            className="flex w-full items-center justify-center rounded-md p-2 hover:bg-[color:var(--color-surface-hover)] text-[color:var(--color-foreground-tertiary)] transition-colors mb-2"
+            className="flex w-full items-center justify-center rounded-md py-1.5 transition-colors"
+            style={{ color: 'var(--color-foreground-tertiary)' }}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            {collapsed ? (
+              <ChevronRight size={14} />
+            ) : (
+              <span className="flex items-center gap-1.5 text-[11px] font-medium">
+                <ChevronLeft size={14} />Collapse
+              </span>
+            )}
           </button>
         )}
-        
-        <div className={clsx("flex items-center gap-3 rounded-xl border border-border p-3 bg-surface", collapsed && "justify-center px-0")}>
-          <div className="avatar avatar-sm shrink-0 bg-accent text-white font-semibold">
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+
+        {/* User card */}
+        <div
+          className={clsx(
+            'flex items-center gap-2.5 rounded-lg p-2 transition-colors cursor-default',
+            collapsed ? 'justify-center' : '',
+          )}
+          style={{ background: 'var(--color-surface-active)' }}
+        >
+          {/* Avatar */}
+          <div
+            className="flex shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+            style={{
+              width: 28,
+              height: 28,
+              background: 'var(--color-accent)',
+              position: 'relative',
+            }}
+          >
+            {userInitials}
+            {/* Online indicator */}
+            <span
+              className="absolute"
+              style={{
+                width: 7,
+                height: 7,
+                background: 'var(--color-success)',
+                border: '1.5px solid var(--color-surface-active)',
+                borderRadius: '50%',
+                bottom: -1,
+                right: -1,
+              }}
+            />
           </div>
+
           {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-[color:var(--color-foreground)]">{user?.name || 'User'}</p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-success"></span>
-                </span>
-                <p className="text-[10px] text-[color:var(--color-foreground-tertiary)]">
-                  {onlineUsers.length > 0 ? `${onlineUsers.length + 1} online now` : 'Online'}
+            <>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[12px] font-semibold leading-none mb-0.5"
+                  style={{ color: 'var(--color-foreground)' }}>
+                  {user?.name || 'User'}
+                </p>
+                <p className="text-[10px] leading-none"
+                  style={{ color: 'var(--color-foreground-tertiary)' }}>
+                  {onlineUsers.length > 0
+                    ? `${onlineUsers.length + 1} online`
+                    : 'Online'}
                 </p>
               </div>
-            </div>
-          )}
-          {!collapsed && (
-            <button onClick={handleLogout} className="text-[color:var(--color-foreground-tertiary)] hover:text-danger transition-colors p-1 rounded-md hover:bg-danger-light" aria-label="Sign out">
-              <LogOut size={14} />
-            </button>
+              <div className="flex items-center gap-0.5">
+                <button
+                  onClick={() => navigate('/notifications')}
+                  className="relative rounded-md p-1.5 transition-colors"
+                  style={{ color: 'var(--color-foreground-tertiary)' }}
+                  aria-label="Notifications"
+                >
+                  <Bell size={13} />
+                  {unread > 0 && (
+                    <span className="notification-dot" style={{ width: 6, height: 6, top: 2, right: 2 }} />
+                  )}
+                </button>
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="rounded-md p-1.5 transition-colors"
+                  style={{ color: 'var(--color-foreground-tertiary)' }}
+                  aria-label="Settings"
+                >
+                  <Settings size={13} />
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-md p-1.5 transition-colors"
+                  style={{ color: 'var(--color-foreground-tertiary)' }}
+                  aria-label="Sign out"
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
     </div>
   );
 
+  // Mobile drawer
   if (isMobile) {
     return (
       <AnimatePresence>
         {isOpen && (
           <>
+            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-40"
+              style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}
               onClick={onClose}
+              aria-hidden="true"
             />
+            {/* Drawer */}
             <motion.aside
-              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-              transition={{ type: "spring", stiffness: 350, damping: 35 }}
-              className="fixed inset-y-0 left-0 z-50 flex flex-col w-[260px] bg-surface border-r border-border"
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', stiffness: 380, damping: 38 }}
+              className="fixed inset-y-0 left-0 z-50 flex flex-col"
+              style={{
+                width: 256,
+                background: 'var(--color-background)',
+                borderRight: '1px solid var(--color-border)',
+              }}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation"
             >
-              <div className="flex items-center justify-between p-4 pb-0">
-                <div />
-                <button ref={closeButtonRef} onClick={onClose} className="rounded-lg p-1.5 text-[color:var(--color-muted)]" aria-label="Close sidebar">
-                  <ChevronLeft size={20} />
+              <div className="flex items-center justify-end p-2 shrink-0">
+                <button
+                  ref={closeButtonRef}
+                  onClick={onClose}
+                  className="rounded-lg p-1.5 transition-colors"
+                  style={{ color: 'var(--color-foreground-tertiary)' }}
+                  aria-label="Close navigation"
+                >
+                  <X size={18} />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto pt-2">{sidebarContent}</div>
+              <div className="flex-1 overflow-y-auto">
+                {sidebarContent}
+              </div>
             </motion.aside>
           </>
         )}
@@ -389,11 +594,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
     );
   }
 
+  // Desktop sidebar
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 260 }}
-      transition={{ type: "spring", stiffness: 400, damping: 40 }}
-      className="h-screen shrink-0 bg-background-secondary/70 backdrop-blur-2xl border-r border-border flex flex-col overflow-hidden"
+      animate={{ width: collapsed ? 64 : 256 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 40 }}
+      className="h-screen shrink-0 flex flex-col overflow-hidden"
+      style={{
+        background: 'var(--color-background)',
+        borderRight: '1px solid var(--color-border)',
+      }}
     >
       {sidebarContent}
     </motion.aside>
