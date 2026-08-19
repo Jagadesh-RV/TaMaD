@@ -473,7 +473,7 @@ export default function FilesPage() {
                      )}
                      <button
                        onClick={(e) => { e.stopPropagation(); handleDelete(file._id); }}
-                       className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
+                       className="rounded p-1.5 transition-colors hover:bg-[color:var(--color-danger-ghost)]"
                        style={{ color: 'var(--color-danger)' }}
                        aria-label="Delete file"
                      >
