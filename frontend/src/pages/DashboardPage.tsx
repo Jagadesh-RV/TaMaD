@@ -2,54 +2,136 @@ import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   CheckCircle2, AlertTriangle,
-  Filter, AlertCircle, X, Inbox, FolderKanban, Activity,
-  Radio, Target, Sparkles, ChevronRight, Zap,
+  X, Inbox, FolderKanban, Activity,
+  Target, Sparkles, ChevronRight, Zap,
+  Plus, ArrowRight, Clock, TrendingUp,
+  CheckSquare, Calendar,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
-import { format, startOfWeek, endOfWeek, isToday } from 'date-fns';
+import { format, startOfWeek, endOfWeek, isToday, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useTaskStore } from '../store/taskStore';
 import { useProjectStore } from '../store/projectStore';
 import { useRealtime } from '../providers/RealtimeProvider';
 import { EmptyState } from '../components/ui/EmptyState';
-import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { SkeletonTable } from '../components/ui/Skeleton';
-import { staggerContainer, cardVariant } from '../lib/animations';
+import { SkeletonStatGrid, SkeletonList } from '../components/ui/Skeleton';
 import TeamDashboardPage from './TeamDashboardPage';
 import { Card } from '../components/ui/Card';
 import AIInsightPanel from '../components/ai/AIInsightPanel';
 import clsx from 'clsx';
+import { useInteractionStore } from '../store/interactionStore';
 
 const STATUS_TABS = [
-  { key: 'all', label: 'All Tasks' },
+  { key: 'all', label: 'All' },
   { key: 'urgent', label: 'High Priority' },
   { key: 'today', label: 'Due Today' },
   { key: 'in-progress', label: 'In Progress' },
 ] as const;
 
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case 'urgent': return { bg: 'var(--color-danger-light)', text: 'var(--color-danger)', dot: 'var(--color-danger)' };
-    case 'high': return { bg: 'var(--color-warning-light)', text: 'var(--color-warning)', dot: 'var(--color-warning)' };
-    case 'medium': return { bg: 'var(--color-accent-light)', text: 'var(--color-accent)', dot: 'var(--color-accent)' };
-    case 'low': return { bg: 'var(--color-surface-active)', text: 'var(--color-muted)', dot: 'var(--color-muted)' };
-    default: return { bg: 'var(--color-surface-active)', text: 'var(--color-muted)', dot: 'var(--color-muted)' };
-  }
-};
+const PRIORITY_CONFIG = {
+  urgent: { color: 'var(--color-danger)', bg: 'var(--color-danger-light)', label: 'Urgent', dotClass: 'priority-dot-urgent' },
+  high:   { color: 'var(--color-warning)', bg: 'var(--color-warning-light)', label: 'High', dotClass: 'priority-dot-high' },
+  medium: { color: 'var(--color-accent)', bg: 'var(--color-accent-light)', label: 'Medium', dotClass: 'priority-dot-medium' },
+  low:    { color: 'var(--color-muted)', bg: 'var(--color-surface-active)', label: 'Low', dotClass: 'priority-dot-low' },
+} as const;
 
-const statusColors: Record<string, { bg: string; text: string }> = {
-  'todo': { bg: 'var(--color-surface-active)', text: 'var(--color-muted)' },
-  'in-progress': { bg: 'var(--color-accent-ghost)', text: 'var(--color-accent)' },
-  'review': { bg: 'var(--color-warning-light)', text: 'var(--color-warning)' },
-  'done': { bg: 'var(--color-success-light)', text: 'var(--color-success)' },
-};
+const STATUS_CONFIG = {
+  'todo':        { color: 'var(--color-foreground-tertiary)', bg: 'var(--color-surface-active)', label: 'To Do' },
+  'in-progress': { color: 'var(--color-accent)', bg: 'var(--color-accent-light)', label: 'In Progress' },
+  'review':      { color: 'var(--color-warning)', bg: 'var(--color-warning-light)', label: 'In Review' },
+  'done':        { color: 'var(--color-success)', bg: 'var(--color-success-light)', label: 'Done' },
+} as const;
 
 function useAuthName() {
   const user = useAuthStore(s => s.user);
   return user?.name?.split(' ')[0] || 'there';
+}
+
+function QuickActions() {
+  const navigate = useNavigate();
+  const { openQuickCreate } = useInteractionStore();
+
+  const actions = [
+    { label: 'New Task', icon: CheckSquare, onClick: () => openQuickCreate(), color: 'var(--color-accent)' },
+    { label: 'New Project', icon: FolderKanban, onClick: () => navigate('/projects'), color: 'var(--color-success)' },
+    { label: 'New Note', icon: Zap, onClick: () => navigate('/notes'), color: 'var(--color-warning)' },
+    { label: 'Focus Now', icon: Target, onClick: () => navigate('/focus'), color: 'var(--color-info)' },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      {actions.map((a) => (
+        <button
+          key={a.label}
+          onClick={a.onClick}
+          className="flex items-center gap-2.5 rounded-xl border transition-all text-left group"
+          style={{
+            padding: '10px 14px',
+            background: 'var(--color-surface)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
+          <span
+            className="flex items-center justify-center rounded-lg shrink-0 transition-transform group-hover:scale-110"
+            style={{ width: 32, height: 32, background: a.color + '15', color: a.color }}
+          >
+            <a.icon size={15} />
+          </span>
+          <span className="text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
+            {a.label}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  sub,
+  color,
+  icon: Icon,
+  onClick,
+  critical = false,
+}: {
+  label: string;
+  value: number | string;
+  sub: string;
+  color: string;
+  icon: React.ElementType;
+  onClick?: () => void;
+  critical?: boolean;
+}) {
+  return (
+    <div
+      className="stat-card cursor-pointer group"
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={e => e.key === 'Enter' && onClick?.()}
+    >
+      <div className="flex items-center justify-between">
+        <span className="stat-card-label">{label}</span>
+        <span
+          className="flex items-center justify-center rounded-lg"
+          style={{ width: 32, height: 32, background: color + '15', color }}
+        >
+          <Icon size={15} />
+        </span>
+      </div>
+      <div
+        className="stat-card-value"
+        style={{ color: critical ? 'var(--color-danger)' : 'var(--color-foreground)' }}
+      >
+        {value}
+      </div>
+      <span className="stat-card-label">{sub}</span>
+    </div>
+  );
 }
 
 export default function DashboardPage() {
@@ -70,7 +152,7 @@ export default function DashboardPage() {
   const today = format(new Date(), 'yyyy-MM-dd');
   const authName = useAuthName();
   const currentHour = new Date().getHours();
-  const greeting = currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening';
+  const greeting = currentHour < 5 ? 'night' : currentHour < 12 ? 'morning' : currentHour < 18 ? 'afternoon' : 'evening';
 
   useEffect(() => {
     if (workspaceId) {
@@ -94,56 +176,26 @@ export default function DashboardPage() {
   const overdueTasks = tasks.filter(t => t.dueDate && t.dueDate < today && t.status !== 'done').length;
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   const doneToday = tasks.filter(t => t.status === 'done' && t.updatedAt && isToday(new Date(t.updatedAt))).length;
+  const todayTasks = tasks.filter(t => t.dueDate === today && t.status !== 'done').length;
 
   const weeklyData = useMemo(() => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
-    return days.slice(1).map(day => {
-      const dayTasks = tasks.filter(t => {
-        if (!t.createdAt) return false;
-        const created = new Date(t.createdAt);
-        return created >= weekStart && created <= weekEnd &&
-          created.toLocaleDateString('en-US', { weekday: 'short' }) === day;
-      });
-      const completedDayTasks = tasks.filter(t => {
+    return days.map(day => {
+      const dayCompleted = tasks.filter(t => {
         if (!t.updatedAt || t.status !== 'done') return false;
-        const updated = new Date(t.updatedAt);
-        return updated >= weekStart && updated <= weekEnd &&
-          updated.toLocaleDateString('en-US', { weekday: 'short' }) === day;
-      });
-      return { day, completed: completedDayTasks.length, created: dayTasks.length };
+        const u = new Date(t.updatedAt);
+        return u >= weekStart && u <= weekEnd && u.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+      }).length;
+      const dayCreated = tasks.filter(t => {
+        if (!t.createdAt) return false;
+        const c = new Date(t.createdAt);
+        return c >= weekStart && c <= weekEnd && c.toLocaleDateString('en-US', { weekday: 'short' }) === day;
+      }).length;
+      return { day, completed: dayCompleted, created: dayCreated };
     });
   }, [tasks]);
-
-  const weekStory = useMemo(() => {
-    const done = weeklyData.reduce((sum, d) => sum + d.completed, 0);
-    const created = weeklyData.reduce((sum, d) => sum + d.created, 0);
-    return { done, created };
-  }, [weeklyData]);
-
-  const storySentence = useMemo(() => {
-    const parts: string[] = [];
-    if (weekStory.done > 0) parts.push(`you've closed ${weekStory.done} ${weekStory.done === 1 ? 'task' : 'tasks'} this week`);
-    if (weekStory.created > 0) parts.push(`opened ${weekStory.created} new ones`);
-    if (parts.length === 0) parts.push('the week is just beginning — every surface is yours');
-    if (overdueTasks > 0) {
-      return `${parts.join(', ')}. ${overdueTasks} item${overdueTasks > 1 ? 's' : ''} need${overdueTasks > 1 ? '' : 's'} your attention right now.`;
-    }
-    if (inProgressTasks > 0) {
-      return `${parts.join(', ')}. ${inProgressTasks} ${inProgressTasks === 1 ? 'item is' : 'items are'} in flight — momentum is alive.`;
-    }
-    return `${parts.join(', ')}.`;
-  }, [weekStory, overdueTasks, inProgressTasks]);
-
-  const pulse = [
-    { label: 'In flight now', value: inProgressTasks, icon: Radio, tone: 'var(--color-info)', live: true },
-    { label: 'Closed today', value: doneToday, icon: CheckCircle2, tone: 'var(--color-success)', live: true },
-    { label: 'Needs attention', value: overdueTasks, icon: AlertTriangle, tone: 'var(--color-danger)', live: true },
-    { label: 'Completion', value: completionRate, icon: Target, tone: 'var(--color-accent)', live: false },
-  ];
-
-  const recentTasks = filteredTasks.slice(0, 6);
 
   const focusTasks = useMemo(() => {
     return [...tasks]
@@ -152,7 +204,7 @@ export default function DashboardPage() {
         const prio = { urgent: 0, high: 1, medium: 2, low: 3 };
         return (prio[a.priority as keyof typeof prio] ?? 4) - (prio[b.priority as keyof typeof prio] ?? 4);
       })
-      .slice(0, 5);
+      .slice(0, 7);
   }, [tasks]);
 
   const attentionTasks = useMemo(() => {
@@ -165,8 +217,10 @@ export default function DashboardPage() {
   const recentActivities = useMemo(() => {
     return [...tasks]
       .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-      .slice(0, 5);
+      .slice(0, 6);
   }, [tasks]);
+
+  const displayTasks = statusFilter === 'all' ? focusTasks : filteredTasks.slice(0, 7);
 
   const handleDismissEmailBanner = () => {
     if (user?.id) {
@@ -183,34 +237,43 @@ export default function DashboardPage() {
 
   return (
     <div className="page pb-20">
+
+      {/* Email verification banner */}
       <AnimatePresence>
         {showEmailBanner && (
           <motion.div
             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex items-center justify-between gap-4 rounded-xl px-5 py-4 border bg-warning-light border-warning/20 shadow-xs">
-              <div className="flex items-center gap-3">
-                <AlertCircle size={20} className="text-warning" />
-                <span className="text-sm font-semibold text-warning-dark">
-                  Please verify your email address to unlock all features
+            <div
+              className="flex items-center justify-between gap-4 rounded-xl px-4 py-3"
+              style={{
+                background: 'var(--color-warning-ghost)',
+                border: '1px solid var(--color-warning-light)',
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle size={15} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
+                <span className="text-[13px] font-medium" style={{ color: 'var(--color-warning)' }}>
+                  Verify your email to unlock all features
                 </span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigate('/verify-email')}
-                  className="rounded-full px-4 py-1.5 text-xs font-bold transition-transform hover:scale-105 bg-warning text-white shadow-sm"
+                  className="btn btn-sm"
+                  style={{ background: 'var(--color-warning)', color: '#fff', borderRadius: 'var(--radius-md)' }}
                 >
-                  Verify Now
+                  Verify
                 </button>
                 <button
                   onClick={handleDismissEmailBanner}
-                  className="rounded-full p-1.5 transition-colors hover:bg-warning/20 text-warning"
+                  className="btn-icon-xs btn-ghost"
                   aria-label="Dismiss"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               </div>
             </div>
@@ -218,239 +281,235 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
 
-      {/* ---------------- Narrative hero ---------------- */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="relative mb-8 overflow-hidden rounded-xl border border-border bg-[color:var(--color-surface)] px-6 py-6 sm:px-8 sm:py-8"
-      >
-        <div className="relative z-10">
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
-              <Zap size={11} className="text-[color:var(--color-accent)]" />
-              Command center
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-[color:var(--color-surface)] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-foreground-secondary)]">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-[color:var(--color-success)] opacity-60 animate-ping" />
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[color:var(--color-success)]" />
-              </span>
-              {onlineUsers.length + 1} online now
-            </span>
-          </div>
-
-          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
-            Good {greeting}, {authName}
-          </h1>
-          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[color:var(--color-foreground-secondary)]">
-            {format(new Date(), 'EEEE, MMMM d, yyyy')} — {storySentence}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <button
-              onClick={() => navigate('/tasks')}
-              className="btn btn-primary btn-md rounded-full"
-            >
-              Open today <ChevronRight size={16} />
-            </button>
+      {/* --- Header --- */}
+      <div className="mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="flex items-start justify-between gap-4 flex-wrap mb-1">
+            <div>
+              <h1 className="page-title">
+                Good {greeting}, {authName}
+              </h1>
+              <p className="page-subtitle mt-1">
+                {format(new Date(), 'EEEE, MMMM d')}
+                {overdueTasks > 0 && (
+                  <span style={{ color: 'var(--color-danger)' }}>
+                    {' '}— {overdueTasks} overdue {overdueTasks === 1 ? 'task' : 'tasks'} need attention
+                  </span>
+                )}
+                {overdueTasks === 0 && inProgressTasks > 0 && (
+                  <span style={{ color: 'var(--color-foreground-secondary)' }}>
+                    {' '}— {inProgressTasks} {inProgressTasks === 1 ? 'task' : 'tasks'} in flight
+                  </span>
+                )}
+              </p>
+            </div>
             <button
               onClick={() => navigate('/ai')}
-              className="btn btn-secondary btn-md rounded-full"
+              className="btn btn-sm btn-secondary flex items-center gap-1.5"
             >
-              <Sparkles size={15} className="text-[color:var(--color-accent)]" /> Ask AI
+              <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
+              Ask AI
             </button>
           </div>
-        </div>
-      </motion.div>
-
-      {/* ---------------- Live pulse strip ---------------- */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-      >
-        {pulse.map((stat) => {
-          const Icon = stat.icon;
-          const critical = stat.label === 'Needs attention' && stat.value > 0;
-          return (
-            <div key={stat.label}>
-              <Card
-                className="group relative overflow-hidden p-5 cursor-pointer"
-                onClick={() => navigate(stat.label === 'In flight now' ? '/tasks' : stat.label === 'Needs attention' ? '/tasks' : '/reports')}
-              >
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[color:var(--color-muted)]">{stat.label}</span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: `${stat.tone}15`, color: stat.tone }}>
-                    <Icon size={18} strokeWidth={2} />
-                  </div>
-                </div>
-                <div
-                  className={clsx(
-                    'text-3xl font-bold tracking-tight',
-                    critical ? 'text-danger' : 'text-[color:var(--color-foreground)]',
-                  )}
-                >
-                  {stat.value}{stat.label === 'Completion' ? '%' : ''}
-                </div>
-                <div className="mt-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: stat.tone }}>
-                  {stat.label === 'Needs attention' ? (critical ? 'Respond now' : 'All clear') : stat.label === 'Completion' ? 'of the week done' : 'live now'}
-                </div>
-              </Card>
-            </div>
-          );
-        })}
-      </motion.div>
-
-      {/* ---------------- Focus tabs ---------------- */}
-      <div className="mb-8 flex items-center gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-        <Filter size={14} className="text-[color:var(--color-muted)] shrink-0 ml-1 mr-2" />
-        {STATUS_TABS.map(tab => {
-          const count = tab.key === 'all' ? totalTasks
-            : tab.key === 'urgent' ? tasks.filter(t => t.priority === 'urgent' || t.priority === 'high').length
-            : tab.key === 'today' ? tasks.filter(t => t.dueDate === today).length
-            : tasks.filter(t => t.status === 'in-progress').length;
-
-          const isActive = statusFilter === tab.key;
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setStatusFilter(tab.key)}
-              className={clsx(
-                'relative shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
-                isActive ? 'bg-[color:var(--color-accent)] text-white' : 'bg-surface border border-border text-[color:var(--color-foreground-secondary)] hover:border-[color:var(--color-foreground-tertiary)]'
-              )}
-            >
-              <span className="flex items-center gap-2">
-                {tab.label}
-                <span className={clsx(
-                  "rounded-full px-1.5 py-0.5 text-[10px] font-bold",
-                  isActive ? 'bg-white/20 text-white' : 'bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]'
-                )}>
-                  {count}
-                </span>
-              </span>
-            </button>
-          );
-        })}
+        </motion.div>
       </div>
 
+      {/* --- Quick actions --- */}
+      <QuickActions />
+
+      {/* --- Stat cards --- */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className="mb-8"
+      >
+        {tasksLoading ? (
+          <SkeletonStatGrid count={4} />
+        ) : (
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+            <StatCard
+              label="In Progress"
+              value={inProgressTasks}
+              sub="active tasks"
+              color="var(--color-info)"
+              icon={Activity}
+              onClick={() => navigate('/tasks')}
+            />
+            <StatCard
+              label="Due Today"
+              value={todayTasks}
+              sub={todayTasks === 1 ? 'task due' : 'tasks due'}
+              color="var(--color-warning)"
+              icon={Calendar}
+              onClick={() => navigate('/tasks')}
+            />
+            <StatCard
+              label="Overdue"
+              value={overdueTasks}
+              sub={overdueTasks > 0 ? 'needs attention' : 'all caught up'}
+              color={overdueTasks > 0 ? 'var(--color-danger)' : 'var(--color-success)'}
+              icon={AlertTriangle}
+              onClick={() => navigate('/tasks')}
+              critical={overdueTasks > 0}
+            />
+            <StatCard
+              label="Completion"
+              value={`${completionRate}%`}
+              sub={`${completedTasks} of ${totalTasks} done`}
+              color="var(--color-success)"
+              icon={TrendingUp}
+              onClick={() => navigate('/analytics')}
+            />
+          </div>
+        )}
+      </motion.div>
+
+      {/* --- Main grid --- */}
       <div className="grid gap-6 xl:grid-cols-3">
         <div className="space-y-6 xl:col-span-2">
-          {/* ---------------- Week at a glance ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <Card className="p-6">
-              <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">The week at a glance</h2>
-                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">
-                    {weekStory.done} closed &middot; {weekStory.created} opened
-                  </p>
-                </div>
-                <div className="flex items-center gap-4 text-[11px] font-bold uppercase tracking-wider text-[color:var(--color-muted)]">
-                  <span className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded-md shadow-xs bg-[color:var(--color-accent)]" /> Closed</span>
-                  <span className="flex items-center gap-2"><span className="inline-block h-3 w-3 rounded-md shadow-xs bg-[color:var(--color-border)]" /> Opened</span>
-                </div>
-              </div>
-              <div className="h-72">
-                {tasksLoading ? (
-                  <div className="flex h-full items-center justify-center">
-                    <LoadingSpinner size={24} />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={weeklyData} barGap={6} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
-                      <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'var(--color-muted)', fontWeight: 600 }} axisLine={false} tickLine={false} dy={10} />
-                      <YAxis tick={{ fontSize: 11, fill: 'var(--color-muted)', fontWeight: 600 }} axisLine={false} tickLine={false} />
-                      <Tooltip
-                        cursor={{ fill: 'var(--color-surface-hover)' }}
-                        contentStyle={{
-                          background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-                          borderRadius: '12px', boxShadow: 'var(--shadow-lg)', fontSize: 12, fontWeight: 500,
-                          padding: '12px 16px'
-                        }}
-                        itemStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
-                      />
-                      <Bar dataKey="completed" fill="var(--color-accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                      <Bar dataKey="created" fill="var(--color-border-light)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </Card>
-          </motion.div>
 
-          {/* ---------------- Focus today ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
-            <Card  className="overflow-hidden">
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Your focus today</h2>
-                  <p className="mt-1 text-xs text-[color:var(--color-foreground-secondary)]">Ordered by priority — start at the top</p>
-                </div>
-                <button
-                  onClick={() => navigate('/tasks')}
-                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors px-3 py-1.5 rounded-lg hover:bg-[color:var(--color-accent-ghost)]"
-                >
-                  View all
-                </button>
-              </div>
-              <div className="overflow-x-auto">
-                {tasksLoading ? (
-                  <div className="p-6">
-                    <SkeletonTable rows={5} cols={3} />
+          {/* Task list with filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+          >
+            <Card className="overflow-hidden">
+              {/* Header + tabs */}
+              <div className="px-5 pt-5 pb-0">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-foreground)', letterSpacing: '-0.01em' }}>
+                      Your focus
+                    </h2>
+                    <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
+                      {statusFilter === 'all' ? 'Sorted by priority' : 'Filtered view'}
+                    </p>
                   </div>
-                ) : recentTasks.length === 0 && focusTasks.length === 0 ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => navigate('/tasks')}
+                      className="text-[12px] font-medium flex items-center gap-1 transition-colors"
+                      style={{ color: 'var(--color-accent)' }}
+                    >
+                      All tasks <ArrowRight size={12} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filter tabs */}
+                <div className="flex gap-1 overflow-x-auto pb-0" style={{ scrollbarWidth: 'none' }}>
+                  {STATUS_TABS.map(tab => {
+                    const count = tab.key === 'all' ? totalTasks
+                      : tab.key === 'urgent' ? tasks.filter(t => t.priority === 'urgent' || t.priority === 'high').length
+                      : tab.key === 'today' ? tasks.filter(t => t.dueDate === today).length
+                      : tasks.filter(t => t.status === 'in-progress').length;
+                    const isActive = statusFilter === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        onClick={() => setStatusFilter(tab.key)}
+                        className={clsx('tab-item shrink-0', isActive && 'active')}
+                      >
+                        {tab.label}
+                        <span
+                          className="ml-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-bold"
+                          style={{
+                            minWidth: 18,
+                            height: 16,
+                            padding: '0 5px',
+                            background: isActive ? 'var(--color-accent-light)' : 'var(--color-surface-active)',
+                            color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)',
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Task rows */}
+              <div>
+                {tasksLoading ? (
+                  <div className="p-4">
+                    <SkeletonList count={5} />
+                  </div>
+                ) : displayTasks.length === 0 ? (
                   <EmptyState
                     icon={Inbox}
-                    title="No tasks yet"
-                    description="Create your first task to get started"
-                    action={{ label: 'Create Task', onClick: () => navigate('/tasks') }}
+                    title="No tasks here"
+                    description={statusFilter === 'all' ? 'Create your first task to get started' : 'No tasks match this filter'}
+                    action={statusFilter === 'all' ? { label: 'Create Task', onClick: () => navigate('/tasks') } : undefined}
                   />
                 ) : (
-                  <div className="divide-y divide-[color:var(--color-border-light)]">
-                    {(statusFilter === 'all' ? focusTasks : recentTasks).map((task, i) => {
-                      const pColor = getPriorityColor(task.priority);
-                      const sc = statusColors[task.status] || statusColors.todo;
+                  <div style={{ borderTop: '1px solid var(--color-border-light)' }}>
+                    {displayTasks.map((task, i) => {
+                      const pConf = PRIORITY_CONFIG[task.priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG.low;
+                      const sConf = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.todo;
                       const isOverdue = task.dueDate && task.dueDate < today && task.status !== 'done';
                       return (
                         <motion.div
                           key={task._id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 30 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: i * 0.03 }}
                           onClick={() => navigate('/tasks')}
-                          className="group flex cursor-pointer items-center gap-4 px-6 py-4 transition-colors hover:bg-[color:var(--color-surface-hover)]"
+                          className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors"
+                          style={{ borderBottom: i < displayTasks.length - 1 ? '1px solid var(--color-border-light)' : 'none' }}
                         >
-                          <div
-                            className={clsx('h-2.5 w-2.5 shrink-0 rounded-full', isOverdue && 'animate-pulse')}
-                            style={{ background: isOverdue ? 'var(--color-danger)' : pColor.dot, boxShadow: isOverdue ? '0 0 10px var(--color-danger)' : 'none' }}
+                          {/* Priority dot */}
+                          <span
+                            className={clsx('priority-dot shrink-0', pConf.dotClass)}
+                            style={{ opacity: isOverdue ? 1 : 0.9 }}
                           />
+
+                          {/* Title */}
                           <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-semibold text-[color:var(--color-foreground)] group-hover:text-[color:var(--color-accent)] transition-colors">
+                            <p className="truncate text-[13px] font-medium transition-colors"
+                              style={{ color: 'var(--color-foreground)' }}>
                               {task.title}
                             </p>
-                            {task.tags && task.tags.length > 0 && (
-                              <p className="truncate text-[11px] font-medium mt-0.5 text-[color:var(--color-muted)]">{task.tags[0].name}</p>
+                            {task.dueDate && (
+                              <p className="text-[11px] mt-0.5"
+                                style={{ color: isOverdue ? 'var(--color-danger)' : 'var(--color-foreground-tertiary)' }}>
+                                {isOverdue
+                                  ? `Overdue · ${format(parseISO(task.dueDate), 'MMM d')}`
+                                  : task.dueDate === today
+                                  ? 'Due today'
+                                  : format(parseISO(task.dueDate), 'MMM d')}
+                              </p>
                             )}
                           </div>
+
+                          {/* Status badge */}
                           <span
-                            className="hidden sm:inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
-                            style={{ background: sc.bg, color: sc.text }}
+                            className="hidden sm:inline-flex badge"
+                            style={{ background: sConf.bg, color: sConf.color }}
                           >
-                            {task.status.replace('-', ' ')}
+                            {sConf.label}
                           </span>
+
+                          {/* Priority badge */}
                           <span
-                            className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider"
-                            style={{ background: pColor.bg, color: pColor.text }}
+                            className="inline-flex badge"
+                            style={{ background: pConf.bg, color: pConf.color }}
                           >
-                            {task.priority}
+                            {pConf.label}
                           </span>
-                          <span className={clsx('hidden md:block w-20 text-right text-xs font-semibold', isOverdue ? 'text-danger' : 'text-[color:var(--color-muted)]')}>
-                            {!task.dueDate ? 'No date' : task.dueDate === today ? 'Today' : task.dueDate < today ? 'Overdue' : format(new Date(task.dueDate), 'MMM d')}
-                          </span>
+
+                          {/* Hover arrow */}
+                          <ChevronRight
+                            size={14}
+                            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            style={{ color: 'var(--color-foreground-tertiary)' }}
+                          />
                         </motion.div>
                       );
                     })}
@@ -459,91 +518,202 @@ export default function DashboardPage() {
               </div>
             </Card>
           </motion.div>
+
+          {/* Weekly chart */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+          >
+            <Card className="p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-foreground)', letterSpacing: '-0.01em' }}>
+                    This week
+                  </h2>
+                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
+                    Completed vs. created
+                  </p>
+                </div>
+                <div className="flex items-center gap-4 text-[11px] font-medium" style={{ color: 'var(--color-foreground-tertiary)' }}>
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--color-accent)' }} />
+                    Completed
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--color-border)' }} />
+                    Created
+                  </span>
+                </div>
+              </div>
+              <div style={{ height: 200 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyData} barGap={4} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: 'var(--color-foreground-tertiary)', fontWeight: 500 }}
+                      axisLine={false}
+                      tickLine={false}
+                      dy={8}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: 'var(--color-foreground-tertiary)', fontWeight: 500 }}
+                      axisLine={false}
+                      tickLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'var(--color-surface-hover)', radius: 4 }}
+                      contentStyle={{
+                        background: 'var(--color-surface)',
+                        border: '1px solid var(--color-border)',
+                        borderRadius: 10,
+                        boxShadow: 'var(--shadow-lg)',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        padding: '10px 14px',
+                      }}
+                      itemStyle={{ color: 'var(--color-foreground)' }}
+                      labelStyle={{ color: 'var(--color-foreground-secondary)', fontWeight: 600, marginBottom: 4 }}
+                    />
+                    <Bar dataKey="completed" name="Completed" fill="var(--color-accent)" radius={[3, 3, 0, 0]} maxBarSize={32} />
+                    <Bar dataKey="created" name="Created" fill="var(--color-border)" radius={[3, 3, 0, 0]} maxBarSize={32} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </motion.div>
         </div>
 
-        <div className="space-y-6">
-          {/* ---------------- AI teammate ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
+        {/* Right sidebar */}
+        <div className="space-y-5">
+
+          {/* AI Insight */}
+          <motion.div
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
             <AIInsightPanel tasks={tasks} projectsCount={projects.length} />
           </motion.div>
 
-          {/* ---------------- Attention radar ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.32 }}>
-            <Card  className="p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Attention radar</h2>
-                <span className={clsx(
-                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider',
-                  attentionTasks.length > 0 ? 'bg-[color:var(--color-danger-light)] text-danger' : 'bg-[color:var(--color-success-light)] text-[color:var(--color-success)]'
-                )}>
-                  {attentionTasks.length > 0 ? `${attentionTasks.length} risk` : 'All clear'}
-                </span>
-              </div>
-              {attentionTasks.length === 0 ? (
-                <div className="flex flex-col items-center py-8 text-center">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--color-success-light)] text-[color:var(--color-success)]">
-                    <CheckCircle2 size={26} />
+          {/* Overdue / Attention */}
+          {attentionTasks.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.16 }}
+            >
+              <Card className="overflow-hidden">
+                <div className="px-5 pt-4 pb-3 flex items-center justify-between"
+                  style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle size={14} style={{ color: 'var(--color-danger)' }} />
+                    <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
+                      Overdue
+                    </span>
                   </div>
-                  <p className="text-sm font-bold text-[color:var(--color-foreground)]">Nothing is burning</p>
-                  <p className="mt-1 text-xs font-medium text-[color:var(--color-foreground-secondary)]">Everything is within reach — enjoy the calm.</p>
+                  <span className="badge badge-danger">{attentionTasks.length}</span>
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {attentionTasks.map(task => {
-                    const pColor = getPriorityColor(task.priority);
-                    return (
-                      <div key={task._id} onClick={() => navigate('/tasks')} className="group flex cursor-pointer items-center gap-3 rounded-lg border border-[color:var(--color-danger-light)] bg-[color:var(--color-danger-light)]/30 p-3 transition-colors hover:border-danger/30">
-                        <div className="h-2 w-2 shrink-0 rounded-full bg-danger" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[13px] font-medium text-[color:var(--color-foreground)] group-hover:text-danger transition-colors">{task.title}</p>
-                          <p className="text-[11px] font-medium text-danger mt-0.5">
-                            {format(new Date(task.dueDate!), 'MMM d')} &middot; {task.priority}
-                          </p>
-                        </div>
+                <div className="p-3 space-y-1.5">
+                  {attentionTasks.map(task => (
+                    <div
+                      key={task._id}
+                      onClick={() => navigate('/tasks')}
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 cursor-pointer transition-colors group"
+                      style={{ background: 'var(--color-danger-ghost)' }}
+                    >
+                      <span className="priority-dot priority-dot-urgent shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
+                          {task.title}
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'var(--color-danger)' }}>
+                          Was due {format(parseISO(task.dueDate!), 'MMM d')}
+                        </p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
-              )}
-            </Card>
-          </motion.div>
+              </Card>
+            </motion.div>
+          )}
 
-          {/* ---------------- Active projects ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <Card  className="p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Active projects</h2>
+          {/* Active projects */}
+          <motion.div
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.22 }}
+          >
+            <Card className="overflow-hidden">
+              <div className="px-5 pt-4 pb-3 flex items-center justify-between"
+                style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
+                  Projects
+                </span>
                 <button
                   onClick={() => navigate('/projects')}
-                  className="text-xs font-medium text-[color:var(--color-accent)] hover:text-[color:var(--color-accent-hover)] transition-colors"
+                  className="text-[12px] font-medium flex items-center gap-1 transition-colors"
+                  style={{ color: 'var(--color-accent)' }}
                 >
-                  View all
+                  View all <ArrowRight size={11} />
                 </button>
               </div>
               {projectsLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <LoadingSpinner size={16} />
+                <div className="p-3 space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex items-center gap-3 px-2 py-2 animate-pulse">
+                      <div className="rounded-lg shrink-0" style={{ width: 32, height: 32, background: 'var(--color-surface-active)' }} />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="rounded" style={{ height: 12, width: '60%', background: 'var(--color-surface-active)' }} />
+                        <div className="rounded" style={{ height: 10, width: '40%', background: 'var(--color-surface-active)' }} />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : projects.length === 0 ? (
-                <EmptyState
-                  icon={FolderKanban}
-                  title="No projects yet"
-                  description="Create your first project to get started"
-                  action={{ label: 'Create Project', onClick: () => navigate('/projects') }}
-                />
+                <div className="p-4 text-center">
+                  <p className="text-[12px]" style={{ color: 'var(--color-foreground-tertiary)' }}>No projects yet</p>
+                  <button
+                    onClick={() => navigate('/projects')}
+                    className="btn btn-xs btn-ghost mt-2"
+                    style={{ color: 'var(--color-accent)' }}
+                  >
+                    <Plus size={12} /> Create project
+                  </button>
+                </div>
               ) : (
-                <div className="space-y-3">
-                  {projects.slice(0, 4).map(project => (
-                    <div key={project._id} onClick={() => navigate('/projects')} className="group flex items-center gap-4 cursor-pointer rounded-lg p-3 transition-colors hover:bg-[color:var(--color-surface-hover)]">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white font-semibold text-sm" style={{ background: project.color || 'var(--color-accent)' }}>
+                <div className="p-3 space-y-1">
+                  {projects.slice(0, 5).map(project => (
+                    <div
+                      key={project._id}
+                      onClick={() => navigate('/projects')}
+                      className="flex items-center gap-3 rounded-lg px-2 py-2 cursor-pointer transition-colors group"
+                      style={{ borderRadius: 'var(--radius-md)' }}
+                    >
+                      <div
+                        className="flex shrink-0 items-center justify-center rounded-lg text-white text-[12px] font-bold"
+                        style={{
+                          width: 30,
+                          height: 30,
+                          background: project.color || 'var(--color-accent)',
+                        }}
+                      >
                         {project.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium truncate text-[color:var(--color-foreground)]">{project.name}</span>
+                        <p className="truncate text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
+                          {project.name}
+                        </p>
                         {project.description && (
-                          <span className="block text-[11px] font-medium mt-0.5 truncate text-[color:var(--color-muted)]">{project.description}</span>
+                          <p className="truncate text-[11px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
+                            {project.description}
+                          </p>
                         )}
                       </div>
+                      <ChevronRight size={13} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{ color: 'var(--color-foreground-tertiary)' }} />
                     </div>
                   ))}
                 </div>
@@ -551,35 +721,46 @@ export default function DashboardPage() {
             </Card>
           </motion.div>
 
-          {/* ---------------- Recent activity ---------------- */}
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Card className="p-6">
-              <div className="mb-5">
-                <h2 className="text-lg font-semibold text-[color:var(--color-foreground)]">Recent activity</h2>
+          {/* Recent activity */}
+          <motion.div
+            initial={{ opacity: 0, x: 8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.28 }}
+          >
+            <Card className="overflow-hidden">
+              <div className="px-5 pt-4 pb-3"
+                style={{ borderBottom: '1px solid var(--color-border-light)' }}>
+                <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
+                  Recent activity
+                </span>
               </div>
-              <div className="space-y-3">
-                {recentActivities.length === 0 ? (
-                  <EmptyState
-                    icon={Activity}
-                    title="No recent activity"
-                    description="Start working on tasks to see activity here"
-                  />
-                ) : (
-                  recentActivities.map(task => (
-                    <div key={task._id} className="flex items-start gap-3 py-2">
-                      <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-[color:var(--color-border)]" />
-                      <div>
-                        <p className="text-sm text-[color:var(--color-foreground)] leading-snug">
-                          Updated <span className="font-medium">{task.title}</span>
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-[color:var(--color-muted)]">
-                          {task.status.replace('-', ' ')} &middot; {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
-                        </p>
+              {recentActivities.length === 0 ? (
+                <EmptyState icon={Activity} title="No activity yet" description="Start working on tasks" />
+              ) : (
+                <div className="p-3 space-y-1">
+                  {recentActivities.map(task => {
+                    const sConf = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.todo;
+                    return (
+                      <div key={task._id} className="flex items-start gap-2.5 px-2 py-2">
+                        <span
+                          className="mt-1 flex items-center justify-center rounded-full shrink-0"
+                          style={{ width: 20, height: 20, background: sConf.bg, color: sConf.color }}
+                        >
+                          <CheckCircle2 size={11} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-[12px] font-medium" style={{ color: 'var(--color-foreground)' }}>
+                            {task.title}
+                          </p>
+                          <p className="text-[11px]" style={{ color: 'var(--color-foreground-tertiary)' }}>
+                            {sConf.label} · {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
-                )}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </Card>
           </motion.div>
         </div>

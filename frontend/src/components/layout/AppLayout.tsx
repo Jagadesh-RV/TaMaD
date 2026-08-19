@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sidebar from './Sidebar';
@@ -12,6 +12,11 @@ import { pageVariants } from '../../utils/motion';
 import { useInteractionStore, isTypingTarget } from '../../store/interactionStore';
 import { pageLabelFor, iconNameFor } from '../../lib/navigation';
 import { Toaster } from 'react-hot-toast';
+import {
+  LayoutDashboard, CheckSquare, FolderKanban, Bell, Plus,
+} from 'lucide-react';
+import { useNotifStore } from '../../store/notifStore';
+import clsx from 'clsx';
 
 const GOTO: Record<string, string> = {
   d: '/dashboard',
@@ -32,6 +37,114 @@ const GOTO: Record<string, string> = {
   s: '/settings',
 };
 
+const MOBILE_NAV = [
+  { path: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+  { path: '/tasks',     icon: CheckSquare,     label: 'Tasks' },
+  { path: '/projects',  icon: FolderKanban,    label: 'Projects' },
+  { path: '/notifications', icon: Bell,        label: 'Alerts' },
+];
+
+function MobileBottomNav() {
+  const unread = useNotifStore(s => s.unread);
+  const { openQuickCreate } = useInteractionStore();
+  const location = useLocation();
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 lg:hidden"
+      style={{
+        background: 'var(--color-surface)',
+        borderTop: '1px solid var(--color-border)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+      aria-label="Mobile navigation"
+    >
+      <div className="flex items-center justify-around px-2 pt-1.5 pb-2">
+        {MOBILE_NAV.slice(0, 2).map(item => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className="flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+              aria-label={item.label}
+            >
+              <Icon
+                size={20}
+                strokeWidth={isActive ? 2.5 : 1.8}
+                style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)' }}
+              />
+              <span
+                className="text-[10px] font-medium"
+                style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)' }}
+              >
+                {item.label}
+              </span>
+            </NavLink>
+          );
+        })}
+
+        {/* Quick create center button */}
+        <button
+          onClick={() => openQuickCreate()}
+          className="flex items-center justify-center rounded-full transition-all active:scale-95"
+          style={{
+            width: 44,
+            height: 44,
+            background: 'var(--color-accent)',
+            boxShadow: '0 2px 8px rgba(59,78,246,0.35)',
+          }}
+          aria-label="Quick create"
+        >
+          <Plus size={20} style={{ color: '#fff' }} strokeWidth={2.5} />
+        </button>
+
+        {MOBILE_NAV.slice(2).map(item => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+          const hasNotif = item.path === '/notifications' && unread > 0;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className="relative flex flex-col items-center gap-0.5 py-1 px-3 rounded-lg transition-colors"
+              aria-label={`${item.label}${hasNotif ? ` (${unread} unread)` : ''}`}
+            >
+              <div className="relative">
+                <Icon
+                  size={20}
+                  strokeWidth={isActive ? 2.5 : 1.8}
+                  style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)' }}
+                />
+                {hasNotif && (
+                  <span
+                    className="absolute rounded-full"
+                    style={{
+                      width: 7,
+                      height: 7,
+                      top: -1,
+                      right: -1,
+                      background: 'var(--color-danger)',
+                      border: '1.5px solid var(--color-surface)',
+                    }}
+                  />
+                )}
+              </div>
+              <span
+                className="text-[10px] font-medium"
+                style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)' }}
+              >
+                {item.label}
+              </span>
+            </NavLink>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,6 +162,11 @@ export default function AppLayout() {
       href: location.pathname,
       icon: iconNameFor(location.pathname),
     });
+  }, [location.pathname]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
   }, [location.pathname]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -115,7 +233,7 @@ export default function AppLayout() {
         <Sidebar collapsed={sidebarCollapsed} onToggleCollapse={() => setSidebarCollapsed(p => !p)} />
       </div>
 
-      {/* Mobile sidebar */}
+      {/* Mobile sidebar drawer */}
       <div className="lg:hidden">
         <Sidebar
           isMobile
@@ -131,7 +249,6 @@ export default function AppLayout() {
           onCommandPaletteOpen={() => useInteractionStore.getState().openCommandPalette()}
         />
         <main className="main-content">
-          {/* Cinematic page choreography — every journey reveals itself */}
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -148,6 +265,9 @@ export default function AppLayout() {
           </AnimatePresence>
         </main>
       </div>
+
+      {/* Mobile bottom nav */}
+      <MobileBottomNav />
 
       <CommandPalette />
       <QuickCreate />
