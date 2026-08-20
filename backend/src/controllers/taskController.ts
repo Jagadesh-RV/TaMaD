@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Task from '../models/Task';
+import Workspace from '../models/Workspace';
 import '../models/Category';
 import '../models/Tag';
 import '../models/User';
@@ -85,7 +86,6 @@ export const createTask = async (req: AuthRequest, res: Response) => {
 
   // Verify assignees belong to the workspace
   if (assignees && Array.isArray(assignees)) {
-    const Workspace = require('../models/Workspace').default;
     const workspace = await Workspace.findById(workspaceId);
     if (workspace) {
       const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
