@@ -23,9 +23,9 @@ services:
     volumes:
       - ./backend/src:/app/src
     depends_on:
-  # Dev-only MongoDB — no auth, port exposed for local tools.
-  # Production uses MONGO_INITDB_ROOT_PASSWORD via docker-compose.yml / deployment configs.
-  mongo:
+      # Dev-only MongoDB — no auth, port exposed for local tools.
+      # Production uses MONGO_INITDB_ROOT_PASSWORD via docker-compose.yml / deployment configs.
+      mongo:
         condition: service_healthy
       redis:
         condition: service_healthy

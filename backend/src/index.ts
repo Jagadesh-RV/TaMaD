@@ -11,6 +11,7 @@ import logger from './utils/logger';
 import { validateEnv } from './utils/validateEnv';
 import { startBackgroundJobs } from './utils/jobs';
 import { setupSecurity } from './utils/security';
+import { ensureIndexes } from './utils/performance';
 import 'express-async-errors';
 
 dotenv.config();
@@ -136,6 +137,7 @@ const startServer = async () => {
       logger.info('Redis is connected');
     }
 
+    await ensureIndexes();
     startBackgroundJobs();
 
     httpServer.listen(PORT, () => {
