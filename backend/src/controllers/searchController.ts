@@ -32,28 +32,28 @@ export const globalSearch = async (req: AuthRequest, res: Response) => {
       return res.json({ results: [] });
     }
 
-    const regex = { $regex: query, $options: 'i' };
+    const textQuery = { $text: { $search: query } };
 
     const [tasks, projects, notes, documents, files, habits, goals] = await Promise.all([
-      Task.find({ workspaceId, $or: [{ title: regex }, { description: regex }] })
+      Task.find({ workspaceId, ...textQuery })
         .limit(5)
         .select('title status priority description'),
-      Project.find({ workspaceId, $or: [{ name: regex }, { description: regex }] })
+      Project.find({ workspaceId, ...textQuery })
         .limit(5)
         .select('name status description'),
-      Note.find({ workspaceId, $or: [{ title: regex }, { content: regex }] })
+      Note.find({ workspaceId, ...textQuery })
         .limit(5)
         .select('title content'),
-      Document.find({ workspaceId, $or: [{ title: regex }, { content: regex }], isArchived: false })
+      Document.find({ workspaceId, isArchived: false, ...textQuery })
         .limit(5)
         .select('title content'),
-      File.find({ workspaceId, originalName: regex, isArchived: false })
+      File.find({ workspaceId, isArchived: false, ...textQuery })
         .limit(5)
         .select('originalName mimeType size'),
-      Habit.find({ workspaceId, name: regex })
+      Habit.find({ workspaceId, ...textQuery })
         .limit(5)
         .select('name frequency'),
-      Goal.find({ workspaceId, $or: [{ title: regex }, { description: regex }] })
+      Goal.find({ workspaceId, ...textQuery })
         .limit(5)
         .select('title status description'),
     ]);
