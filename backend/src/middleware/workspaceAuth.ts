@@ -4,7 +4,7 @@ import Workspace from '../models/Workspace';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
 export const requireWorkspaceMember = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const workspaceId = req.query.workspaceId || req.body.workspaceId || req.params.workspaceId;
+  const workspaceId = req.params.id || req.query.workspaceId || req.body.workspaceId || req.params.workspaceId;
 
   if (!workspaceId) {
     // If there is no workspaceId, we just pass to the next handler.
@@ -85,5 +85,23 @@ export const requireEntityWorkspaceMember = (Model: any) => {
       console.error('Entity auth error:', error);
       return res.status(500).json({ error: 'Server error checking resource permissions' });
     }
+  };
+};
+
+export const requireWorkspaceRole = (roles: string[]) => {
+  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.workspace || !req.user) {
+      return res.status(403).json({ error: 'Workspace context missing' });
+    }
+
+    const memberEntry = req.workspace.members.find(
+      (m: any) => m.userId.toString() === req.user!._id.toString()
+    );
+
+    if (!memberEntry || !roles.includes(memberEntry.role)) {
+      return res.status(403).json({ error: `Requires one of roles: ${roles.join(', ')}` });
+    }
+
+    next();
   };
 };
