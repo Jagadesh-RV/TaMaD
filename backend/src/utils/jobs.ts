@@ -37,15 +37,6 @@ const cleanupOldNotifications = async () => {
   }
 };
 
-const cleanupStaleCache = async () => {
-  try {
-    await cache.invalidatePattern('*');
-    logger.debug('Cache cleanup completed');
-  } catch (error) {
-    logger.error('Error checking cache:', error);
-  }
-};
-
 const checkOverdueTasks = async () => {
   try {
     const overdueTasks = await Task.find({
@@ -65,7 +56,6 @@ const checkOverdueTasks = async () => {
 export const startBackgroundJobs = () => {
   cron.schedule('0 * * * *', cleanupExpiredSessions);
   cron.schedule('0 2 * * *', cleanupOldNotifications);
-  cron.schedule('*/5 * * * *', cleanupStaleCache);
   cron.schedule('0 9 * * *', checkOverdueTasks);
 
   logger.info('Background jobs scheduled');
