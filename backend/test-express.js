@@ -1,0 +1,1 @@
+const express = require('express'); const app = express(); const router = express.Router(); router.use((req, res, next) => { console.log('global middleware req.params.id:', req.params.id); next(); }); router.route('/:id').get((req, res) => res.send('ok')); app.use('/api', router); const request = require('supertest'); request(app).get('/api/123').end();
