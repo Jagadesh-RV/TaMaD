@@ -1,0 +1,1 @@
+import fetch from 'node-fetch'; fetch('http://localhost:5000/api/v1/tasks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'Test', workspaceId: '123' }) }).then(r => r.json()).then(console.log).catch(console.error);

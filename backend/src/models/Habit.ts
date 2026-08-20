@@ -28,5 +28,6 @@ const HabitSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+HabitSchema.index({ name: 'text', description: 'text' });
 
 export default mongoose.model<IHabit>('Habit', HabitSchema);

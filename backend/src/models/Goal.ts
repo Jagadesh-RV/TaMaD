@@ -42,5 +42,6 @@ const GoalSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+GoalSchema.index({ title: 'text', description: 'text' });
 
 export default mongoose.model<IGoal>('Goal', GoalSchema);

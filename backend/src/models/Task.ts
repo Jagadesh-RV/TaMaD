@@ -97,5 +97,6 @@ TaskSchema.index({ dueDate: 1 });
 TaskSchema.index({ workspaceId: 1, createdAt: 1 });
 TaskSchema.index({ workspaceId: 1, status: 1, updatedAt: 1 });
 TaskSchema.index({ workspaceId: 1, status: 1, dueDate: 1 });
+TaskSchema.index({ title: 'text', description: 'text' });
 
 export default mongoose.model<ITask>('Task', TaskSchema);

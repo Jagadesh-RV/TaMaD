@@ -55,12 +55,12 @@ export default function NotesPage() {
   };
 
   return (
-    <div className="page flex h-[calc(100vh-80px)] overflow-hidden">
-      <div className="flex w-full overflow-hidden rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
+    <div className="page flex flex-col h-[calc(100vh-64px)] p-4 lg:p-6 bg-[color:var(--color-background)]">
+      <div className="flex w-full flex-1 overflow-hidden rounded-[24px] border border-[color:var(--color-border)] shadow-sm bg-[color:var(--color-surface)]">
         {/* Sidebar: Document List — hidden on mobile, shown when activeDoc is null */}
         <aside className={clsx(
-          "flex shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-background-secondary)]",
-          activeDoc ? "hidden md:flex md:w-80" : "w-full md:w-80"
+          "flex shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)]",
+          activeDoc ? "hidden md:flex md:w-[320px]" : "w-full md:w-[320px]"
         )}>
           <div className="border-b border-[color:var(--color-border)] p-4">
             <div className="mb-4 flex items-center justify-between">

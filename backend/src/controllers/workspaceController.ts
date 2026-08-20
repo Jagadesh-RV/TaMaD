@@ -23,13 +23,6 @@ export const getWorkspaceById = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  const isMember = workspace.members.some(
-    (m: any) => m.userId._id.toString() === req.user._id.toString()
-  );
-
-  if (!isMember) {
-    return res.status(403).json({ error: 'Not a member of this workspace' });
-  }
 
   res.json(workspace);
 };
@@ -57,13 +50,6 @@ export const updateWorkspace = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  const memberEntry = workspace.members.find(
-    (m: any) => m.userId.toString() === req.user._id.toString()
-  );
-
-  if (!memberEntry || !['owner', 'admin'].includes(memberEntry.role)) {
-    return res.status(403).json({ error: 'Not authorized to update workspace' });
-  }
 
   const { name, description, settings } = req.body;
   if (name !== undefined) workspace.name = name;
@@ -86,9 +72,6 @@ export const deleteWorkspace = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  if (workspace.ownerId.toString() !== req.user._id.toString()) {
-    return res.status(403).json({ error: 'Only the owner can delete the workspace' });
-  }
 
   workspace.isActive = false;
   await workspace.save();
@@ -106,13 +89,6 @@ export const addMember = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  const requesterEntry = workspace.members.find(
-    (m: any) => m.userId.toString() === req.user._id.toString()
-  );
-
-  if (!requesterEntry || !['owner', 'admin'].includes(requesterEntry.role)) {
-    return res.status(403).json({ error: 'Not authorized to add members' });
-  }
 
   if (workspace.type === 'personal') {
     return res.status(400).json({ error: 'Personal workspaces cannot be shared. Please create a Team workspace.' });
@@ -152,13 +128,6 @@ export const updateMemberRole = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  const requesterEntry = workspace.members.find(
-    (m: any) => m.userId.toString() === req.user._id.toString()
-  );
-
-  if (!requesterEntry || requesterEntry.role !== 'owner') {
-    return res.status(403).json({ error: 'Only the owner can change member roles' });
-  }
 
   if (userId === req.user._id.toString()) {
     return res.status(400).json({ error: 'Cannot change your own role' });
@@ -188,17 +157,9 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
-  const requesterEntry = workspace.members.find(
-    (m: any) => m.userId.toString() === req.user._id.toString()
-  );
-
   const targetEntry = workspace.members.find(
     (m: any) => m.userId.toString() === userId
   );
-
-  if (!requesterEntry || !['owner', 'admin'].includes(requesterEntry.role)) {
-    return res.status(403).json({ error: 'Not authorized to remove members' });
-  }
 
   if (targetEntry?.role === 'owner') {
     return res.status(400).json({ error: 'Cannot remove the workspace owner' });
@@ -218,18 +179,7 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
 export const getWorkspaceStats = async (req: AuthRequest, res: Response) => {
   const workspaceId = req.params.id;
   
-  const workspace = await Workspace.findById(workspaceId);
-  if (!workspace) {
-    return res.status(404).json({ error: 'Workspace not found' });
-  }
-
-  const isMember = workspace.members.some(
-    (m: any) => m.userId.toString() === req.user._id.toString()
-  );
-
-  if (!isMember) {
-    return res.status(403).json({ error: 'Not a member' });
-  }
+  const workspace = req.workspace;
 
   const Task = (await import('../models/Task')).default;
   const Project = (await import('../models/Project')).default;

@@ -30,7 +30,7 @@ const TeamInvitationSchema: Schema = new Schema(
 );
 
 // Allow one active email invitation per email per team
-TeamInvitationSchema.index({ email: 1, teamId: 1, status: 1 });
-TeamInvitationSchema.index({ token: 1 });
+TeamInvitationSchema.index({ email: 1 });
+TeamInvitationSchema.index({ teamId: 1 });
 
 export default mongoose.model<ITeamInvitation>('TeamInvitation', TeamInvitationSchema);

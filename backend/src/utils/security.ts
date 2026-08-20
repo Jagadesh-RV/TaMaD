@@ -28,9 +28,10 @@ export const securityHeaders = helmet({
 });
 
 export const createRateLimiter = (windowMs: number, max: number, message?: string) => {
+  const isProd = process.env.NODE_ENV === 'production';
   return rateLimit({
     windowMs,
-    max,
+    max: isProd ? max : Math.max(max, 3000),
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: message || 'Too many requests, please try again later.' },

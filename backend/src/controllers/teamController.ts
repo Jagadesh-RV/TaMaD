@@ -33,18 +33,13 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'Team name and slug are required' });
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const existingTeam = await Team.findOne({ slug }).session(session);
+    const existingTeam = await Team.findOne({ slug });
     if (existingTeam) {
-      await session.abortTransaction();
-      session.endSession();
       return res.status(400).json({ error: 'Team slug already in use' });
     }
 
-    const team = await Team.create([{
+    const team = await Team.create({
       name,
       slug,
       description,
@@ -53,27 +48,27 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
       visibility: visibility || 'private',
       timeZone: timeZone || 'UTC',
       createdBy: userId,
-    }], { session });
+    });
 
-    const newTeam = team[0];
+    const newTeam = team;
 
     const defaultRoles = await ensureDefaultRoles(newTeam._id as mongoose.Types.ObjectId);
     const ownerRole = defaultRoles.find(r => r.name === 'Owner');
 
     if (!ownerRole) throw new Error('Owner role could not be created');
 
-    await TeamMember.create([{
+    await TeamMember.create({
       teamId: newTeam._id,
       userId,
       roleId: ownerRole._id,
       status: 'active',
       joinedAt: new Date(),
       lastActive: new Date(),
-    }], { session });
+    });
 
     const defaultWorkspaceName = workspaceName || `${name} Workspace`;
     
-    await Workspace.create([{
+    await Workspace.create({
       name: defaultWorkspaceName,
       type: 'team',
       teamId: newTeam._id,
@@ -81,15 +76,10 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
       members: [{ userId, role: 'owner' }],
       isActive: true,
       settings: { allowGuests: false, isPublic: false }
-    }], { session });
-
-    await session.commitTransaction();
-    session.endSession();
+    });
 
     res.status(201).json({ message: 'Team created successfully', team: newTeam });
   } catch (error: any) {
-    await session.abortTransaction();
-    session.endSession();
     res.status(500).json({ error: error.message || 'Failed to create team' });
   }
 };

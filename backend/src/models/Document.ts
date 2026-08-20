@@ -22,5 +22,6 @@ const DocumentSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+DocumentSchema.index({ title: 'text', content: 'text' });
 
 export default mongoose.model<IDocument>('Document', DocumentSchema);

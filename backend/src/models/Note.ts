@@ -20,5 +20,6 @@ const NoteSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+NoteSchema.index({ title: 'text', content: 'text' });
 
 export default mongoose.model<INote>('Note', NoteSchema);

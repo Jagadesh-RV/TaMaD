@@ -160,8 +160,7 @@ export default function FilesPage() {
 
   return (
     <div
-      className="page"
-      style={{ padding: '0 32px 40px' }}
+      className="page flex flex-col min-h-[calc(100vh-64px)] p-6 lg:p-8"
       onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
@@ -177,7 +176,7 @@ export default function FilesPage() {
       {/* Stats bar */}
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <div className="card flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-accent-light)', color: 'var(--color-accent)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-accent-ghost)', color: 'var(--color-accent)' }}>
             <HardDrive size={18} />
           </div>
           <div>
@@ -186,7 +185,7 @@ export default function FilesPage() {
           </div>
         </div>
         <div className="card flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-info-light)', color: 'var(--color-info)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-info-ghost)', color: 'var(--color-info)' }}>
             <FolderOpen size={18} />
           </div>
           <div>
@@ -195,7 +194,7 @@ export default function FilesPage() {
           </div>
         </div>
         <div className="card flex items-center gap-3 p-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-success-light)', color: 'var(--color-success)' }}>
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: 'var(--color-success-ghost)', color: 'var(--color-success)' }}>
             <Folder size={18} />
           </div>
           <div>
@@ -456,7 +455,7 @@ export default function FilesPage() {
                      {file.isArchived ? (
                        <button
                          onClick={(e) => { e.stopPropagation(); handleRestore(file._id); }}
-                         className="rounded p-1.5 transition-colors hover:bg-[var(--color-success-light)]"
+                         className="rounded p-1.5 transition-colors hover:bg-[color:var(--color-success-ghost)]"
                          style={{ color: 'var(--color-success)' }}
                          aria-label="Restore file"
                        >
@@ -465,7 +464,7 @@ export default function FilesPage() {
                      ) : (
                        <button
                          onClick={(e) => { e.stopPropagation(); handleArchive(file._id); }}
-                         className="rounded p-1.5 transition-colors hover:bg-[var(--color-warning-light)]"
+                         className="rounded p-1.5 transition-colors hover:bg-[color:var(--color-warning-ghost)]"
                          style={{ color: 'var(--color-warning)' }}
                          aria-label="Archive file"
                        >
@@ -474,7 +473,7 @@ export default function FilesPage() {
                      )}
                      <button
                        onClick={(e) => { e.stopPropagation(); handleDelete(file._id); }}
-                       className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
+                       className="rounded p-1.5 transition-colors hover:bg-[color:var(--color-danger-ghost)]"
                        style={{ color: 'var(--color-danger)' }}
                        aria-label="Delete file"
                      >
@@ -538,7 +537,7 @@ export default function FilesPage() {
                    </button>
                    <button
                      onClick={() => handleDelete(file._id)}
-                     className="rounded p-1.5 transition-colors hover:bg-[var(--color-danger-light)]"
+                     className="rounded p-1.5 transition-colors hover:bg-[color:var(--color-danger-ghost)]"
                      style={{ color: 'var(--color-danger)' }}
                      aria-label="Delete file"
                    >
