@@ -34,7 +34,6 @@ const TeamSchema: Schema = new Schema(
 );
 
 // Indexes
-TeamSchema.index({ slug: 1 });
 TeamSchema.index({ createdBy: 1 });
 
 export default mongoose.model<ITeam>('Team', TeamSchema);
