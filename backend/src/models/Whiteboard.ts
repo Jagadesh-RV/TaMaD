@@ -18,5 +18,6 @@ const WhiteboardSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+WhiteboardSchema.index({ title: 'text' });
 
 export default mongoose.model<IWhiteboard>('Whiteboard', WhiteboardSchema);
