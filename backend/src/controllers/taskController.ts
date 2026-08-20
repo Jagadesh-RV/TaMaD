@@ -166,7 +166,6 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
 
   // Verify assignees belong to the workspace
   if (req.body.assignees && Array.isArray(req.body.assignees)) {
-    const Workspace = require('../models/Workspace').default;
     const workspace = await Workspace.findById(task.workspaceId);
     if (workspace) {
       const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
