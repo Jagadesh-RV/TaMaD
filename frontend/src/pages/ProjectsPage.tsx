@@ -136,11 +136,11 @@ export default function ProjectsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left shadow-xs">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-[color:var(--color-muted)]">
+            <Card className="p-5 flex flex-col items-center sm:items-start text-center sm:text-left transition-all hover:border-[color:var(--color-foreground-tertiary)] hover:shadow-sm cursor-default">
+              <p className="text-[12px] font-semibold uppercase tracking-widest text-[color:var(--color-foreground-secondary)]">
                 {stat.label}
               </p>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+              <p className="mt-2 text-4xl font-bold tracking-tight text-[color:var(--color-foreground)]" style={{ fontFamily: 'var(--font-display)' }}>
                 {stat.value}
               </p>
             </Card>
