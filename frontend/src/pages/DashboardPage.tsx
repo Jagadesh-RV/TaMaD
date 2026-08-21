@@ -55,10 +55,10 @@ function QuickActions() {
   const { openQuickCreate } = useInteractionStore();
 
   const actions = [
-    { label: 'New Task', icon: CheckSquare, onClick: () => openQuickCreate(), color: 'var(--color-accent)' },
-    { label: 'New Project', icon: FolderKanban, onClick: () => navigate('/projects'), color: 'var(--color-success)' },
-    { label: 'New Note', icon: Zap, onClick: () => navigate('/notes'), color: 'var(--color-warning)' },
-    { label: 'Focus Now', icon: Target, onClick: () => navigate('/focus'), color: 'var(--color-info)' },
+    { label: 'New Task', icon: CheckSquare, onClick: () => openQuickCreate(), color: 'var(--color-foreground)' },
+    { label: 'New Project', icon: FolderKanban, onClick: () => navigate('/projects'), color: 'var(--color-foreground)' },
+    { label: 'New Note', icon: Zap, onClick: () => navigate('/notes'), color: 'var(--color-foreground)' },
+    { label: 'Focus Now', icon: Target, onClick: () => navigate('/focus'), color: 'var(--color-foreground)' },
   ];
 
   return (
@@ -67,20 +67,20 @@ function QuickActions() {
         <button
           key={a.label}
           onClick={a.onClick}
-          className="flex items-center gap-2.5 rounded-xl border transition-all text-left group"
+          className="flex items-center gap-3 rounded-xl border transition-all text-left group hover:shadow-sm"
           style={{
-            padding: '10px 14px',
+            padding: '12px 14px',
             background: 'var(--color-surface)',
             borderColor: 'var(--color-border)',
           }}
         >
           <span
-            className="flex items-center justify-center rounded-lg shrink-0 transition-transform group-hover:scale-110"
-            style={{ width: 32, height: 32, background: a.color + '15', color: a.color }}
+            className="flex items-center justify-center rounded-md shrink-0 transition-all group-hover:scale-105 group-hover:bg-[color:var(--color-foreground)] group-hover:text-[color:var(--color-surface)]"
+            style={{ width: 28, height: 28, background: 'var(--color-surface-hover)', border: '1px solid var(--color-border)', color: 'var(--color-foreground-secondary)' }}
           >
-            <a.icon size={15} />
+            <a.icon size={14} />
           </span>
-          <span className="text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
+          <span className="text-[13px] font-semibold tracking-tight" style={{ color: 'var(--color-foreground)' }}>
             {a.label}
           </span>
         </button>
@@ -108,28 +108,29 @@ function StatCard({
 }) {
   return (
     <div
-      className="stat-card cursor-pointer group"
+      className="flex flex-col gap-2 rounded-xl border transition-all hover:border-[color:var(--color-foreground-tertiary)] cursor-pointer bg-[color:var(--color-surface)] p-4 shadow-xs"
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={e => e.key === 'Enter' && onClick?.()}
+      style={{ borderColor: 'var(--color-border)' }}
     >
       <div className="flex items-center justify-between">
-        <span className="stat-card-label">{label}</span>
+        <span className="text-[12px] font-semibold uppercase tracking-widest text-[color:var(--color-foreground-secondary)]">{label}</span>
         <span
-          className="flex items-center justify-center rounded-lg"
-          style={{ width: 32, height: 32, background: color + '15', color }}
+          className="flex items-center justify-center rounded-md"
+          style={{ width: 24, height: 24, color: critical ? 'var(--color-danger)' : 'var(--color-foreground-secondary)' }}
         >
-          <Icon size={15} />
+          <Icon size={14} />
         </span>
       </div>
       <div
-        className="stat-card-value"
-        style={{ color: critical ? 'var(--color-danger)' : 'var(--color-foreground)' }}
+        className="text-3xl font-bold leading-none tracking-tight"
+        style={{ color: critical ? 'var(--color-danger)' : 'var(--color-foreground)', fontFamily: 'var(--font-display)' }}
       >
         {value}
       </div>
-      <span className="stat-card-label">{sub}</span>
+      <span className="text-[12px] font-medium text-[color:var(--color-foreground-tertiary)] mt-1">{sub}</span>
     </div>
   );
 }
@@ -290,10 +291,10 @@ export default function DashboardPage() {
         >
           <div className="flex items-start justify-between gap-4 flex-wrap mb-1">
             <div>
-              <h1 className="page-title">
+              <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}>
                 Good {greeting}, {authName}
               </h1>
-              <p className="page-subtitle mt-1">
+              <p className="text-[13px] mt-1.5 font-medium" style={{ color: 'var(--color-foreground-secondary)' }}>
                 {format(new Date(), 'EEEE, MMMM d')}
                 {overdueTasks > 0 && (
                   <span style={{ color: 'var(--color-danger)' }}>
@@ -301,7 +302,7 @@ export default function DashboardPage() {
                   </span>
                 )}
                 {overdueTasks === 0 && inProgressTasks > 0 && (
-                  <span style={{ color: 'var(--color-foreground-secondary)' }}>
+                  <span>
                     {' '}— {inProgressTasks} {inProgressTasks === 1 ? 'task' : 'tasks'} in flight
                   </span>
                 )}
@@ -309,10 +310,11 @@ export default function DashboardPage() {
             </div>
             <button
               onClick={() => navigate('/ai')}
-              className="btn btn-sm btn-secondary flex items-center gap-1.5"
+              className="group flex items-center gap-1.5 rounded-full border px-4 py-2 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-foreground)' }}
             >
-              <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
-              Ask AI
+              <Sparkles size={14} className="group-hover:rotate-12 transition-transform text-[color:var(--color-accent)]" />
+              <span className="text-[12px] font-semibold">Ask AI</span>
             </button>
           </div>
         </motion.div>
