@@ -196,14 +196,14 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
             {task.tags?.slice(0, 2).map((tag: string) => (
               <span
                 key={tag}
-                className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase bg-[color:var(--color-surface-active)] text-[color:var(--color-muted)]"
+                className="rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase bg-[color:var(--color-surface-active)] text-[color:var(--color-foreground-tertiary)]"
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-light">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border-light">
             <MemberAvatar memberId={task.assignee} />
             {task.dueDate && (
               <span
@@ -272,8 +272,8 @@ function KanbanColumn({
       <div
         ref={setNodeRef}
         className={clsx(
-          'flex min-h-[500px] flex-1 flex-col rounded-3xl border-2 p-2.5 transition-all duration-300',
-          isOver ? 'border-[color:var(--color-accent)] bg-[color:var(--color-accent-ghost)]' : 'border-transparent bg-[color:var(--color-surface-active)]/55',
+          'flex min-h-[500px] flex-1 flex-col rounded-2xl p-2.5 transition-all duration-300',
+          isOver ? 'bg-[color:var(--color-accent-ghost)]' : 'bg-[color:var(--color-surface-active)]/40',
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -547,8 +547,8 @@ export default function TasksPage() {
       {/* Header */}
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <h1 className="page-title mb-0">Tasks</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>
+          <h1 className="text-3xl font-bold tracking-tight mb-0" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}>Tasks</h1>
+          <p className="mt-1 text-[13px] font-medium" style={{ color: 'var(--color-foreground-secondary)' }}>
             {filtered.length} task{filtered.length !== 1 ? 's' : ''}
           </p>
         </div>
