@@ -140,8 +140,8 @@ function NavItem({
 function SectionLabel({ label, collapsed }: { label: string; collapsed: boolean }) {
   if (collapsed) return <div className="my-2 h-px mx-2" style={{ background: 'var(--color-border-light)' }} />;
   return (
-    <p className="mb-1 mt-4 px-2.5 text-[10px] font-semibold tracking-wider"
-      style={{ color: 'var(--color-foreground-tertiary)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+    <p className="mb-1 mt-5 px-3 text-[11px] font-semibold tracking-widest"
+      style={{ color: 'var(--color-foreground-tertiary)', textTransform: 'uppercase' }}>
       {label}
     </p>
   );
@@ -283,19 +283,18 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
 
       {/* Brand + Workspace mode */}
       <div className={clsx(
-        'flex items-center border-b shrink-0',
-        collapsed ? 'justify-center py-3 px-2' : 'gap-2.5 px-4 py-3',
+        'flex items-center shrink-0 transition-all',
+        collapsed ? 'justify-center py-3 px-2' : 'gap-3 px-4 py-3',
       )}
-        style={{ borderColor: 'var(--color-border-light)', minHeight: 52 }}
+        style={{ minHeight: 'var(--header-height)' }}
       >
         {/* Logo mark */}
         <div
-          className="flex shrink-0 items-center justify-center rounded-lg font-bold text-[15px] leading-none text-white"
+          className="flex shrink-0 items-center justify-center rounded-lg font-bold text-[16px] leading-none text-white shadow-sm"
           style={{
-            width: 30,
-            height: 30,
-            background: 'var(--color-accent)',
-            boxShadow: '0 1px 3px rgba(59,78,246,0.3)',
+            width: 28,
+            height: 28,
+            background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))',
             letterSpacing: '-0.02em',
           }}
         >
@@ -308,23 +307,22 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
             animate={{ opacity: 1, x: 0 }}
             className="min-w-0 flex-1"
           >
-            <div className="flex items-center gap-1.5">
-              <p className="text-[13px] font-semibold tracking-tight"
-                style={{ color: 'var(--color-foreground)', letterSpacing: '-0.02em' }}>
+            <div className="flex items-center gap-2">
+              <p className="text-[15px] font-bold tracking-tight"
+                style={{ color: 'var(--color-foreground)', fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}>
                 TaMaD
               </p>
               <span
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider"
                 style={{
                   background: isTeam ? 'var(--color-success-ghost)' : 'var(--color-accent-ghost)',
                   color: isTeam ? 'var(--color-success)' : 'var(--color-accent)',
-                  letterSpacing: '0.04em',
                 }}
               >
                 {isTeam ? (
-                  <><Building2 size={8} />{currentWorkspace?.name?.slice(0, 12) || 'Team'}</>
+                  <><Building2 size={10} />{currentWorkspace?.name?.slice(0, 12) || 'Team'}</>
                 ) : (
-                  <><User size={8} />Personal</>
+                  <><User size={10} />Personal</>
                 )}
               </span>
             </div>
@@ -597,11 +595,11 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
   // Desktop sidebar
   return (
     <motion.aside
-      animate={{ width: collapsed ? 64 : 256 }}
+      animate={{ width: collapsed ? 64 : 240 }}
       transition={{ type: 'spring', stiffness: 420, damping: 40 }}
       className="h-screen shrink-0 flex flex-col overflow-hidden"
       style={{
-        background: 'var(--color-background)',
+        background: 'var(--color-background-secondary)',
         borderRight: '1px solid var(--color-border)',
       }}
     >

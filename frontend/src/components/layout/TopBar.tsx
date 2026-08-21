@@ -137,28 +137,30 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
       </div>
 
       {/* Center: Search bar */}
-      <div className="hidden md:flex flex-1 max-w-sm">
+      <div className="hidden md:flex flex-1 max-w-md mx-auto justify-center">
         <button
           onClick={onCommandPaletteOpen}
           id="topbar-search-btn"
-          className="flex w-full items-center gap-2 rounded-lg transition-all"
+          className="group flex w-full max-w-[320px] items-center gap-2 rounded-lg transition-all"
           style={{
-            background: 'var(--color-surface)',
+            background: 'var(--color-surface-hover)',
             border: '1px solid var(--color-border)',
-            padding: '6px 12px',
+            padding: '5px 8px 5px 12px',
             color: 'var(--color-foreground-tertiary)',
+            boxShadow: 'var(--shadow-xs)',
           }}
           aria-label="Search (Ctrl+K)"
         >
-          <Search size={14} />
-          <span className="flex-1 text-left text-[13px]">Search...</span>
+          <Search size={14} className="group-hover:text-[color:var(--color-foreground-secondary)] transition-colors" />
+          <span className="flex-1 text-left text-[13px] group-hover:text-[color:var(--color-foreground-secondary)] transition-colors">Search or jump to...</span>
           <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded text-[10px] font-medium"
             style={{
               padding: '2px 5px',
-              background: 'var(--color-surface-active)',
+              background: 'var(--color-surface)',
               border: '1px solid var(--color-border)',
               color: 'var(--color-foreground-secondary)',
               fontFamily: 'var(--font-mono)',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
             }}>
             <Command size={9} />K
           </kbd>
@@ -169,9 +171,8 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
       <div className="flex items-center gap-1">
         {/* Connection status — minimal */}
         <div
-          className="hidden lg:flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium"
+          className="hidden lg:flex items-center gap-1.5 rounded-full px-2 py-1 text-[11px] font-medium transition-colors"
           style={{
-            borderColor: isConnected ? 'var(--color-border)' : 'var(--color-warning-light)',
             background: isConnected ? 'transparent' : 'var(--color-warning-ghost)',
             color: isConnected ? 'var(--color-foreground-tertiary)' : 'var(--color-warning)',
           }}
@@ -183,9 +184,10 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
               width: 6,
               height: 6,
               background: isConnected ? 'var(--color-success)' : 'var(--color-warning)',
+              boxShadow: isConnected ? '0 0 0 2px var(--color-success-ghost)' : '0 0 0 2px var(--color-warning-ghost)',
             }}
           />
-          {isConnected ? 'Live' : 'Syncing'}
+          {isConnected ? 'Syncing...' : 'Disconnected'}
         </div>
 
         {/* Mobile search */}
@@ -235,19 +237,20 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2 rounded-lg border transition-all"
+            className="flex items-center gap-1.5 rounded-full border transition-all hover:bg-[color:var(--color-surface-hover)]"
             style={{
-              padding: '4px 10px 4px 4px',
+              padding: '2px 8px 2px 2px',
               background: 'var(--color-surface)',
               borderColor: profileOpen ? 'var(--color-foreground-tertiary)' : 'var(--color-border)',
+              boxShadow: 'var(--shadow-xs)',
             }}
             aria-expanded={profileOpen}
             aria-haspopup="true"
             aria-label="Profile menu"
           >
             <div
-              className="flex items-center justify-center rounded-full text-[10px] font-bold text-white"
-              style={{ width: 26, height: 26, background: 'var(--color-accent)' }}
+              className="flex items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm"
+              style={{ width: 26, height: 26, background: 'linear-gradient(135deg, var(--color-accent), var(--color-accent-hover))' }}
               aria-hidden="true"
             >
               {userInitials}
