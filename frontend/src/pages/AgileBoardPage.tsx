@@ -208,12 +208,12 @@ export default function AgileBoardPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <h1 className="page-title">Active Sprint</h1>
+              <h1 className="text-3xl font-bold tracking-tight mb-0" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}>Active Sprint</h1>
               {activeSprint && (
-                <span className="badge badge-accent">{activeSprint.name}</span>
+                <span className="badge badge-accent ml-2">{activeSprint.name}</span>
               )}
             </div>
-            <p className="page-subtitle">
+            <p className="text-[13px] font-medium mt-1.5" style={{ color: 'var(--color-foreground-secondary)' }}>
               {activeSprint
                 ? `${activeTasks.length} tasks in sprint`
                 : 'No active sprint'}
@@ -307,7 +307,7 @@ export default function AgileBoardPage() {
                       style={{
                         background: 'var(--color-surface-active)',
                         minHeight: 320,
-                        border: '1px solid var(--color-border-light)',
+                        border: '1px solid transparent',
                       }}
                     >
                       {colTasks.length === 0 ? (

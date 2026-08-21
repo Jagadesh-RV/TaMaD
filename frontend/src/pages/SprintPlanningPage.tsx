@@ -44,7 +44,7 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
       </div>
       <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs px-2 py-0.5 rounded bg-[color:var(--color-surface-hover)]" style={{ color: 'var(--color-muted)' }}>{task.status}</span>
+        <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-[color:var(--color-surface-hover)]" style={{ color: 'var(--color-foreground-tertiary)' }}>{task.status}</span>
         {task.assignees && task.assignees.length > 0 && (
           <div className="flex -space-x-1">
             {task.assignees.map((a: any) => (
@@ -168,8 +168,8 @@ export default function SprintPlanningPage() {
     <div className="flex h-full flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b border-[var(--color-border-light)] p-6">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Backlog & Planning</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
+          <h1 className="text-3xl font-bold tracking-tight mb-0" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}>Backlog & Planning</h1>
+          <p className="mt-1.5 text-[13px] font-medium" style={{ color: 'var(--color-foreground-secondary)' }}>
             Plan your sprints for {currentWorkspace.name}
           </p>
         </div>
