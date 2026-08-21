@@ -434,7 +434,7 @@ export function CommandPalette() {
             className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-[var(--shadow-float)] backdrop-blur-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
+            <div className="flex items-center gap-3 border-b border-[color:var(--color-border-light)] px-5 py-4 bg-[color:var(--color-surface-hover)]">
               <Search size={18} className="shrink-0 text-[color:var(--color-muted)]" />
               <input
                 ref={inputRef}
@@ -443,10 +443,10 @@ export function CommandPalette() {
                 onChange={(e) => handleQueryChange(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search anything, or type a command…"
-                className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
+                className="flex-1 bg-transparent text-[15px] font-medium outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
                 style={{ color: 'var(--color-foreground)' }}
               />
-              <kbd className="flex items-center gap-0.5 rounded border border-border bg-background-secondary px-1.5 py-0.5 text-[10px] font-medium text-[color:var(--color-foreground-tertiary)]">
+              <kbd className="flex items-center gap-0.5 rounded border border-[color:var(--color-border-light)] bg-[color:var(--color-surface)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
                 <Command size={10} />K
               </kbd>
             </div>
@@ -514,12 +514,12 @@ export function CommandPalette() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 border-t border-border bg-background-secondary/60 px-4 py-2.5 text-[10px] font-semibold text-[color:var(--color-foreground-tertiary)]">
-              <span className="flex items-center gap-1"><kbd className="kbd-hint">↑↓</kbd> navigate</span>
-              <span className="flex items-center gap-1"><kbd className="kbd-hint">↵</kbd> select</span>
-              <span className="flex items-center gap-1"><kbd className="kbd-hint">esc</kbd> close</span>
-              <span className="ml-auto flex items-center gap-1.5 text-[color:var(--color-muted)]">
-                <Command size={10} /> {navPages.length} pages
+            <div className="flex items-center gap-4 border-t border-[color:var(--color-border-light)] bg-[color:var(--color-surface)] px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[color:var(--color-foreground-tertiary)]">
+              <span className="flex items-center gap-1.5"><kbd className="kbd-hint">↑↓</kbd> navigate</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd-hint">↵</kbd> select</span>
+              <span className="flex items-center gap-1.5"><kbd className="kbd-hint">esc</kbd> close</span>
+              <span className="ml-auto flex items-center gap-1.5 text-[color:var(--color-muted)] normal-case font-semibold tracking-normal text-xs">
+                <Command size={12} /> {navPages.length} pages
               </span>
             </div>
           </motion.div>

@@ -136,27 +136,27 @@ export function QuickCreate() {
           onClick={close}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -12 }}
+            initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -8 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-[var(--shadow-float)] backdrop-blur-2xl"
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 40 }}
+            className="w-full max-w-2xl overflow-hidden rounded-2xl border border-border bg-surface shadow-[var(--shadow-xl)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+            <div className="flex items-center gap-3 border-b border-[color:var(--color-border-light)] px-5 py-4 bg-[color:var(--color-surface-hover)]">
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                style={{ background: 'var(--color-accent-ghost)', color: active.accent }}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: 'var(--color-surface-active)', color: active.accent, border: '1px solid var(--color-border)' }}
               >
-                <Plus size={18} />
+                <Plus size={20} />
               </div>
               <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-bold text-[color:var(--color-foreground)]">Quick create</h2>
-                <p className="text-xs font-medium text-[color:var(--color-muted)]">
-                  {active.label} · press <span className="text-[color:var(--color-accent)]">↵</span> to save
+                <h2 className="text-[15px] font-bold tracking-tight text-[color:var(--color-foreground)]" style={{ fontFamily: 'var(--font-display)' }}>Quick capture</h2>
+                <p className="text-[12px] font-medium text-[color:var(--color-foreground-tertiary)] mt-0.5">
+                  {active.label} · press <span className="text-[color:var(--color-accent)] font-bold">↵</span> to save
                 </p>
               </div>
-              <kbd className="flex items-center gap-0.5 rounded border border-border bg-background-secondary px-1.5 py-0.5 text-[10px] font-medium text-[color:var(--color-foreground-tertiary)]">esc</kbd>
+              <kbd className="flex items-center gap-0.5 rounded border border-[color:var(--color-border-light)] bg-[color:var(--color-surface)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">esc</kbd>
             </div>
 
             <div className="flex flex-wrap gap-1.5 px-4 pt-4">
@@ -284,7 +284,7 @@ export function QuickCreate() {
                 </>
               )}
 
-              <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center justify-between pt-2 border-t border-[color:var(--color-border-light)] mt-2">
                 <span className="flex items-center gap-1.5 text-xs font-semibold text-[color:var(--color-muted)]">
                   <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
                   Tap out or press <kbd className="kbd-hint">↵</kbd>
