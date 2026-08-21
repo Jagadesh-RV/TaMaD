@@ -33,27 +33,29 @@ function TeamStatCard({
 }) {
   return (
     <div
-      className="stat-card cursor-pointer group"
+      className="flex flex-col gap-2 rounded-xl border transition-all hover:border-[color:var(--color-foreground-tertiary)] cursor-pointer bg-[color:var(--color-surface)] p-4 shadow-xs"
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      onKeyDown={e => e.key === 'Enter' && onClick?.()}
+      style={{ borderColor: 'var(--color-border)' }}
     >
       <div className="flex items-center justify-between">
-        <span className="stat-card-label">{label}</span>
+        <span className="text-[12px] font-semibold uppercase tracking-widest text-[color:var(--color-foreground-secondary)]">{label}</span>
         <span
-          className="flex items-center justify-center rounded-lg"
-          style={{ width: 30, height: 30, background: color + '15', color }}
+          className="flex items-center justify-center rounded-md"
+          style={{ width: 24, height: 24, color: critical ? 'var(--color-danger)' : 'var(--color-foreground-secondary)' }}
         >
           <Icon size={14} />
         </span>
       </div>
       <div
-        className="stat-card-value"
-        style={{ color: critical ? 'var(--color-danger)' : 'var(--color-foreground)' }}
+        className="text-3xl font-bold leading-none tracking-tight"
+        style={{ color: critical ? 'var(--color-danger)' : 'var(--color-foreground)', fontFamily: 'var(--font-display)' }}
       >
         {value}
       </div>
-      <span className="stat-card-label">{sub}</span>
+      <span className="text-[12px] font-medium text-[color:var(--color-foreground-tertiary)] mt-1">{sub}</span>
     </div>
   );
 }
@@ -111,10 +113,10 @@ export default function TeamDashboardPage() {
       <div className="mb-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="page-title">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-foreground)' }}>
               {currentWorkspace.name}
             </h1>
-            <p className="page-subtitle mt-1">
+            <p className="text-[13px] mt-1.5 font-medium" style={{ color: 'var(--color-foreground-secondary)' }}>
               {format(new Date(), 'EEEE, MMMM d')}
               {onlineUsers.length > 0 && (
                 <span style={{ color: 'var(--color-success)' }}>
@@ -191,8 +193,9 @@ export default function TeamDashboardPage() {
         <div
           className="mb-6 rounded-xl border px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
           style={{
-            background: 'var(--color-accent-ghost)',
-            borderColor: 'var(--color-accent-light)',
+            background: 'var(--color-surface)',
+            borderColor: 'var(--color-accent)',
+            boxShadow: 'var(--shadow-sm)',
           }}
         >
           <div className="flex items-center gap-3">
