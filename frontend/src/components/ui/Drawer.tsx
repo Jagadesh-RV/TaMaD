@@ -21,7 +21,7 @@ export function Drawer({ open, onClose, children }: DrawerProps) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-slate-950/35" />
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[59]" />
         </Transition.Child>
 
         <div className="fixed inset-y-0 right-0 flex max-w-full">
