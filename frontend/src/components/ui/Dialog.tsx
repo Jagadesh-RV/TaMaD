@@ -32,7 +32,7 @@ export function Dialog({ open, onClose, children }: DialogProps) {
                 initial="initial"
                 animate="enter"
                 exit="exit"
-                className="w-full max-w-lg relative bg-surface border border-border-light rounded-2xl shadow-float flex flex-col max-h-[90vh]"
+                className="w-full max-w-lg relative bg-surface border border-border rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
               >
                 {children}
               </HeadlessDialog.Panel>
