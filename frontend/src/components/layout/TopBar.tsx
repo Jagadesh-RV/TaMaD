@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Search, Bell, Sun, Moon, Menu, Command, LogOut, User, Settings,
-  Wifi, WifiOff, ChevronRight,
+  Wifi, WifiOff, ChevronRight, Plus,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
@@ -137,30 +137,31 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
       </div>
 
       {/* Center: Search bar */}
-      <div className="hidden md:flex flex-1 max-w-sm">
+      <div className="hidden md:flex flex-1 max-w-[480px] mx-auto justify-center">
         <button
           onClick={onCommandPaletteOpen}
           id="topbar-search-btn"
-          className="flex w-full items-center gap-2 rounded-lg transition-all"
+          className="flex w-full items-center gap-2 rounded-lg transition-all group"
           style={{
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
-            padding: '6px 12px',
+            padding: '8px 14px',
             color: 'var(--color-foreground-tertiary)',
+            boxShadow: 'var(--shadow-xs)',
           }}
           aria-label="Search (Ctrl+K)"
         >
-          <Search size={14} />
-          <span className="flex-1 text-left text-[13px]">Search...</span>
-          <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded text-[10px] font-medium"
+          <Search size={15} className="group-hover:text-[color:var(--color-accent)] transition-colors" />
+          <span className="flex-1 text-left text-[14px]">Search anything...</span>
+          <kbd className="hidden lg:inline-flex items-center gap-0.5 rounded text-[11px] font-medium"
             style={{
-              padding: '2px 5px',
+              padding: '2px 6px',
               background: 'var(--color-surface-active)',
-              border: '1px solid var(--color-border)',
+              border: '1px solid var(--color-border-light)',
               color: 'var(--color-foreground-secondary)',
               fontFamily: 'var(--font-mono)',
             }}>
-            <Command size={9} />K
+            <Command size={10} />K
           </kbd>
         </button>
       </div>
@@ -188,7 +189,6 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
           {isConnected ? 'Live' : 'Syncing'}
         </div>
 
-        {/* Mobile search */}
         <button
           onClick={onCommandPaletteOpen}
           className="md:hidden flex items-center justify-center rounded-md transition-colors"
@@ -196,6 +196,16 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
           aria-label="Search"
         >
           <Search size={16} />
+        </button>
+
+        {/* Quick Create */}
+        <button
+          onClick={() => {}} // TODO: Connect to QuickCreate modal
+          className="relative flex items-center justify-center rounded-full bg-[color:var(--color-foreground)] text-[color:var(--color-background)] hover:opacity-90 transition-opacity mx-1"
+          style={{ width: 28, height: 28 }}
+          aria-label="Quick Create"
+        >
+          <Plus size={16} />
         </button>
 
         {/* Notifications */}

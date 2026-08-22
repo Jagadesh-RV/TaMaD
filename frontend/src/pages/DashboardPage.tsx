@@ -236,534 +236,161 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="page pb-20">
+    <div className="page pb-20 max-w-[1200px] mx-auto pt-6">
 
-      {/* Email verification banner */}
       <AnimatePresence>
         {showEmailBanner && (
           <motion.div
             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-            animate={{ opacity: 1, height: 'auto', marginBottom: 20 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
             className="overflow-hidden"
           >
-            <div
-              className="flex items-center justify-between gap-4 rounded-xl px-4 py-3"
-              style={{
-                background: 'var(--color-warning-ghost)',
-                border: '1px solid var(--color-warning-light)',
-              }}
-            >
-              <div className="flex items-center gap-2.5">
-                <AlertTriangle size={15} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
-                <span className="text-[13px] font-medium" style={{ color: 'var(--color-warning)' }}>
-                  Verify your email to unlock all features
-                </span>
+            <div className="flex items-center justify-between gap-4 rounded-2xl px-5 py-4" style={{ background: 'var(--color-warning-ghost)', border: '1px solid var(--color-warning-light)' }}>
+              <div className="flex items-center gap-3">
+                <AlertTriangle size={18} style={{ color: 'var(--color-warning)' }} />
+                <span className="text-[14px] font-medium" style={{ color: 'var(--color-warning)' }}>Verify your email to unlock all features</span>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => navigate('/verify-email')}
-                  className="btn btn-sm"
-                  style={{ background: 'var(--color-warning)', color: '#fff', borderRadius: 'var(--radius-md)' }}
-                >
-                  Verify
-                </button>
-                <button
-                  onClick={handleDismissEmailBanner}
-                  className="btn-icon-xs btn-ghost"
-                  aria-label="Dismiss"
-                >
-                  <X size={14} />
-                </button>
+                <button onClick={() => navigate('/verify-email')} className="btn btn-sm" style={{ background: 'var(--color-warning)', color: '#fff', borderRadius: 'var(--radius-md)' }}>Verify</button>
+                <button onClick={handleDismissEmailBanner} className="btn-icon-sm btn-ghost"><X size={14} /></button>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* --- Header --- */}
-      <div className="mb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="flex items-start justify-between gap-4 flex-wrap mb-1">
-            <div>
-              <h1 className="page-title">
-                Good {greeting}, {authName}
-              </h1>
-              <p className="page-subtitle mt-1">
-                {format(new Date(), 'EEEE, MMMM d')}
-                {overdueTasks > 0 && (
-                  <span style={{ color: 'var(--color-danger)' }}>
-                    {' '}— {overdueTasks} overdue {overdueTasks === 1 ? 'task' : 'tasks'} need attention
-                  </span>
-                )}
-                {overdueTasks === 0 && inProgressTasks > 0 && (
-                  <span style={{ color: 'var(--color-foreground-secondary)' }}>
-                    {' '}— {inProgressTasks} {inProgressTasks === 1 ? 'task' : 'tasks'} in flight
-                  </span>
-                )}
-              </p>
-            </div>
-            <button
-              onClick={() => navigate('/ai')}
-              className="btn btn-sm btn-secondary flex items-center gap-1.5"
-            >
-              <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
-              Ask AI
-            </button>
+      {/* Header */}
+      <header className="mb-12 flex items-end justify-between gap-6">
+        <div>
+          <h1 className="text-[32px] font-display font-semibold tracking-tight text-[color:var(--color-foreground)] leading-tight">
+            Good {greeting}, {authName}
+          </h1>
+          <p className="text-[15px] mt-1 text-[color:var(--color-foreground-secondary)]">
+            {format(new Date(), 'EEEE, MMMM d')}
+            {overdueTasks > 0 ? (
+              <span className="text-[color:var(--color-danger)] font-medium"> — {overdueTasks} overdue</span>
+            ) : (
+              <span> — Ready to focus?</span>
+            )}
+          </p>
+        </div>
+        <div className="flex gap-2">
+           <button onClick={() => navigate('/ai')} className="btn btn-md btn-secondary shadow-xs">
+             <Sparkles size={14} className="text-[color:var(--color-accent)]" />
+             Ask AI
+           </button>
+        </div>
+      </header>
+
+      {/* Lanes */}
+      <div className="flex flex-col gap-14">
+        
+        {/* FOCUS LANE */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[18px] font-display font-semibold tracking-tight">Focus Lane</h2>
+            <button onClick={() => navigate('/focus')} className="text-[13px] font-medium text-[color:var(--color-accent)] hover:underline">Enter Focus Mode</button>
           </div>
-        </motion.div>
-      </div>
-
-      {/* --- Quick actions --- */}
-      <QuickActions />
-
-      {/* --- Stat cards --- */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.08 }}
-        className="mb-8"
-      >
-        {tasksLoading ? (
-          <SkeletonStatGrid count={4} />
-        ) : (
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-            <StatCard
-              label="In Progress"
-              value={inProgressTasks}
-              sub="active tasks"
-              color="var(--color-info)"
-              icon={Activity}
-              onClick={() => navigate('/tasks')}
-            />
-            <StatCard
-              label="Due Today"
-              value={todayTasks}
-              sub={todayTasks === 1 ? 'task due' : 'tasks due'}
-              color="var(--color-warning)"
-              icon={Calendar}
-              onClick={() => navigate('/tasks')}
-            />
-            <StatCard
-              label="Overdue"
-              value={overdueTasks}
-              sub={overdueTasks > 0 ? 'needs attention' : 'all caught up'}
-              color={overdueTasks > 0 ? 'var(--color-danger)' : 'var(--color-success)'}
-              icon={AlertTriangle}
-              onClick={() => navigate('/tasks')}
-              critical={overdueTasks > 0}
-            />
-            <StatCard
-              label="Completion"
-              value={`${completionRate}%`}
-              sub={`${completedTasks} of ${totalTasks} done`}
-              color="var(--color-success)"
-              icon={TrendingUp}
-              onClick={() => navigate('/analytics')}
-            />
-          </div>
-        )}
-      </motion.div>
-
-      {/* --- Main grid --- */}
-      <div className="grid gap-6 xl:grid-cols-3">
-        <div className="space-y-6 xl:col-span-2">
-
-          {/* Task list with filters */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-          >
-            <Card className="overflow-hidden">
-              {/* Header + tabs */}
-              <div className="px-5 pt-5 pb-0">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-foreground)', letterSpacing: '-0.01em' }}>
-                      Your focus
-                    </h2>
-                    <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
-                      {statusFilter === 'all' ? 'Sorted by priority' : 'Filtered view'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => navigate('/tasks')}
-                      className="text-[12px] font-medium flex items-center gap-1 transition-colors"
-                      style={{ color: 'var(--color-accent)' }}
-                    >
-                      All tasks <ArrowRight size={12} />
-                    </button>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="lg:col-span-1 flex flex-col gap-3">
+              <button onClick={() => navigate('/tasks')} className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-surface hover:border-foreground-tertiary transition-colors shadow-xs text-left">
+                <div className="w-10 h-10 rounded-xl bg-accent-ghost text-accent flex items-center justify-center shrink-0">
+                  <CheckSquare size={18} />
                 </div>
-
-                {/* Filter tabs */}
-                <div className="flex gap-1 overflow-x-auto pb-0" style={{ scrollbarWidth: 'none' }}>
-                  {STATUS_TABS.map(tab => {
-                    const count = tab.key === 'all' ? totalTasks
-                      : tab.key === 'urgent' ? tasks.filter(t => t.priority === 'urgent' || t.priority === 'high').length
-                      : tab.key === 'today' ? tasks.filter(t => t.dueDate === today).length
-                      : tasks.filter(t => t.status === 'in-progress').length;
-                    const isActive = statusFilter === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        onClick={() => setStatusFilter(tab.key)}
-                        className={clsx('tab-item shrink-0', isActive && 'active')}
-                      >
-                        {tab.label}
-                        <span
-                          className="ml-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-bold"
-                          style={{
-                            minWidth: 18,
-                            height: 16,
-                            padding: '0 5px',
-                            background: isActive ? 'var(--color-accent-light)' : 'var(--color-surface-active)',
-                            color: isActive ? 'var(--color-accent)' : 'var(--color-foreground-tertiary)',
-                          }}
-                        >
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Task rows */}
-              <div>
-                {tasksLoading ? (
-                  <div className="p-4">
-                    <SkeletonList count={5} />
-                  </div>
-                ) : displayTasks.length === 0 ? (
-                  <EmptyState
-                    icon={Inbox}
-                    title="No tasks here"
-                    description={statusFilter === 'all' ? 'Create your first task to get started' : 'No tasks match this filter'}
-                    action={statusFilter === 'all' ? { label: 'Create Task', onClick: () => navigate('/tasks') } : undefined}
-                  />
-                ) : (
-                  <div style={{ borderTop: '1px solid var(--color-border-light)' }}>
-                    {displayTasks.map((task, i) => {
-                      const pConf = PRIORITY_CONFIG[task.priority as keyof typeof PRIORITY_CONFIG] || PRIORITY_CONFIG.low;
-                      const sConf = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.todo;
-                      const isOverdue = task.dueDate && task.dueDate < today && task.status !== 'done';
-                      return (
-                        <motion.div
-                          key={task._id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: i * 0.03 }}
-                          onClick={() => navigate('/tasks')}
-                          className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors"
-                          style={{ borderBottom: i < displayTasks.length - 1 ? '1px solid var(--color-border-light)' : 'none' }}
-                        >
-                          {/* Priority dot */}
-                          <span
-                            className={clsx('priority-dot shrink-0', pConf.dotClass)}
-                            style={{ opacity: isOverdue ? 1 : 0.9 }}
-                          />
-
-                          {/* Title */}
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[13px] font-medium transition-colors"
-                              style={{ color: 'var(--color-foreground)' }}>
-                              {task.title}
-                            </p>
-                            {task.dueDate && (
-                              <p className="text-[11px] mt-0.5"
-                                style={{ color: isOverdue ? 'var(--color-danger)' : 'var(--color-foreground-tertiary)' }}>
-                                {isOverdue
-                                  ? `Overdue · ${format(parseISO(task.dueDate), 'MMM d')}`
-                                  : task.dueDate === today
-                                  ? 'Due today'
-                                  : format(parseISO(task.dueDate), 'MMM d')}
-                              </p>
-                            )}
-                          </div>
-
-                          {/* Status badge */}
-                          <span
-                            className="hidden sm:inline-flex badge"
-                            style={{ background: sConf.bg, color: sConf.color }}
-                          >
-                            {sConf.label}
-                          </span>
-
-                          {/* Priority badge */}
-                          <span
-                            className="inline-flex badge"
-                            style={{ background: pConf.bg, color: pConf.color }}
-                          >
-                            {pConf.label}
-                          </span>
-
-                          {/* Hover arrow */}
-                          <ChevronRight
-                            size={14}
-                            className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                            style={{ color: 'var(--color-foreground-tertiary)' }}
-                          />
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Weekly chart */}
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-          >
-            <Card className="p-5">
-              <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-[15px] font-semibold" style={{ color: 'var(--color-foreground)', letterSpacing: '-0.01em' }}>
-                    This week
-                  </h2>
-                  <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
-                    Completed vs. created
-                  </p>
+                  <div className="text-[14px] font-semibold">{inProgressTasks} Active</div>
+                  <div className="text-[12px] text-foreground-tertiary">Tasks in progress</div>
                 </div>
-                <div className="flex items-center gap-4 text-[11px] font-medium" style={{ color: 'var(--color-foreground-tertiary)' }}>
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--color-accent)' }} />
-                    Completed
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--color-border)' }} />
-                    Created
-                  </span>
+              </button>
+              <button onClick={() => navigate('/tasks')} className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-surface hover:border-foreground-tertiary transition-colors shadow-xs text-left">
+                <div className="w-10 h-10 rounded-xl bg-danger-ghost text-danger flex items-center justify-center shrink-0">
+                  <AlertTriangle size={18} />
                 </div>
-              </div>
-              <div style={{ height: 200 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={weeklyData} barGap={4} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-light)" vertical={false} />
-                    <XAxis
-                      dataKey="day"
-                      tick={{ fontSize: 11, fill: 'var(--color-foreground-tertiary)', fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                      dy={8}
-                    />
-                    <YAxis
-                      tick={{ fontSize: 11, fill: 'var(--color-foreground-tertiary)', fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      cursor={{ fill: 'var(--color-surface-hover)', radius: 4 }}
-                      contentStyle={{
-                        background: 'var(--color-surface)',
-                        border: '1px solid var(--color-border)',
-                        borderRadius: 10,
-                        boxShadow: 'var(--shadow-lg)',
-                        fontSize: 12,
-                        fontWeight: 500,
-                        padding: '10px 14px',
-                      }}
-                      itemStyle={{ color: 'var(--color-foreground)' }}
-                      labelStyle={{ color: 'var(--color-foreground-secondary)', fontWeight: 600, marginBottom: 4 }}
-                    />
-                    <Bar dataKey="completed" name="Completed" fill="var(--color-accent)" radius={[3, 3, 0, 0]} maxBarSize={32} />
-                    <Bar dataKey="created" name="Created" fill="var(--color-border)" radius={[3, 3, 0, 0]} maxBarSize={32} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Right sidebar */}
-        <div className="space-y-5">
-
-          {/* AI Insight */}
-          <motion.div
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <AIInsightPanel tasks={tasks} projectsCount={projects.length} />
-          </motion.div>
-
-          {/* Overdue / Attention */}
-          {attentionTasks.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.16 }}
-            >
-              <Card className="overflow-hidden">
-                <div className="px-5 pt-4 pb-3 flex items-center justify-between"
-                  style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle size={14} style={{ color: 'var(--color-danger)' }} />
-                    <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
-                      Overdue
-                    </span>
+                <div>
+                  <div className="text-[14px] font-semibold">{overdueTasks} Overdue</div>
+                  <div className="text-[12px] text-foreground-tertiary">Needs attention</div>
+                </div>
+              </button>
+            </div>
+            
+            <div className="lg:col-span-3 flex gap-4 overflow-x-auto pb-4 snap-x" style={{ scrollbarWidth: 'none' }}>
+              {focusTasks.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center bg-surface/50">
+                  <Target size={24} className="text-muted mb-3" />
+                  <p className="text-[14px] font-medium">Clear focus</p>
+                  <p className="text-[13px] text-foreground-tertiary mt-1">No urgent tasks currently.</p>
+                </div>
+              ) : (
+                focusTasks.slice(0, 3).map(task => (
+                  <div key={task._id} className="min-w-[280px] flex-1 rounded-2xl border border-border bg-surface p-5 shadow-xs snap-start hover:border-foreground-tertiary transition-colors cursor-pointer" onClick={() => navigate('/tasks')}>
+                    <div className="flex items-start justify-between mb-3">
+                      <span className={`badge badge-${task.priority === 'urgent' ? 'danger' : 'accent'}`}>{task.priority}</span>
+                      {task.dueDate && <span className="text-[11px] font-medium text-foreground-tertiary">{format(parseISO(task.dueDate), 'MMM d')}</span>}
+                    </div>
+                    <h3 className="text-[15px] font-semibold leading-tight mb-2">{task.title}</h3>
+                    <p className="text-[13px] text-foreground-secondary line-clamp-2">{task.description || 'No description'}</p>
                   </div>
-                  <span className="badge badge-danger">{attentionTasks.length}</span>
-                </div>
-                <div className="p-3 space-y-1.5">
-                  {attentionTasks.map(task => (
-                    <div
-                      key={task._id}
-                      onClick={() => navigate('/tasks')}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 cursor-pointer transition-colors group"
-                      style={{ background: 'var(--color-danger-ghost)' }}
-                    >
-                      <span className="priority-dot priority-dot-urgent shrink-0" />
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
-                          {task.title}
-                        </p>
-                        <p className="text-[11px]" style={{ color: 'var(--color-danger)' }}>
-                          Was due {format(parseISO(task.dueDate!), 'MMM d')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Active projects */}
-          <motion.div
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.22 }}
-          >
-            <Card className="overflow-hidden">
-              <div className="px-5 pt-4 pb-3 flex items-center justify-between"
-                style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
-                  Projects
-                </span>
-                <button
-                  onClick={() => navigate('/projects')}
-                  className="text-[12px] font-medium flex items-center gap-1 transition-colors"
-                  style={{ color: 'var(--color-accent)' }}
-                >
-                  View all <ArrowRight size={11} />
-                </button>
-              </div>
-              {projectsLoading ? (
-                <div className="p-3 space-y-2">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center gap-3 px-2 py-2 animate-pulse">
-                      <div className="rounded-lg shrink-0" style={{ width: 32, height: 32, background: 'var(--color-surface-active)' }} />
-                      <div className="flex-1 space-y-1.5">
-                        <div className="rounded" style={{ height: 12, width: '60%', background: 'var(--color-surface-active)' }} />
-                        <div className="rounded" style={{ height: 10, width: '40%', background: 'var(--color-surface-active)' }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : projects.length === 0 ? (
-                <div className="p-4 text-center">
-                  <p className="text-[12px]" style={{ color: 'var(--color-foreground-tertiary)' }}>No projects yet</p>
-                  <button
-                    onClick={() => navigate('/projects')}
-                    className="btn btn-xs btn-ghost mt-2"
-                    style={{ color: 'var(--color-accent)' }}
-                  >
-                    <Plus size={12} /> Create project
-                  </button>
-                </div>
-              ) : (
-                <div className="p-3 space-y-1">
-                  {projects.slice(0, 5).map(project => (
-                    <div
-                      key={project._id}
-                      onClick={() => navigate('/projects')}
-                      className="flex items-center gap-3 rounded-lg px-2 py-2 cursor-pointer transition-colors group"
-                      style={{ borderRadius: 'var(--radius-md)' }}
-                    >
-                      <div
-                        className="flex shrink-0 items-center justify-center rounded-lg text-white text-[12px] font-bold"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          background: project.color || 'var(--color-accent)',
-                        }}
-                      >
-                        {project.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[13px] font-medium" style={{ color: 'var(--color-foreground)' }}>
-                          {project.name}
-                        </p>
-                        {project.description && (
-                          <p className="truncate text-[11px] mt-0.5" style={{ color: 'var(--color-foreground-tertiary)' }}>
-                            {project.description}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight size={13} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ color: 'var(--color-foreground-tertiary)' }} />
-                    </div>
-                  ))}
-                </div>
+                ))
               )}
-            </Card>
-          </motion.div>
+            </div>
+          </div>
+        </section>
 
-          {/* Recent activity */}
-          <motion.div
-            initial={{ opacity: 0, x: 8 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.28 }}
-          >
-            <Card className="overflow-hidden">
-              <div className="px-5 pt-4 pb-3"
-                style={{ borderBottom: '1px solid var(--color-border-light)' }}>
-                <span className="text-[13px] font-semibold" style={{ color: 'var(--color-foreground)' }}>
-                  Recent activity
-                </span>
-              </div>
-              {recentActivities.length === 0 ? (
-                <EmptyState icon={Activity} title="No activity yet" description="Start working on tasks" />
-              ) : (
-                <div className="p-3 space-y-1">
-                  {recentActivities.map(task => {
-                    const sConf = STATUS_CONFIG[task.status as keyof typeof STATUS_CONFIG] || STATUS_CONFIG.todo;
-                    return (
-                      <div key={task._id} className="flex items-start gap-2.5 px-2 py-2">
-                        <span
-                          className="mt-1 flex items-center justify-center rounded-full shrink-0"
-                          style={{ width: 20, height: 20, background: sConf.bg, color: sConf.color }}
-                        >
-                          <CheckCircle2 size={11} />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-[12px] font-medium" style={{ color: 'var(--color-foreground)' }}>
-                            {task.title}
-                          </p>
-                          <p className="text-[11px]" style={{ color: 'var(--color-foreground-tertiary)' }}>
-                            {sConf.label} · {format(new Date(task.updatedAt), 'MMM d, h:mm a')}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </Card>
-          </motion.div>
-        </div>
+        {/* TODAY LANE */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[18px] font-display font-semibold tracking-tight">Today</h2>
+            <span className="badge badge-neutral">{todayTasks} due today</span>
+          </div>
+          <div className="rounded-3xl border border-border bg-surface shadow-xs overflow-hidden">
+             {todayTasks === 0 ? (
+               <div className="p-8 text-center flex flex-col items-center justify-center">
+                 <CheckCircle2 size={32} className="text-success mb-3" />
+                 <p className="text-[15px] font-semibold">You're all done for today!</p>
+               </div>
+             ) : (
+               <div className="divide-y divide-border">
+                 {filteredTasks.filter(t => t.dueDate === today).map(task => (
+                   <div key={task._id} className="flex items-center gap-4 p-4 hover:bg-surface-hover transition-colors cursor-pointer group" onClick={() => navigate('/tasks')}>
+                     <div className="w-5 h-5 rounded border-2 border-border group-hover:border-accent transition-colors" />
+                     <div className="flex-1">
+                       <p className="text-[14px] font-medium">{task.title}</p>
+                     </div>
+                     <ChevronRight size={16} className="text-foreground-tertiary opacity-0 group-hover:opacity-100 transition-opacity" />
+                   </div>
+                 ))}
+               </div>
+             )}
+          </div>
+        </section>
+
+        {/* ACTIVITY & INSIGHTS LANE */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            <h2 className="text-[18px] font-display font-semibold tracking-tight mb-4">Insights</h2>
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-xs h-[300px] flex flex-col">
+              <AIInsightPanel tasks={tasks} projectsCount={projects.length} />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-[18px] font-display font-semibold tracking-tight mb-4">Recent Activity</h2>
+            <div className="rounded-3xl border border-border bg-surface p-6 shadow-xs h-[300px] overflow-y-auto">
+               {recentActivities.map(task => (
+                 <div key={task._id} className="flex items-start gap-3 mb-4 last:mb-0">
+                    <div className="w-8 h-8 rounded-full bg-surface-active flex items-center justify-center shrink-0">
+                      <Activity size={14} className="text-foreground-secondary" />
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-medium">{task.title}</p>
+                      <p className="text-[11px] text-foreground-tertiary">{format(new Date(task.updatedAt), 'MMM d, h:mm a')}</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   );

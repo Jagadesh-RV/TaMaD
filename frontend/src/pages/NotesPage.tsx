@@ -55,56 +55,47 @@ export default function NotesPage() {
   };
 
   return (
-    <div className="page flex flex-col h-[calc(100vh-64px)] p-4 lg:p-6 bg-[color:var(--color-background)]">
-      <div className="flex w-full flex-1 overflow-hidden rounded-[24px] border border-[color:var(--color-border)] shadow-sm bg-[color:var(--color-surface)]">
-        {/* Sidebar: Document List — hidden on mobile, shown when activeDoc is null */}
+    <div className="page flex flex-col h-[calc(100vh-64px)] pt-4 pb-0 px-4 lg:px-6">
+      
+      {/* Knowledge Workspace Header */}
+      <div className="mb-4 flex items-center justify-between shrink-0">
+        <h1 className="text-[24px] font-display font-semibold tracking-tight leading-none text-foreground">
+          Knowledge Base
+        </h1>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="btn btn-primary shadow-xs"
+        >
+          <Plus size={14} /> New Note
+        </button>
+      </div>
+
+      <div className="flex w-full flex-1 overflow-hidden rounded-t-[32px] border border-border shadow-xs bg-surface mb-[-1px]">
+        {/* Sidebar: Document List */}
         <aside className={clsx(
-          "flex shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)]",
+          "flex shrink-0 flex-col border-r border-border bg-surface-hover/30",
           activeDoc ? "hidden md:flex md:w-[320px]" : "w-full md:w-[320px]"
         )}>
-          <div className="border-b border-[color:var(--color-border)] p-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-[15px] font-bold tracking-tight text-[color:var(--color-foreground)]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)]">
-                  <FileText size={16} />
-                </span>
-                Knowledge Base
-              </h2>
-               <button
-                 onClick={() => setIsModalOpen(true)}
-                 title="New note"
-                 className="btn btn-icon-sm bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)] hover:bg-[color:var(--color-accent-light)]"
-                 aria-label="New note"
-               >
-                <Plus size={18} />
-              </button>
-            </div>
-            <div className="search-input bg-[color:var(--color-surface)]">
-              <Search size={15} className="text-[color:var(--color-muted)]" />
+          <div className="p-4 border-b border-border-light">
+            <div className="flex items-center gap-2 px-2 py-1.5 bg-surface border border-border rounded-lg shadow-sm focus-within:border-accent transition-colors">
+              <Search size={14} className="text-muted" />
                <input
                  type="text"
-                 placeholder="Search docs..."
+                 placeholder="Search documents..."
                  value={search}
                  onChange={e => setSearch(e.target.value)}
-                 className="text-sm font-medium"
+                 className="w-full bg-transparent border-none outline-none text-[13px] font-medium placeholder-muted"
                  aria-label="Search notes"
                />
             </div>
           </div>
 
-          <div className="flex-1 space-y-1.5 overflow-y-auto p-3">
-            {loading && <LoadingSpinner text="Loading notes..." />}
+          <div className="flex-1 space-y-1 overflow-y-auto p-3" style={{ scrollbarWidth: 'none' }}>
+            {loading && <div className="p-4"><LoadingSpinner text="Loading notes..." /></div>}
             {!loading && filteredNotes?.length === 0 && (
-              <div className="flex h-full flex-col items-center justify-center px-4 py-10 text-center">
-                <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)]">
-                  <FileText size={24} />
-                </div>
-                <p className="text-sm font-bold text-[color:var(--color-foreground)]">
-                  {notes?.length === 0 ? 'No notes yet' : 'No matching notes'}
-                </p>
-                <p className="mt-1 text-xs font-medium text-[color:var(--color-muted)]">
-                  {notes?.length === 0 ? 'Click + to create your first one.' : 'Try a different search.'}
-                </p>
+              <div className="flex h-full flex-col items-center justify-center p-4 text-center opacity-50">
+                <FileText size={24} className="mb-3 text-muted" />
+                <p className="text-[13px] font-medium text-foreground">No notes found</p>
               </div>
             )}
             <AnimatePresence>
@@ -114,30 +105,29 @@ export default function NotesPage() {
                   <motion.button
                     key={doc._id}
                     layout
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, x: -8 }}
-                    transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.2) }}
                     onClick={() => setActiveDoc(doc)}
                     className={clsx(
-                      'relative w-full rounded-xl border p-3 text-left transition-all duration-200',
+                      'relative w-full rounded-xl p-3 text-left transition-all duration-200 border',
                       active
-                        ? 'border-[color:var(--color-accent)]/40 bg-[color:var(--color-accent-ghost)] shadow-xs'
-                        : 'border-transparent hover:bg-[color:var(--color-surface-active)]',
+                        ? 'bg-surface shadow-sm border-border'
+                        : 'border-transparent hover:bg-surface-active',
                     )}
                   >
                     {active && (
                       <motion.span
-                        layoutId="notes-active-bar"
-                        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                        className="absolute left-0 top-1/2 h-6 w-[3px] -translate-y-1/2 rounded-r-full bg-[color:var(--color-accent)]"
+                        layoutId="notes-active-indicator"
+                        className="absolute left-0 top-1/2 h-8 w-[3px] -translate-y-1/2 rounded-r-full bg-accent"
                       />
                     )}
-                    <h3 className={clsx('truncate text-[13px] font-semibold', active ? 'text-[color:var(--color-foreground)]' : 'text-[color:var(--color-foreground)]')}>
+                    <h3 className={clsx('truncate text-[14px] font-semibold leading-tight', active ? 'text-foreground' : 'text-foreground-secondary')}>
                       {doc.title || 'Untitled Document'}
                     </h3>
-                    <p className="mt-0.5 text-[11px] font-medium text-[color:var(--color-muted)]">
-                      Updated {doc.updatedAt ? format(new Date(doc.updatedAt), 'MMM d, yyyy') : 'Just now'}
+                    <p className="mt-1 text-[11px] font-medium text-muted truncate line-clamp-1">
+                      {doc.content ? doc.content.replace(/<[^>]*>?/gm, '').substring(0, 60) : 'Empty note...'}
                     </p>
                   </motion.button>
                 );
@@ -148,75 +138,73 @@ export default function NotesPage() {
 
         {/* Main Editor Area */}
         <div className={clsx(
-          "relative flex min-w-0 flex-1 flex-col bg-[color:var(--color-background)]",
+          "relative flex min-w-0 flex-1 flex-col bg-surface",
           !activeDoc && "hidden md:flex"
         )}>
           {activeDoc ? (
             <>
-              {/* Editor Toolbar */}
-              <div className="flex h-14 shrink-0 items-center justify-between border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)]/80 px-4 md:px-6 backdrop-blur-md">
+              {/* Editor Toolbar (Floating style) */}
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex h-12 items-center justify-between rounded-full border border-border bg-surface/80 px-4 backdrop-blur-md shadow-float gap-4">
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setActiveDoc(null)}
-                    className="mr-2 rounded-lg p-2 text-[color:var(--color-muted)] hover:bg-[color:var(--color-surface-active)] md:hidden"
-                    aria-label="Back to notes list"
+                    className="mr-2 rounded-full p-1.5 text-muted hover:bg-surface-active md:hidden"
                   >
                     <FileText size={16} />
                   </button>
-                  <div className="hidden sm:flex items-center gap-1 border-r border-[color:var(--color-border-light)] pr-3">
+                  <div className="flex items-center gap-1 pr-3 border-r border-border-light">
                     {[Bold, Italic].map((Icon, idx) => (
-                      <button key={idx} title={idx === 0 ? 'Bold' : 'Italic'} className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]">
-                        <Icon size={16} />
+                      <button key={idx} className="rounded-full p-1.5 text-muted transition-colors hover:bg-surface-active hover:text-foreground">
+                        <Icon size={14} />
                       </button>
                     ))}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 pl-3">
+                <div className="flex items-center gap-1">
                   {[List, CheckSquare].map((Icon, idx) => (
-                    <button key={idx} title={idx === 0 ? 'Bullet list' : 'Checklist'} className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]">
-                      <Icon size={16} />
+                    <button key={idx} className="rounded-full p-1.5 text-muted transition-colors hover:bg-surface-active hover:text-foreground">
+                      <Icon size={14} />
                     </button>
                   ))}
                 </div>
-                <div className="ml-auto flex items-center gap-3">
-                  <span className="flex items-center gap-1.5 text-[11px] font-semibold text-[color:var(--color-success)]">
+                <div className="ml-2 flex items-center gap-2 pl-3 border-l border-border-light">
+                  <span className="flex items-center gap-1 text-[10px] font-bold tracking-wider uppercase text-success">
                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                    Auto-saved
+                    Saved
                   </span>
-                   <button className="rounded-lg p-2 text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-active)] hover:text-[color:var(--color-foreground)]" aria-label="More options">
-                     <MoreVertical size={16} />
+                   <button className="rounded-full p-1.5 text-muted transition-colors hover:bg-surface-active hover:text-foreground">
+                     <MoreVertical size={14} />
                    </button>
                 </div>
               </div>
 
-              {/* Editor Canvas */}
-              <div className="flex flex-1 justify-center overflow-y-auto p-6 md:p-10">
-                <div className="h-fit w-full max-w-3xl rounded-2xl border border-[color:var(--color-border-light)] bg-[color:var(--color-surface)] p-8 shadow-sm md:p-10">
+              {/* Editor Canvas (Fluid, block-based feel) */}
+              <div className="flex flex-1 justify-center overflow-y-auto pt-24 pb-32 px-6 md:px-12" style={{ scrollbarWidth: 'thin' }}>
+                <div className="w-full max-w-3xl">
                    <input
                      type="text"
                      value={activeDoc.title || ''}
                      onChange={(e) => handleUpdateTitle(e.target.value)}
-                     className="mb-6 w-full border-none bg-transparent text-3xl font-bold tracking-tight text-[color:var(--color-foreground)] outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
+                     className="mb-8 w-full border-none bg-transparent text-[42px] font-display font-semibold tracking-tight leading-none text-foreground outline-none placeholder:text-muted"
                      placeholder="Untitled Document"
                      aria-label="Document title"
                    />
                   <textarea
                     value={activeDoc.content || ''}
                     onChange={(e) => handleUpdateContent(e.target.value)}
-                    className="h-full min-h-[500px] w-full resize-none border-none bg-transparent leading-relaxed text-[color:var(--color-foreground)] outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
-                    placeholder="Start writing..."
+                    className="h-full min-h-[600px] w-full resize-none border-none bg-transparent text-[16px] leading-relaxed text-foreground-secondary outline-none placeholder:text-muted"
+                    placeholder="Press '/' for commands or start typing..."
                   />
                 </div>
               </div>
             </>
           ) : (
-            <div className="flex h-full items-center justify-center">
+            <div className="flex h-full items-center justify-center bg-surface-hover/30">
               <EmptyState
                 icon={FileText}
-                title="Start with a blank page"
+                title="Start writing"
                 description="Your knowledge base is a quiet place to capture ideas, decisions, and research."
-                action={{ label: 'Create a note', onClick: () => setIsModalOpen(true) }}
-                steps={['Give your note a title', 'Write freely — it auto-saves', 'Search anytime from the sidebar']}
+                action={{ label: 'Create new note', onClick: () => setIsModalOpen(true) }}
               />
             </div>
           )}
