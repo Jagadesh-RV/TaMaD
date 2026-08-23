@@ -51,10 +51,18 @@ export function AuthLayout({ children, wide = false }: AuthLayoutProps) {
               Experience the new standard in task management. Clean, powerful, and deeply integrated with your workflows.
             </p>
 
-            <div className="mt-12 relative">
-               <div className="rounded-xl border shadow-2xl overflow-hidden" style={{ borderColor: 'var(--color-border)', background: 'var(--color-surface)' }}>
-                 <img src="/images/hero-dashboard.png" alt="TaMaD App" className="w-full h-auto object-cover rounded-xl" />
-               </div>
+            <div className="mt-12 space-y-6">
+              {bullets.map((b, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[color:var(--color-foreground)] text-[color:var(--color-background)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[color:var(--color-foreground)]">{b.title}</h3>
+                    <p className="mt-1 text-[13px] text-[color:var(--color-muted)]">{b.text}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
