@@ -16,7 +16,7 @@ export function LogoMark({ size = 36, className }: { size?: number; className?: 
       aria-hidden="true"
     >
       <img
-        src="/tamadmainlogo-removebg-preview.png"
+        src="/logo/tamad-favicon-ink.svg"
         alt=""
         width={size}
         height={size}
