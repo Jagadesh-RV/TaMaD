@@ -5,6 +5,9 @@ import { GripVertical, Sparkles, ChevronDown, CheckCircle2, ChevronRight } from 
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { format, parseISO } from 'date-fns';
+import { ContextMenu } from '../ui/ContextMenu';
+import { Trash2, Edit2, Archive } from 'lucide-react';
+import { useTaskStore } from '../../store/taskStore';
 
 interface Task {
   _id: string;
@@ -37,6 +40,7 @@ const PRIORITY_COLORS: Record<string, { dot: string; label: string; edge: string
 
 function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const { deleteTask, updateTask } = useTaskStore() as any;
   const {
     attributes,
     listeners,
@@ -64,6 +68,12 @@ function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) 
   };
 
   return (
+    <ContextMenu items={[
+      { label: 'Edit Task', icon: <Edit2 size={14} />, onClick: () => { if (onClick) onClick(); } },
+      { label: task.status === 'done' ? 'Mark as Todo' : 'Mark as Done', icon: <CheckCircle2 size={14} />, onClick: () => updateTask(task._id, { status: task.status === 'done' ? 'todo' : 'done' }) },
+      { divider: true, label: '' },
+      { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => deleteTask(task._id), danger: true }
+    ]}>
     <div
       ref={setNodeRef}
       className={clsx('kanban-card group relative', isDragging && 'z-50 scale-[1.02]')}

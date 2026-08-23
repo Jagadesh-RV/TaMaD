@@ -16,6 +16,7 @@ import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { ContextMenu } from '../components/ui/ContextMenu';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonGrid } from '../components/ui/Skeleton';
 import ErrorState from '../components/ui/ErrorState';
@@ -162,6 +163,12 @@ export default function ProjectsPage() {
                const isOverdue = project.dueDate && (() => { try { return isPast(parseISO(project.dueDate)); } catch { return false; } })();
                return (
                  <motion.div key={project._id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: index * 0.05 }}>
+                   <ContextMenu items={[
+                     { label: 'Edit Project', icon: <Edit2 size={14} />, onClick: () => { /* open edit */ } },
+                     { label: 'Archive', icon: <Archive size={14} />, onClick: () => {} },
+                     { divider: true, label: '' },
+                     { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDeleteClick(project._id), danger: true }
+                   ]}>
                    <div className="group relative bg-surface border border-border rounded-3xl p-6 shadow-xs hover:shadow-soft hover:border-foreground-tertiary transition-all overflow-hidden cursor-pointer" onClick={() => toggleExpand(project._id)}>
                      {/* Decorative top accent */}
                      <div className="absolute top-0 left-0 w-full h-1" style={{ background: project.color || 'var(--color-accent)' }} />
