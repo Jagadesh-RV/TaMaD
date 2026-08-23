@@ -31,7 +31,7 @@ export function SectionHeading({
         <Reveal>
           <span
             className={clsx(
-              'mb-4 inline-flex items-center gap-2 rounded-full border border-brand-500/25 bg-brand-500/[0.07] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-brand-600 dark:border-brand-400/25 dark:bg-brand-400/10 dark:text-brand-300',
+              'mb-4 inline-flex items-center gap-2 rounded-full border border-brand-500/25 bg-brand-500/[0.07] px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-brand-600   ',
               eyebrowClassName,
             )}
           >
@@ -40,13 +40,13 @@ export function SectionHeading({
         </Reveal>
       )}
       <Reveal delay={0.05}>
-        <h2 className="text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-navy-900 dark:text-white md:text-5xl">
+        <h2 className="text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-[color:var(--color-foreground)] :var(--color-foreground)] md:text-5xl">
           {title}
         </h2>
       </Reveal>
       {subtitle && (
         <Reveal delay={0.12}>
-          <p className="mt-5 text-pretty text-base leading-relaxed text-slate-600 dark:text-slate-400 md:text-lg">
+          <p className="mt-5 text-pretty text-base leading-relaxed text-[color:var(--color-muted)]  md:text-lg">
             {subtitle}
           </p>
         </Reveal>
