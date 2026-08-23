@@ -9,6 +9,10 @@ import SprintModal from '../components/tasks/SprintModal';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import toast from 'react-hot-toast';
+import { ContextMenu } from '../components/ui/ContextMenu';
+import { GripVertical, Plus, Rocket, ListTodo, Archive } from 'lucide-react';
+import clsx from 'clsx';
+import EmptyState from '../components/ui/EmptyState';
 
 function DroppableContainer({ id, children, className, style }: { id: string; children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -16,7 +20,7 @@ function DroppableContainer({ id, children, className, style }: { id: string; ch
     data: { type: 'Container', containerId: id }
   });
   return (
-    <div ref={setNodeRef} id={id} className={`${className || ''} transition-colors ${isOver ? 'bg-black/5 dark:bg-white/5 rounded-lg' : ''}`} style={style}>
+    <div ref={setNodeRef} id={id} className={clsx(className, "transition-colors", isOver && 'bg-surface-active')} style={style}>
       {children}
     </div>
   );
@@ -32,24 +36,28 @@ function SortableTaskItem({ task, onClick }: { task: any, onClick: () => void })
   return (
     <div 
       ref={setNodeRef}
-      style={{ ...style, background: 'var(--color-surface)', borderColor: 'var(--color-border-light)' }}
-      className="mb-2 cursor-grab active:cursor-grabbing rounded-lg border p-3 transition-colors hover:border-[var(--color-accent)]" 
+      style={style}
+      className={clsx(
+        "group relative bg-surface border border-border rounded-xl p-3 mb-2 shadow-xs transition-all cursor-pointer hover:border-accent hover:shadow-soft",
+        isDragging && "z-50 shadow-float scale-[1.02]"
+      )}
       onClick={onClick}
-      {...attributes} 
-      {...listeners}
     >
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>{task.taskType || 'Task'}</span>
-        <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{task.storyPoints ? `${task.storyPoints} pts` : '-'}</span>
+      <div className="mb-2 flex items-center justify-between" {...attributes} {...listeners}>
+        <div className="flex items-center gap-1.5">
+          <GripVertical size={13} className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab text-muted shrink-0" />
+          <span className="px-2 py-0.5 rounded-[6px] bg-surface-active text-foreground-tertiary text-[9px] font-bold uppercase tracking-widest">{task.taskType || 'Task'}</span>
+        </div>
+        <span className="text-[10px] font-bold text-muted">{task.storyPoints ? `${task.storyPoints} pts` : '-'}</span>
       </div>
-      <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{task.title}</p>
-      <div className="mt-2 flex items-center justify-between">
-        <span className="text-xs px-2 py-0.5 rounded bg-[color:var(--color-surface-hover)]" style={{ color: 'var(--color-muted)' }}>{task.status}</span>
+      <p className="text-[13px] font-medium text-foreground leading-snug ml-1">{task.title}</p>
+      <div className="mt-2.5 flex items-center justify-between ml-1">
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-surface-hover border border-border text-foreground-tertiary font-bold uppercase tracking-widest">{task.status.replace('-', ' ')}</span>
         {task.assignees && task.assignees.length > 0 && (
           <div className="flex -space-x-1">
             {task.assignees.map((a: any) => (
-              <div key={a.email} className="h-5 w-5 rounded-full bg-[color:var(--color-accent)] text-white flex items-center justify-center text-[10px] font-bold border border-[color:var(--color-surface)]" title={a.name}>
-                {a.name.charAt(0)}
+              <div key={a.email} className="h-5 w-5 rounded-full bg-accent text-white flex items-center justify-center text-[9px] font-bold border border-surface shadow-sm" title={a.name}>
+                {a.name.charAt(0).toUpperCase()}
               </div>
             ))}
           </div>
@@ -73,16 +81,16 @@ export default function SprintPlanningPage() {
   useEffect(() => {
     if (currentWorkspace?._id) {
       fetchTasks(currentWorkspace._id);
-      fetchSprints(currentWorkspace._id, ''); // Fetch all sprints for workspace for now
+      fetchSprints(currentWorkspace._id, ''); 
     }
-  }, [currentWorkspace?._id]);
+  }, [currentWorkspace?._id, fetchTasks, fetchSprints]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor)
   );
 
-  if (!currentWorkspace) return <div className="p-8 text-[color:var(--color-muted)]">Loading workspace...</div>;
+  if (!currentWorkspace) return null;
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -117,7 +125,6 @@ export default function SprintPlanningPage() {
     const currentSprintId = task.sprintId || null;
     if (currentSprintId === newSprintId) return;
 
-    // Optimistic UI update during drag
     useTaskStore.setState(s => ({
       tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: newSprintId || undefined } : t)
     }));
@@ -136,7 +143,6 @@ export default function SprintPlanningPage() {
 
     try {
       await updateTask(taskId, { sprintId: currentSprintId as any });
-      toast.success('Task moved');
     } catch {
       useTaskStore.setState(s => ({
         tasks: s.tasks.map(t => t._id === taskId ? { ...t, sprintId: originalSprintId || undefined } : t)
@@ -160,49 +166,55 @@ export default function SprintPlanningPage() {
 
   const activeSprint = sprints.find(s => s.status === 'active');
   const plannedSprints = sprints.filter(s => s.status === 'planned');
-  
-  // Filter backlog tasks (tasks not in done status, and not in any active/planned sprint shown)
   const backlogTasks = tasks.filter(t => t.status !== 'done' && !t.sprintId);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <div className="flex items-center justify-between border-b border-[var(--color-border-light)] p-6">
+    <div className="page flex h-[calc(100vh-80px)] flex-col overflow-hidden">
+      
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8 shrink-0">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>Backlog & Planning</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">
-            Plan your sprints for {currentWorkspace.name}
-          </p>
+          <h1 className="text-[28px] font-display font-bold text-foreground tracking-tight leading-none mb-1 flex items-center gap-3">
+             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+               <ListTodo size={22} />
+             </div>
+             Backlog
+          </h1>
+          <p className="text-[14px] text-foreground-secondary mt-2 pl-[52px]">Plan your sprints and manage the backlog.</p>
         </div>
         <button 
           onClick={() => setIsSprintModalOpen(true)}
-          className="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:opacity-90 text-white" 
-          style={{ background: 'var(--color-accent)' }}>
+          className="btn-primary">
           Create Sprint
         </button>
       </div>
 
       <DndContext sensors={sensors} collisionDetection={pointerWithin} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 gap-6 min-h-0 overflow-hidden">
+          
           {/* Sprints Area */}
-          <div className="flex-1 overflow-y-auto p-6" style={{ borderRight: '1px solid var(--color-border-light)' }}>
+          <div className="flex-1 overflow-y-auto pr-2" style={{ scrollbarWidth: 'none' }}>
             
             {activeSprint && (
-              <DroppableContainer id={activeSprint._id} className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
-                <div className="mb-4 flex items-center justify-between">
+              <DroppableContainer id={activeSprint._id} className="mb-6 rounded-[24px] border border-border bg-surface p-6 shadow-xs">
+                <div className="mb-6 flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>{activeSprint.name} <span className="ml-2 text-xs bg-blue-500/20 text-blue-500 px-2 py-1 rounded">Active</span></h2>
-                    <p className="text-xs text-[var(--color-muted)]">Ends {new Date(activeSprint.endDate).toLocaleDateString()}</p>
+                    <h2 className="text-[16px] font-display font-bold text-foreground flex items-center gap-2">
+                      {activeSprint.name}
+                      <span className="px-2 py-0.5 rounded-md bg-success/10 text-success text-[10px] uppercase tracking-widest font-bold">Active</span>
+                    </h2>
+                    <p className="text-[12px] font-medium text-foreground-secondary mt-1">Ends {new Date(activeSprint.endDate).toLocaleDateString()}</p>
                   </div>
-                  <button className="text-sm rounded border px-3 py-1 text-[var(--color-muted)] hover:bg-[var(--color-surface-hover)] border-[var(--color-border-light)]">Complete Sprint</button>
+                  <button className="btn-secondary btn-sm">Complete Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === activeSprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <div className="min-h-[100px]">
+                  <div className="min-h-[120px]">
                     {tasks.filter(t => t.sprintId === activeSprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
                     {tasks.filter(t => t.sprintId === activeSprint._id).length === 0 && (
-                      <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
-                        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Drag issues here</p>
+                      <div className="rounded-[16px] border-2 border-dashed border-border p-8 flex items-center justify-center">
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-muted">Drop issues here</p>
                       </div>
                     )}
                   </div>
@@ -211,21 +223,19 @@ export default function SprintPlanningPage() {
             )}
 
             {plannedSprints.map(sprint => (
-              <DroppableContainer key={sprint._id} id={sprint._id} className="mb-6 rounded-xl border border-[var(--color-border-light)] p-5" style={{ background: 'var(--color-surface)' }}>
-                <div className="mb-4 flex items-center justify-between">
-                  <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>{sprint.name}</h2>
-                  <button 
-                    onClick={() => startSprint(sprint._id)}
-                    className="text-sm rounded border px-3 py-1 bg-[var(--color-accent)] text-white hover:opacity-90 border-[var(--color-accent)]">Start Sprint</button>
+              <DroppableContainer key={sprint._id} id={sprint._id} className="mb-6 rounded-[24px] border border-border bg-surface p-6 shadow-xs">
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-[16px] font-display font-bold text-foreground">{sprint.name}</h2>
+                  <button onClick={() => startSprint(sprint._id)} className="btn-primary btn-sm">Start Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === sprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
-                  <div className="min-h-[100px]">
+                  <div className="min-h-[120px]">
                     {tasks.filter(t => t.sprintId === sprint._id).map(task => (
                       <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                     ))}
                     {tasks.filter(t => t.sprintId === sprint._id).length === 0 && (
-                      <div className="rounded-lg border border-dashed p-8 text-center" style={{ borderColor: 'var(--color-border-light)' }}>
-                        <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Plan your sprint here</p>
+                      <div className="rounded-[16px] border-2 border-dashed border-border p-8 flex items-center justify-center">
+                        <p className="text-[12px] font-bold uppercase tracking-widest text-muted">Plan your sprint here</p>
                       </div>
                     )}
                   </div>
@@ -234,54 +244,57 @@ export default function SprintPlanningPage() {
             ))}
             
             {!activeSprint && plannedSprints.length === 0 && (
-               <div className="rounded-xl border border-[var(--color-border-light)] p-12 text-center" style={{ background: 'var(--color-surface)' }}>
-                 <h2 className="text-xl font-bold" style={{ color: 'var(--color-foreground)' }}>No Sprints Found</h2>
-                 <p className="mt-2 text-[var(--color-muted)]">Create a sprint to start planning your work.</p>
-               </div>
+               <EmptyState
+                  icon={Rocket}
+                  title="No Sprints Found"
+                  description="Create a sprint to start planning your work."
+                  action={{ label: 'Create Sprint', onClick: () => setIsSprintModalOpen(true) }}
+               />
             )}
           </div>
 
           {/* Backlog Area */}
-          <div className="w-96 overflow-y-auto p-6" style={{ background: 'var(--color-surface-hover)' }}>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>Backlog</h2>
+          <div className="w-[380px] bg-surface-hover rounded-[24px] border border-border flex flex-col overflow-hidden shrink-0">
+            <div className="p-6 border-b border-border flex items-center justify-between shrink-0 bg-surface">
+              <h2 className="text-[14px] font-display font-bold text-foreground">Backlog</h2>
               <button 
                 onClick={() => setIsCreateModalOpen(true)}
-                className="text-sm font-medium transition-colors hover:opacity-80" 
-                style={{ color: 'var(--color-accent)' }}>
-                + Create Issue
+                className="text-[12px] font-bold text-accent hover:text-accent-hover transition-colors flex items-center gap-1">
+                <Plus size={14} /> Create Issue
               </button>
             </div>
-            <div className="space-y-2">
-              {tasksLoading && <p className="text-sm text-[color:var(--color-muted)]">Loading backlog...</p>}
+            <div className="flex-1 overflow-y-auto p-4" style={{ scrollbarWidth: 'none' }}>
               <SortableContext items={backlogTasks.map(t => t._id)} strategy={verticalListSortingStrategy}>
                 <DroppableContainer id="backlog" className="min-h-[200px]">
                   {!tasksLoading && backlogTasks.map(task => (
                     <SortableTaskItem key={task._id} task={task} onClick={() => setSelectedTask(task)} />
                   ))}
+                  {!tasksLoading && backlogTasks.length === 0 && (
+                    <div className="rounded-[16px] border-2 border-dashed border-border p-8 flex items-center justify-center text-center mt-4">
+                      <p className="text-[12px] font-bold uppercase tracking-widest text-muted">Backlog is empty</p>
+                    </div>
+                  )}
                 </DroppableContainer>
               </SortableContext>
             </div>
           </div>
         </div>
+
+        {/* Drag Overlay */}
         <DragOverlay>
           {activeDragTask ? (
-            <div className="rounded-lg border p-3 shadow-xl" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-accent)', opacity: 0.9 }}>
+            <div className="bg-surface border border-accent rounded-xl p-3 shadow-float w-[320px] opacity-90">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-bold uppercase" style={{ color: 'var(--color-muted)' }}>{activeDragTask.taskType || 'Task'}</span>
-                <span className="text-xs font-medium" style={{ color: 'var(--color-muted)' }}>{activeDragTask.storyPoints ? `${activeDragTask.storyPoints} pts` : '-'}</span>
+                <span className="px-2 py-0.5 rounded-[6px] bg-surface-active text-foreground-tertiary text-[9px] font-bold uppercase tracking-widest">{activeDragTask.taskType || 'Task'}</span>
+                <span className="text-[10px] font-bold text-muted">{activeDragTask.storyPoints ? `${activeDragTask.storyPoints} pts` : '-'}</span>
               </div>
-              <p className="text-sm font-medium" style={{ color: 'var(--color-foreground)' }}>{activeDragTask.title}</p>
+              <p className="text-[13px] font-medium text-foreground leading-snug">{activeDragTask.title}</p>
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
 
-      <IssueDetailModal 
-        isOpen={!!selectedTask}
-        onClose={() => setSelectedTask(null)}
-        initialData={selectedTask}
-      />
+      <IssueDetailModal isOpen={!!selectedTask} onClose={() => setSelectedTask(null)} initialData={selectedTask} />
       
       <TaskModal
         isOpen={isCreateModalOpen}

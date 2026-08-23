@@ -59,7 +59,7 @@ function Breadcrumbs() {
   return (
     <nav className="hidden sm:flex items-center gap-0.5" aria-label="Breadcrumb">
       {breadcrumbs.map((crumb, index) => (
-        <span key={crumb.path} className="flex items-center gap-0.5">
+        <span key={`${crumb.path}-${index}`} className="flex items-center gap-0.5">
           {index > 0 && (
             <ChevronRight size={12} style={{ color: 'var(--color-foreground-tertiary)' }} />
           )}
