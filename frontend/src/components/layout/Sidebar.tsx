@@ -290,16 +290,14 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       >
         {/* Logo mark */}
         <div
-          className="flex shrink-0 items-center justify-center rounded-lg font-bold text-[15px] leading-none text-white"
-          style={{
-            width: 30,
-            height: 30,
-            background: 'var(--color-accent)',
-            boxShadow: '0 1px 3px rgba(59,78,246,0.3)',
-            letterSpacing: '-0.02em',
-          }}
+          className="flex shrink-0 items-center justify-center overflow-hidden"
+          style={{ width: 30, height: 30 }}
         >
-          T
+          <img
+            src="/logo/tamad-favicon-ink.svg"
+            alt="TaMaD"
+            className="h-full w-full object-contain"
+          />
         </div>
 
         {!collapsed && (
