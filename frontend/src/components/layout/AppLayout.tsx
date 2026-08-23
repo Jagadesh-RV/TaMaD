@@ -59,6 +59,15 @@ function MobileBottomNav() {
       }}
       aria-label="Mobile navigation"
     >
+      <div
+        className="absolute inset-0 z-[-1]"
+        style={{
+          background: 'var(--color-surface)',
+          opacity: 0.85,
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
+      />
       <div className="flex items-center justify-around px-2 pt-1.5 pb-2">
         {MOBILE_NAV.slice(0, 2).map(item => {
           const Icon = item.icon;
@@ -88,16 +97,16 @@ function MobileBottomNav() {
         {/* Quick create center button */}
         <button
           onClick={() => openQuickCreate()}
-          className="flex items-center justify-center rounded-full transition-all active:scale-95"
+          className="flex items-center justify-center rounded-full transition-transform active:scale-90 relative top-[-8px] shadow-lg"
           style={{
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             background: 'var(--color-accent)',
-            boxShadow: '0 2px 8px rgba(59,78,246,0.35)',
+            color: 'var(--color-surface)',
           }}
           aria-label="Quick create"
         >
-          <Plus size={20} style={{ color: '#fff' }} strokeWidth={2.5} />
+          <Plus size={22} strokeWidth={2.5} />
         </button>
 
         {MOBILE_NAV.slice(2).map(item => {
