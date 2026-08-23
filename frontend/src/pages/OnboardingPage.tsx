@@ -63,25 +63,25 @@ export default function OnboardingPage() {
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.1 }}
-              className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-brand-500 to-violet-600 text-white shadow-[0_20px_50px_-16px_rgba(37,99,235,0.55)]"
+              className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[color:var(--color-foreground)] text-[color:var(--color-background)] shadow-lg"
             >
               <PartyPopper size={36} />
             </motion.div>
-            <h1 className="text-balance text-3xl font-extrabold tracking-tight text-navy-950 dark:text-white">
+            <h1 className="text-balance text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">
               You&apos;re all set, {firstName}!
             </h1>
-            <p className="mx-auto mt-3 max-w-sm text-pretty text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mx-auto mt-3 max-w-sm text-pretty text-sm leading-relaxed text-[color:var(--color-muted)]">
               Your workspace is ready. Start with your dashboard, create your first task, and watch TaMaD bring it all together.
             </p>
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-600 px-8 text-sm font-bold text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-500"
+              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[color:var(--color-foreground)] text-[color:var(--color-background)] px-8 text-sm font-bold text-[color:var(--color-background)] shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color:var(--color-foreground-secondary)]"
             >
               <Rocket size={18} />
               Open my dashboard
             </button>
-            <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">You can invite teammates anytime from your workspace settings.</p>
+            <p className="mt-4 text-xs text-[color:var(--color-muted)]">You can invite teammates anytime from your workspace settings.</p>
           </motion.div>
         ) : mode === null ? (
           <motion.div
@@ -92,48 +92,48 @@ export default function OnboardingPage() {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="mb-8 text-center">
-              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-500/10 text-brand-600 dark:bg-brand-400/10 dark:text-brand-300">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--color-surface-active)] text-[color:var(--color-foreground)]">
                 <Sparkles size={26} />
               </div>
-              <h1 className="text-balance text-3xl font-extrabold tracking-tight text-navy-950 dark:text-white">
+              <h1 className="text-balance text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">
                 Welcome to TaMaD, {firstName}
               </h1>
-              <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400">Let&apos;s set up your workspace in a few seconds.</p>
+              <p className="mt-2.5 text-sm text-[color:var(--color-muted)]">Let&apos;s set up your workspace in a few seconds.</p>
             </div>
 
             <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => setMode('personal')}
-                className="group flex w-full items-center gap-4 rounded-2xl border border-navy-900/10 bg-white/70 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-[0_16px_40px_-20px_rgba(37,99,235,0.3)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-brand-400/30"
+                className="group flex w-full items-center gap-4 rounded-2xl border border border-border bg-surface p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:shadow-sm"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color:var(--color-surface-active)] text-[color:var(--color-foreground)]">
                   <User size={20} />
                 </span>
                 <span className="flex-1">
-                  <span className="block text-[15px] font-bold text-navy-950 dark:text-white">Just me</span>
-                  <span className="block text-[13px] text-slate-500 dark:text-slate-400">A personal workspace for my own tasks, notes, goals and focus.</span>
+                  <span className="block text-[15px] font-bold text-[color:var(--color-foreground)]">Just me</span>
+                  <span className="block text-[13px] text-[color:var(--color-muted)]">A personal workspace for my own tasks, notes, goals and focus.</span>
                 </span>
-                <ArrowRight size={18} className="text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-brand-500 dark:text-slate-600" />
+                <ArrowRight size={18} className="text-[color:var(--color-muted)] transition-all group-hover:translate-x-1 group-hover:text-[color:var(--color-foreground)]" />
               </button>
 
               <button
                 type="button"
                 onClick={() => setMode('team')}
-                className="group flex w-full items-center gap-4 rounded-2xl border border-navy-900/10 bg-white/70 p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-[0_16px_40px_-20px_rgba(37,99,235,0.3)] dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-brand-400/30"
+                className="group flex w-full items-center gap-4 rounded-2xl border border border-border bg-surface p-5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:shadow-sm"
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-300">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color:var(--color-surface-active)] text-[color:var(--color-foreground)]">
                   <Building2 size={20} />
                 </span>
                 <span className="flex-1">
-                  <span className="block text-[15px] font-bold text-navy-950 dark:text-white">My team</span>
-                  <span className="block text-[13px] text-slate-500 dark:text-slate-400">An organization workspace for projects, sprints, meetings and collaboration.</span>
+                  <span className="block text-[15px] font-bold text-[color:var(--color-foreground)]">My team</span>
+                  <span className="block text-[13px] text-[color:var(--color-muted)]">An organization workspace for projects, sprints, meetings and collaboration.</span>
                 </span>
-                <ArrowRight size={18} className="text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-brand-500 dark:text-slate-600" />
+                <ArrowRight size={18} className="text-[color:var(--color-muted)] transition-all group-hover:translate-x-1 group-hover:text-[color:var(--color-foreground)]" />
               </button>
             </div>
 
-            <button type="button" onClick={() => void skip()} className="mt-6 w-full text-center text-sm font-semibold text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+            <button type="button" onClick={() => void skip()} className="mt-6 w-full text-center text-sm font-semibold text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-foreground)]">
               Skip for now
             </button>
           </motion.div>
@@ -146,10 +146,10 @@ export default function OnboardingPage() {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="mb-8 text-center">
-              <h1 className="text-balance text-3xl font-extrabold tracking-tight text-navy-950 dark:text-white">
+              <h1 className="text-balance text-3xl font-extrabold tracking-tight text-[color:var(--color-foreground)]">
                 {mode === 'team' ? 'Name your workspace' : 'Name your workspace'}
               </h1>
-              <p className="mt-2.5 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-2.5 text-sm text-[color:var(--color-muted)]">
                 {mode === 'team' ? "Your team's shared home for everything TaMaD." : "Your personal command center."}
               </p>
             </div>
@@ -162,7 +162,7 @@ export default function OnboardingPage() {
               className="space-y-5"
             >
               <div>
-                <label htmlFor="wsName" className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
+                <label htmlFor="wsName" className="mb-1.5 block text-[13px] font-semibold text-[color:var(--color-foreground)]">
                   {mode === 'team' ? 'Organization name' : 'Workspace name'}
                 </label>
                 <input
@@ -172,15 +172,15 @@ export default function OnboardingPage() {
                   autoFocus
                   placeholder={mode === 'team' ? 'Acme Inc.' : "My personal workspace"}
                   className={clsx(
-                    'h-12 w-full rounded-xl border bg-white/70 px-4 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
-                    'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
+                    'h-12 w-full rounded-xl border bg-surface px-4 text-[14px] font-medium text-[color:var(--color-foreground)] outline-none transition-all duration-200 placeholder:text-[color:var(--color-muted)]',
+                    'border-border hover:border-border-hover focus:border-accent focus:ring-2 focus:ring-accent/20',
                   )}
                 />
               </div>
 
               {mode === 'team' && (
                 <div>
-                  <label htmlFor="wsDomain" className="mb-1.5 block text-[13px] font-semibold text-navy-900 dark:text-slate-200">
+                  <label htmlFor="wsDomain" className="mb-1.5 block text-[13px] font-semibold text-[color:var(--color-foreground)]">
                     Workspace URL (optional)
                   </label>
                   <div className="flex items-center gap-2">
@@ -191,19 +191,19 @@ export default function OnboardingPage() {
                       onChange={(e) => setDomain(e.target.value.replace(/[^a-z0-9-]/g, ''))}
                       placeholder="acme"
                       className={clsx(
-                        'h-12 w-full rounded-xl border bg-white/70 pl-[92px] pr-4 text-[14px] font-medium text-navy-900 outline-none transition-all duration-200 placeholder:text-slate-400 dark:bg-white/[0.04] dark:text-white',
-                        'border-navy-900/10 hover:border-navy-900/20 focus:border-brand-600 focus:ring-4 focus:ring-brand-500/10 dark:border-white/10 dark:hover:border-white/20',
+                        'h-12 w-full rounded-xl border bg-surface pl-[92px] pr-4 text-[14px] font-medium text-[color:var(--color-foreground)] outline-none transition-all duration-200 placeholder:text-[color:var(--color-muted)]',
+                        'border-border hover:border-border-hover focus:border-accent focus:ring-2 focus:ring-accent/20',
                       )}
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-slate-400 dark:text-slate-500">You can change this later.</p>
+                  <p className="mt-1.5 text-xs text-[color:var(--color-muted)]">You can change this later.</p>
                 </div>
               )}
 
               <button
                 type="submit"
                 disabled={isCreating || !name.trim()}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 text-sm font-bold text-white shadow-[0_8px_30px_rgba(37,99,235,0.35)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[color:var(--color-foreground)] text-[color:var(--color-background)] text-sm font-bold text-[color:var(--color-background)] shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-[color:var(--color-foreground-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isCreating ? (
                   <>
@@ -218,7 +218,7 @@ export default function OnboardingPage() {
                 )}
               </button>
 
-              <button type="button" onClick={() => void skip()} className="w-full text-center text-sm font-semibold text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300">
+              <button type="button" onClick={() => void skip()} className="w-full text-center text-sm font-semibold text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-foreground)]">
                 Skip for now
               </button>
             </form>

@@ -53,7 +53,7 @@ export function PublicNavbar() {
       className={clsx(
         'fixed inset-x-0 top-0 z-50 transition-all duration-500',
         scrolled
-          ? 'border-b border-navy-900/[0.06] bg-white/80 backdrop-blur-xl dark:border-white/[0.08] dark:bg-navy-950/80'
+          ? 'border-b border-border bg-[color:var(--color-background)]/80 backdrop-blur-xl  :var(--color-background)]/80'
           : 'border-b border-transparent bg-transparent',
       )}
     >
@@ -66,7 +66,7 @@ export function PublicNavbar() {
               key={item.id}
               href={`#${item.id}`}
               onClick={(e) => handleNav(e, item.id)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-navy-900/[0.04] hover:text-navy-900 dark:text-slate-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-hover)] hover:text-[color:var(--color-foreground)] :var(--color-muted)] :bg-[color:var(--color-surface-hover)] :text-[color:var(--color-foreground)]"
             >
               {item.label}
             </a>
@@ -74,7 +74,7 @@ export function PublicNavbar() {
           <button
             type="button"
             onClick={handleContact}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-navy-900/[0.04] hover:text-navy-900 dark:text-slate-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-hover)] hover:text-[color:var(--color-foreground)] :var(--color-muted)] :bg-[color:var(--color-surface-hover)] :text-[color:var(--color-foreground)]"
           >
             Contact
           </button>
@@ -84,7 +84,7 @@ export function PublicNavbar() {
               e.preventDefault();
               setMobileOpen(false);
             }}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-navy-900/[0.04] hover:text-navy-900 dark:text-slate-300 dark:hover:bg-white/[0.06] dark:hover:text-white"
+            className="rounded-lg px-3 py-2 text-sm font-medium text-[color:var(--color-muted)] transition-colors hover:bg-[color:var(--color-surface-hover)] hover:text-[color:var(--color-foreground)] :var(--color-muted)] :bg-[color:var(--color-surface-hover)] :text-[color:var(--color-foreground)]"
             aria-disabled="true"
             title="Documentation coming soon"
           >
@@ -97,7 +97,7 @@ export function PublicNavbar() {
             type="button"
             onClick={toggleTheme}
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-navy-900/10 bg-white/70 text-slate-600 transition-colors hover:text-navy-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:text-white"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-[color:var(--color-surface)] text-[color:var(--color-muted)] transition-colors hover:text-[color:var(--color-foreground)]  :var(--color-surface)] :var(--color-muted)] :text-[color:var(--color-foreground)]"
           >
             {isDark ? <Sun size={18} /> : <Moon size={18} />}
           </button>
@@ -110,7 +110,7 @@ export function PublicNavbar() {
             <>
               <Link
                 to="/login"
-                className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:text-navy-900 dark:text-slate-200 dark:hover:text-white sm:inline-flex"
+                className="hidden rounded-xl px-4 py-2 text-sm font-semibold text-[color:var(--color-foreground)] transition-colors hover:text-[color:var(--color-foreground)] :var(--color-muted)] :text-[color:var(--color-foreground)] sm:inline-flex"
               >
                 Login
               </Link>
@@ -125,7 +125,7 @@ export function PublicNavbar() {
             onClick={() => setMobileOpen((open) => !open)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-navy-900/10 bg-white/70 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 lg:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-[color:var(--color-surface)] text-[color:var(--color-foreground)]  :var(--color-surface)] :var(--color-muted)] lg:hidden"
           >
             {mobileOpen ? <X size={19} /> : <Menu size={19} />}
           </button>
@@ -133,14 +133,14 @@ export function PublicNavbar() {
       </nav>
 
       {mobileOpen && (
-        <div className="border-t border-navy-900/[0.06] bg-white/95 backdrop-blur-xl dark:border-white/[0.08] dark:bg-navy-950/95 lg:hidden">
+        <div className="border-t border-border bg-[color:var(--color-background)]/95 backdrop-blur-xl  :var(--color-background)]/95 lg:hidden">
           <div className="mx-auto max-w-7xl space-y-1 px-5 py-4">
             {navItems.map((item) => (
               <a
                 key={item.id}
                 href={`#${item.id}`}
                 onClick={(e) => handleNav(e, item.id)}
-                className="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-navy-900/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.06]"
+                className="block rounded-xl px-4 py-3 text-sm font-medium text-[color:var(--color-foreground)] transition-colors hover:bg-[color:var(--color-surface-hover)] :var(--color-muted)] :bg-[color:var(--color-surface-hover)]"
               >
                 {item.label}
               </a>
@@ -148,7 +148,7 @@ export function PublicNavbar() {
             <button
               type="button"
               onClick={handleContact}
-              className="block w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-navy-900/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.06]"
+              className="block w-full rounded-xl px-4 py-3 text-left text-sm font-medium text-[color:var(--color-foreground)] transition-colors hover:bg-[color:var(--color-surface-hover)] :var(--color-muted)] :bg-[color:var(--color-surface-hover)]"
             >
               Contact
             </button>

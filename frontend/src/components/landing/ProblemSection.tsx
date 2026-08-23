@@ -65,7 +65,7 @@ export function ProblemSection() {
                 <h3 className="text-[15px] font-bold text-foreground">{problem.title}</h3>
                 <p className="mt-2 flex-1 text-[13px] leading-relaxed text-foreground-secondary">{problem.problem}</p>
                 <div className="mt-5 flex items-start gap-2.5 rounded-lg bg-[var(--color-success-light)] p-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success text-[color:var(--color-foreground)]">
                     <Check size={12} strokeWidth={3} />
                   </span>
                   <p className="text-[12px] font-semibold leading-snug text-success">{problem.solution}</p>

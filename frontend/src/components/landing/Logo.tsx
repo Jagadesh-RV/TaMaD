@@ -37,7 +37,7 @@ export function Logo({ className, showWordmark = true, size = 34, to = '/' }: Lo
     >
       <LogoMark size={size} className="transition-transform duration-300 group-hover:scale-[1.04]" />
       {showWordmark && (
-        <span className="text-[1.15rem] font-extrabold tracking-tight text-foreground dark:text-white">
+        <span className="text-[1.15rem] font-extrabold tracking-tight text-foreground :var(--color-foreground)]">
           TaMaD
           <span className="font-normal text-muted">.app</span>
         </span>
