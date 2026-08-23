@@ -417,7 +417,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                 const isPinnedLink = pinned.includes(link.path);
                 return (
                   <NavItem
-                    key={link.path}
+                    key={link.label + link.path}
                     path={link.path}
                     icon={Icon}
                     label={link.label}
