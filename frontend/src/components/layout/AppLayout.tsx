@@ -195,6 +195,11 @@ export default function AppLayout() {
         st.setGNavKey('g');
         return;
       }
+      if (key === '/') {
+        e.preventDefault();
+        st.openCommandPalette();
+        return;
+      }
       if (key === 'c') {
         st.openQuickCreate();
         return;
