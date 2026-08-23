@@ -104,7 +104,7 @@ export function WhyTamadSection() {
                     </tr>
                   ))}
                   <tr>
-                    <td colSpan={8} className="px-6 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+                    <td colSpan={8} className="px-6 py-4 text-center text-xs text-slate-400 ">
                       ● Built-in · ◌ Partial via add-ons · — Not available
                     </td>
                   </tr>
