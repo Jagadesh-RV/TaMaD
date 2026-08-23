@@ -112,15 +112,15 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
 
   return (
     <header
-      className="sticky top-0 z-30 flex items-center justify-between gap-3"
+      className="sticky top-0 z-40 flex h-[var(--header-height)] shrink-0 items-center justify-between border-b px-4 transition-colors lg:px-6"
       style={{
-        padding: '0 20px',
-        height: 'var(--header-height, 52px)',
-        background: 'var(--color-background)',
-        borderBottom: '1px solid var(--color-border)',
+        background: 'rgba(var(--color-surface-rgb, 255, 255, 255), 0.85)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderColor: 'var(--color-border)',
       }}
     >
-      {/* Left: Mobile menu + Breadcrumbs */}
+      {/* Left: Branding & Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {/* Mobile menu */}
         <button

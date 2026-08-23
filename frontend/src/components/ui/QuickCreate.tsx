@@ -135,23 +135,26 @@ export function QuickCreate() {
           className="fixed inset-0 z-[70] flex items-start justify-center bg-black/40 p-4 pt-[16vh] backdrop-blur-sm"
           onClick={close}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: -12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -8 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-            className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-[var(--shadow-float)] backdrop-blur-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-              <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
-                style={{ background: 'var(--color-accent-ghost)', color: active.accent }}
-              >
-                <Plus size={18} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-sm font-bold text-[color:var(--color-foreground)]">Quick create</h2>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: -12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97, y: -8 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+              className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-[var(--shadow-float)] backdrop-blur-2xl"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="quick-create-title"
+            >
+              <div className="flex items-center gap-3 border-b border-border px-5 py-4">
+                <div
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                  style={{ background: 'var(--color-accent-ghost)', color: active.accent }}
+                >
+                  <Plus size={18} aria-hidden="true" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 id="quick-create-title" className="text-sm font-bold text-[color:var(--color-foreground)]">Quick create</h2>
                 <p className="text-xs font-medium text-[color:var(--color-muted)]">
                   {active.label} · press <span className="text-[color:var(--color-accent)]">↵</span> to save
                 </p>
