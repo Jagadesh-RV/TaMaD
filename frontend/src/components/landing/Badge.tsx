@@ -8,10 +8,10 @@ interface BadgeProps {
 }
 
 const tones = {
-  brand: 'border-brand-500/25 bg-brand-500/10 text-brand-700 dark:text-brand-300',
-  neutral: 'border-slate-900/10 bg-slate-900/5 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300',
-  success: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
-  warning: 'border-amber-500/25 bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  brand: 'border-brand-500/25 bg-brand-500/10 text-brand-700 ',
+  neutral: 'border-slate-900/10 bg-slate-900/5 text-[color:var(--color-foreground)]  :var(--color-surface)] :var(--color-muted)]',
+  success: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-700 ',
+  warning: 'border-amber-500/25 bg-amber-500/10 text-amber-700 ',
 };
 
 export function Badge({ children, className, tone = 'brand' }: BadgeProps) {
