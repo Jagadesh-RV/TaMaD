@@ -33,15 +33,15 @@ type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    'bg-brand-600 text-white shadow-[0_8px_30px_rgb(37,99,235,0.35)] hover:bg-brand-500 hover:shadow-[0_10px_36px_rgb(37,99,235,0.45)] border border-transparent',
+    'bg-brand-600 text-[color:var(--color-foreground)] shadow-[0_8px_30px_rgb(37,99,235,0.35)] hover:bg-brand-500 hover:shadow-[0_10px_36px_rgb(37,99,235,0.45)] border border-transparent',
   secondary:
-    'bg-white/80 text-navy-900 dark:bg-white/10 dark:text-white border border-navy-900/10 dark:border-white/15 backdrop-blur-md hover:bg-white dark:hover:bg-white/15 shadow-sm',
+    'bg-[color:var(--color-background)]/80 text-[color:var(--color-foreground)]  :var(--color-foreground)] border border-border  backdrop-blur-md hover:bg-white :bg-white/15 shadow-sm',
   ghost:
-    'text-navy-800 dark:text-slate-200 hover:bg-navy-900/5 dark:hover:bg-white/10 border border-transparent',
+    'text-navy-800 :var(--color-muted)] hover:bg-navy-900/5 :bg-white/10 border border-transparent',
   outline:
-    'border border-navy-900/15 dark:border-white/20 text-navy-900 dark:text-white hover:border-brand-500/60 hover:text-brand-600 dark:hover:text-brand-300 bg-transparent',
+    'border border-navy-900/15  text-[color:var(--color-foreground)] :var(--color-foreground)] hover:border-brand-500/60 hover:text-brand-600 :text-brand-300 bg-transparent',
   glass:
-    'bg-white/70 dark:bg-white/[0.08] border border-white/40 dark:border-white/15 text-navy-900 dark:text-white backdrop-blur-xl hover:bg-white/90 dark:hover:bg-white/[0.14] shadow-[0_8px_32px_rgb(15,23,42,0.12)]',
+    'bg-[color:var(--color-surface)]  border border-white/40  text-[color:var(--color-foreground)] :var(--color-foreground)] backdrop-blur-xl hover:bg-white/90 :bg-white/[0.14] shadow-[0_8px_32px_rgb(15,23,42,0.12)]',
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -80,7 +80,7 @@ export function Button({ variant = 'primary', size = 'md', className, children, 
       {ripples.map((r) => (
         <span
           key={r.id}
-          className="pointer-events-none absolute z-0 rounded-full bg-white/40 dark:bg-white/25"
+          className="pointer-events-none absolute z-0 rounded-full bg-white/40 "
           style={{
             left: r.x,
             top: r.y,
