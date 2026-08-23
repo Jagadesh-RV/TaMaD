@@ -216,6 +216,53 @@ export default function ProjectsPage() {
                         {project.dueDate && (
                            <div className={clsx("flex items-center gap-1.5 text-[11px] font-bold", isOverdue ? "text-danger" : "text-muted")}>
                               <Calendar size={12} />
+                   <div className="group relative bg-surface border border-border rounded-3xl p-6 shadow-xs hover:shadow-soft hover:border-foreground-tertiary transition-all overflow-hidden cursor-pointer" onClick={() => toggleExpand(project._id)}>
+                     {/* Decorative top accent */}
+                     <div className="absolute top-0 left-0 w-full h-1" style={{ background: project.color || 'var(--color-accent)' }} />
+                     
+                     <div className="flex justify-between items-start mb-6">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-[20px] font-bold shadow-sm" style={{ background: project.color || 'var(--color-accent)' }}>
+                          {project.name?.charAt(0) || 'P'}
+                        </div>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={(e) => { e.stopPropagation(); handleDeleteClick(project._id); }} className="w-8 h-8 rounded-full bg-surface-active text-muted hover:bg-danger-ghost hover:text-danger flex items-center justify-center transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                     </div>
+
+                     <h3 className="text-[18px] font-display font-semibold text-foreground leading-tight mb-2 group-hover:text-accent transition-colors">{project.name}</h3>
+                     <p className="text-[13px] text-foreground-secondary line-clamp-2 min-h-[40px] mb-6">{project.description || 'No description provided.'}</p>
+
+                     <div className="space-y-3 mb-6">
+                        <div className="flex justify-between items-center text-[12px] font-medium text-foreground-tertiary">
+                           <span>Progress</span>
+                           <span style={{ color: project.color || 'var(--color-accent)' }}>{stats.progress}%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-surface-active rounded-full overflow-hidden">
+                           <motion.div initial={{ width: 0 }} animate={{ width: `${stats.progress}%` }} transition={{ duration: 1, delay: 0.3 }} className="h-full rounded-full" style={{ background: project.color || 'var(--color-accent)' }} />
+                        </div>
+                     </div>
+
+                     <div className="flex items-center justify-between pt-4 border-t border-border-light">
+                        <div className="flex items-center -space-x-2">
+                           {project.members?.slice(0, 3).map((m: string, i: number) => (
+                             <div key={i} className="w-7 h-7 rounded-full bg-surface-active border-2 border-surface flex items-center justify-center text-[10px] font-bold text-foreground">
+                               {m.charAt(0).toUpperCase()}
+                             </div>
+                           ))}
+                           {(project.members?.length || 0) > 3 && (
+                             <div className="w-7 h-7 rounded-full bg-surface-active border-2 border-surface flex items-center justify-center text-[10px] font-bold text-foreground-tertiary">
+                               +{(project.members.length - 3)}
+                             </div>
+                           )}
+                           {(!project.members || project.members.length === 0) && (
+                             <span className="text-[11px] text-muted font-medium">No members</span>
+                           )}
+                        </div>
+                        {project.dueDate && (
+                           <div className={clsx("flex items-center gap-1.5 text-[11px] font-bold", isOverdue ? "text-danger" : "text-muted")}>
+                              <Calendar size={12} />
                               {format(parseISO(project.dueDate), 'MMM d')}
                            </div>
                         )}
@@ -251,6 +298,7 @@ export default function ProjectsPage() {
                        )}
                      </AnimatePresence>
                    </div>
+                 </ContextMenu>
                  </motion.div>
                );
             })}
