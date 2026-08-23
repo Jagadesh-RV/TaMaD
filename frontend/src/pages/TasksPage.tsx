@@ -543,137 +543,121 @@ export default function TasksPage() {
   ];
 
   return (
-    <div className="page flex flex-col h-[calc(100vh-80px)] relative z-10">
-      {/* Header */}
-      <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="page-title mb-0">Tasks</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>
-            {filtered.length} task{filtered.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+    <div className="page flex flex-col h-[calc(100vh-80px)] relative z-10 max-w-[1400px] mx-auto">
+      
+      {/* Header & Command Bar (Unified) */}
+      <div className="mb-6 flex flex-col gap-4 pt-4">
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <h1 className="text-[24px] font-display font-semibold tracking-tight leading-none text-[color:var(--color-foreground)]">
+              Tasks
+            </h1>
+            <span className="badge badge-neutral mt-1">{filtered.length}</span>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <div
-            className="inline-flex rounded-xl p-1"
-            style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}
-          >
-            {viewButtons.map(vb => (
-              <button
-                key={vb.mode}
-                onClick={() => setView(vb.mode)}
-                className={clsx(
-                  'relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[12px] font-semibold transition-colors',
-                )}
-                style={{
-                  color: view === vb.mode ? 'var(--color-accent)' : 'var(--color-muted)',
-                }}
-              >
-                {view === vb.mode && (
-                  <motion.span
-                    layoutId="tasks-view-pill"
-                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                    className="absolute inset-0 rounded-lg bg-[color:var(--color-surface)]"
-                    style={{ boxShadow: 'var(--shadow-sm)', border: '1px solid var(--color-border)' }}
-                  />
-                )}
-                <span className="relative flex items-center gap-1.5">
-                  <vb.icon size={14} />
-                  {vb.label}
-                </span>
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            {/* View Toggle */}
+            <div className="inline-flex rounded-lg p-1 bg-surface-active border border-border">
+              {viewButtons.map(vb => (
+                <button
+                  key={vb.mode}
+                  onClick={() => setView(vb.mode)}
+                  className={clsx(
+                    'relative flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[12px] font-semibold transition-colors',
+                    view === vb.mode ? 'text-[color:var(--color-foreground)]' : 'text-[color:var(--color-muted)] hover:text-[color:var(--color-foreground-secondary)]'
+                  )}
+                >
+                  {view === vb.mode && (
+                    <motion.span
+                      layoutId="tasks-view-pill"
+                      className="absolute inset-0 rounded-md bg-[color:var(--color-surface)] shadow-xs border border-border"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    <vb.icon size={14} />
+                    <span className="hidden sm:inline">{vb.label}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setQuickTitle('New task')} className="btn btn-sm btn-primary shadow-xs rounded-lg">
+              <Plus size={14} /> Add
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Filter Bar */}
-      <Card
-        className="mb-6 flex flex-col gap-4 p-4 sm:flex-row sm:items-center shadow-xs"
-      >
-        <div className="search-input flex-1 bg-[color:var(--color-surface-active)] border-transparent focus-within:border-[color:var(--color-accent)] focus-within:bg-[color:var(--color-surface)] transition-all">
-          <Search size={18} className="text-[color:var(--color-muted)]" />
-          <input
-            placeholder="Search tasks..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="text-sm font-medium"
-            aria-label="Search tasks"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="rounded-full p-1 transition-colors hover:bg-[color:var(--color-surface-hover)]" aria-label="Clear search">
-              <X size={14} className="text-[color:var(--color-muted)]" />
-            </button>
-          )}
+        {/* Command Bar */}
+        <div className="flex items-center gap-3 bg-surface border border-border rounded-xl p-1.5 shadow-xs transition-colors focus-within:border-accent">
+          <div className="flex-1 flex items-center gap-2 px-2">
+            <Search size={16} className="text-muted" />
+            <input
+              placeholder="Search tasks or press '/' to command..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-transparent border-none outline-none text-[13px] font-medium text-foreground placeholder-muted"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="p-1 hover:bg-surface-hover rounded-md text-muted transition-colors">
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          
+          <div className="w-px h-5 bg-border mx-1" />
+
+          {/* Contextual Filters */}
+          <div className="flex items-center gap-1">
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="appearance-none bg-surface-hover border border-transparent hover:border-border rounded-lg px-3 py-1.5 text-[12px] font-semibold text-foreground-secondary outline-none transition-colors cursor-pointer"
+            >
+              {STATUS_OPTIONS.map(s => (
+                <option key={s} value={s}>{statusLabels[s]}</option>
+              ))}
+            </select>
+            <select
+              value={priorityFilter}
+              onChange={e => setPriorityFilter(e.target.value)}
+              className="appearance-none bg-surface-hover border border-transparent hover:border-border rounded-lg px-3 py-1.5 text-[12px] font-semibold text-foreground-secondary outline-none transition-colors cursor-pointer"
+            >
+              {PRIORITY_OPTIONS.map(p => (
+                <option key={p} value={p}>{priorityLabels[p]}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={e => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-bold outline-none transition-all hover:border-border-hover focus:border-[color:var(--color-accent)] shadow-xs"
-        >
-          {STATUS_OPTIONS.map(s => (
-            <option key={s} value={s}>{statusLabels[s]}{s !== 'all' && statusCounts[s] !== undefined ? ` (${statusCounts[s]})` : ''}</option>
-          ))}
-        </select>
-
-        <select
-          value={priorityFilter}
-          onChange={e => setPriorityFilter(e.target.value)}
-          className="rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-bold outline-none transition-all hover:border-border-hover focus:border-[color:var(--color-accent)] shadow-xs"
-        >
-          {PRIORITY_OPTIONS.map(p => (
-            <option key={p} value={p}>{priorityLabels[p]}</option>
-          ))}
-        </select>
-
-        {(search || statusFilter !== 'all' || priorityFilter !== 'all') && (
-          <button
-            onClick={() => { setSearch(''); setStatusFilter('all'); setPriorityFilter('all'); }}
-            className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold transition-all bg-[color:var(--color-danger-light)] text-[color:var(--color-danger)] hover:bg-[color:var(--color-danger)] hover:text-white"
-          >
-            <X size={14} />
-            Clear
-          </button>
-        )}
-      </Card>
-
-      {/* Quick Add */}
-      <Card
-        className="mb-6 flex items-center gap-3 p-2 pl-3 shadow-xs border-dashed focus-within:border-solid focus-within:border-[color:var(--color-accent)] transition-all"
-      >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-accent-ghost)]">
-          <Plus size={18} className="text-[color:var(--color-accent)]" />
-        </div>
-         <input
-           value={quickTitle}
-           onChange={e => setQuickTitle(e.target.value)}
-           onKeyDown={e => e.key === 'Enter' && handleQuickAdd()}
-           placeholder="Quick add a task... (Press Enter)"
-           className="flex-1 bg-transparent text-sm font-semibold outline-none text-[color:var(--color-foreground)] placeholder:text-[color:var(--color-muted)]"
-           aria-label="Quick add a task"
-         />
+        {/* Inline Quick Add (Appears when quickTitle is active) */}
         <AnimatePresence>
-          {quickTitle.trim() && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
-              <Button
-                onClick={handleQuickAdd}
-                size="sm"
-                className="rounded-lg shadow-sm"
-              >
-                Add Task
-              </Button>
+          {quickTitle && (
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-accent-ghost border border-accent/20 rounded-xl p-3 flex items-center gap-3">
+              <Plus size={16} className="text-accent" />
+              <input
+                 autoFocus
+                 value={quickTitle === 'New task' ? '' : quickTitle}
+                 onChange={e => setQuickTitle(e.target.value)}
+                 onKeyDown={e => {
+                   if (e.key === 'Enter') handleQuickAdd();
+                   if (e.key === 'Escape') setQuickTitle('');
+                 }}
+                 placeholder="What needs to be done?"
+                 className="flex-1 bg-transparent border-none outline-none text-[14px] font-medium text-foreground"
+              />
+              <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Press Enter</span>
             </motion.div>
           )}
         </AnimatePresence>
-      </Card>
+      </div>
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {loading && <div className="p-4"><SkeletonTable rows={6} cols={4} /></div>}
 
         {!loading && view === 'kanban' && (
-          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :
+          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks found" description="Clear filters or create a new task." /> :
           <DndContext
             sensors={sensors}
             collisionDetection={closestCorners}
@@ -700,49 +684,48 @@ export default function TasksPage() {
         )}
 
         {!loading && view === 'list' && (
-          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks in view" description="Nothing matches your current filters. Try a different view or capture the next idea in your head." steps={['Relax or clear your filters', 'Use the quick add bar above to capture the next idea', 'Open Task Hub from the sidebar to start fresh']} /> :
-          <div
-            className="rounded-2xl border overflow-hidden"
-            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}
-          >
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--color-border)', background: 'var(--color-surface-hover)' }}>
-                  <th className="w-10 px-4 py-3" />
-                  {(
-                    [
-                      { key: 'title' as SortField, label: 'Task', width: '' },
-                      { key: 'status' as SortField, label: 'Status', width: 'w-[130px]' },
-                      { key: 'priority' as SortField, label: 'Priority', width: 'w-[110px]' },
-                      { key: 'assignee' as SortField, label: 'Assignee', width: 'w-[160px]' },
-                      { key: 'dueDate' as SortField, label: 'Due', width: 'w-[100px]' },
-                    ] as const
-                  ).map(col => (
-                    <th
-                      key={col.key}
-                      className={clsx('px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider cursor-pointer select-none', col.width)}
-                      style={{ color: 'var(--color-muted)' }}
-                      onClick={() => toggleSort(col.key)}
-                    >
-                      <span className="inline-flex items-center gap-1">
-                        {col.label}
-                        {listSort === col.key && (
-                          listSortAsc ? <ChevronUp size={12} /> : <ChevronDown size={12} />
-                        )}
-                        {listSort !== col.key && <ArrowUpDown size={10} className="opacity-30" />}
-                      </span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {sorted.map((task, i) => (
-                    <ListRow key={task._id} task={task} index={i} onClick={() => openInspector('task', task._id)} />
-                  ))}
-                </AnimatePresence>
-              </tbody>
-            </table>
+          filtered.length === 0 ? <EmptyState icon={Inbox} title="No tasks found" description="Clear filters or create a new task." /> :
+          <div className="rounded-2xl border border-border bg-surface shadow-xs overflow-hidden h-full flex flex-col">
+            <div className="overflow-y-auto flex-1">
+              <table className="w-full text-[13px]">
+                <thead className="sticky top-0 bg-surface z-10 shadow-[0_1px_0_var(--color-border)]">
+                  <tr>
+                    <th className="w-10 px-4 py-3" />
+                    {(
+                      [
+                        { key: 'title' as SortField, label: 'Task', width: '' },
+                        { key: 'status' as SortField, label: 'Status', width: 'w-[130px]' },
+                        { key: 'priority' as SortField, label: 'Priority', width: 'w-[110px]' },
+                        { key: 'assignee' as SortField, label: 'Assignee', width: 'w-[120px]' },
+                        { key: 'dueDate' as SortField, label: 'Due', width: 'w-[100px]' },
+                      ] as const
+                    ).map(col => (
+                      <th
+                        key={col.key}
+                        className={clsx('px-4 py-3 text-left text-[11px] font-semibold text-foreground-tertiary cursor-pointer hover:text-foreground transition-colors', col.width)}
+                        onClick={() => toggleSort(col.key)}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {col.label}
+                          {listSort === col.key ? (
+                            listSortAsc ? <ChevronUp size={12} /> : <ChevronDown size={12} />
+                          ) : (
+                            <ArrowUpDown size={10} className="opacity-0 group-hover:opacity-50" />
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  <AnimatePresence>
+                    {sorted.map((task, i) => (
+                      <ListRow key={task._id} task={task} index={i} onClick={() => openInspector('task', task._id)} />
+                    ))}
+                  </AnimatePresence>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
