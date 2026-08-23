@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { X, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { FileText, X } from 'lucide-react';
+import Drawer from '../ui/Drawer';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 
 export default function NoteModal({
   isOpen,
@@ -16,63 +18,55 @@ export default function NoteModal({
     }
   }, [isOpen, initialData]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({ title, content: '' });
     onClose();
   };
 
-  return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md rounded-[24px] border border-border shadow-float p-8 relative animate-in fade-in zoom-in-95 duration-200">
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 text-gray-400 hover:text-gray-700 transition-colors bg-gray-50 hover:bg-gray-100 p-2 rounded-full"
-        >
-          <X size={20} />
-        </button>
-
-        <div className="mb-8 flex items-center gap-4 text-[#111111]">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100">
-            <FileText size={24} />
+  return (
+    <Drawer open={isOpen} onClose={onClose}>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-6 border-b border-border mb-6">
+          <div className="flex items-center gap-3">
+             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+               <FileText size={20} />
+             </div>
+             <div>
+               <h2 className="text-[18px] font-display font-semibold text-foreground leading-none">
+                 New Note
+               </h2>
+               <p className="text-[13px] text-foreground-secondary mt-1">Create a new document.</p>
+             </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">New Note</h2>
-            <p className="text-sm font-medium text-gray-500">Create a new document.</p>
-          </div>
+          <button onClick={onClose} className="p-2 rounded-full text-muted hover:bg-surface-active hover:text-foreground transition-colors">
+            <X size={18} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Document Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-[#111111] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
-              placeholder="e.g., Q3 Meeting Notes"
-              required
-              autoFocus
-            />
-          </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+          <form id="note-form" onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <label className="text-[13px] font-semibold text-foreground">Document Title</label>
+              <Input
+                value={title}
+                onChange={(e: any) => setTitle(e.target.value)}
+                placeholder="e.g., Q3 Meeting Notes"
+                required
+                autoFocus
+              />
+            </div>
+          </form>
+        </div>
 
-          <div className="pt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2.5 rounded-xl font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors w-full sm:w-auto"
-            >
-              Cancel
-            </button>
-            <button type="submit" className="btn-primary px-8 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
-              Create Note
-            </button>
-          </div>
-        </form>
+        {/* Footer */}
+        <div className="pt-6 mt-6 border-t border-border flex justify-end gap-3 shrink-0">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button type="submit" form="note-form">Create note</Button>
+        </div>
       </div>
-    </div>,
-    document.body
+    </Drawer>
   );
 }

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Calendar, Check } from 'lucide-react';
-import { Dialog, DialogPanel, DialogTitle, DialogDescription } from '../ui/Dialog';
+import React, { useState, useEffect } from 'react';
+import { Calendar, Check, X } from 'lucide-react';
+import Drawer from '../ui/Drawer';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import TaskComments from './TaskComments';
@@ -17,8 +17,7 @@ export default function TaskModal({
   const [priority, setPriority] = useState(initialData?.priority || 'medium');
   const [status, setStatus] = useState(initialData?.status || 'todo');
 
-  // Reset state when modal opens
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '');
       setDescription(initialData?.description || '');
@@ -28,8 +27,6 @@ export default function TaskModal({
     }
   }, [isOpen, initialData]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({ title, description, dueDate, priority, status });
@@ -37,98 +34,98 @@ export default function TaskModal({
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <DialogPanel>
-        <button
-          onClick={onClose}
-          className="absolute right-5 top-5 rounded-full bg-[color:var(--color-surface-hover)] p-2 text-[color:var(--color-muted)]"
-          aria-label="Close modal"
-        >
-          <X size={18} />
-        </button>
-
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[color:var(--color-accent)]/10 text-[color:var(--color-accent)]">
-            <Check size={20} />
+    <Drawer open={isOpen} onClose={onClose}>
+      <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-6 border-b border-border mb-6">
+          <div className="flex items-center gap-3">
+             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent">
+               <Check size={20} />
+             </div>
+             <div>
+               <h2 className="text-[18px] font-display font-semibold text-foreground leading-none">
+                 {initialData?._id ? 'Edit task' : 'Create task'}
+               </h2>
+               <p className="text-[13px] text-foreground-secondary mt-1">Capture the next thing worth doing.</p>
+             </div>
           </div>
-          <div>
-            <DialogTitle>{initialData?._id ? 'Edit task' : 'Create task'}</DialogTitle>
-            <DialogDescription>Capture the next thing worth doing.</DialogDescription>
-          </div>
+          <button onClick={onClose} className="p-2 rounded-full text-muted hover:bg-surface-active hover:text-foreground transition-colors">
+            <X size={18} />
+          </button>
         </div>
 
-        <div className={initialData?._id ? "grid grid-cols-1 md:grid-cols-2 gap-6" : ""}>
-          <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-[color:var(--color-foreground)]">Title</label>
-            <Input value={title} onChange={(e: any) => setTitle(e.target.value)} placeholder="Finalize presentation slides" required autoFocus />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-[color:var(--color-foreground)]">Due date</label>
-            <div className="relative">
-              <Calendar size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[color:var(--color-muted)]" />
-              <Input type="date" value={dueDate} onChange={(e: any) => setDueDate(e.target.value)} className="pl-10" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+          <form id="task-form" onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Priority</label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
-                style={{ borderColor: 'var(--color-border)' }}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="urgent">Urgent</option>
-              </select>
+              <label className="text-[13px] font-semibold text-foreground">Title</label>
+              <Input value={title} onChange={(e: any) => setTitle(e.target.value)} placeholder="Finalize presentation slides" required autoFocus />
             </div>
+
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[color:var(--color-foreground)]">Status</label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full h-10 px-3 rounded-md bg-[color:var(--color-background)] border text-sm outline-none"
-                style={{ borderColor: 'var(--color-border)' }}
-              >
-                <option value="todo">To Do</option>
-                <option value="in-progress">In Progress</option>
-                <option value="review">In Review</option>
-                <option value="done">Done</option>
-              </select>
+              <label className="text-[13px] font-semibold text-foreground">Due date</label>
+              <div className="relative">
+                <Calendar size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <Input type="date" value={dueDate} onChange={(e: any) => setDueDate(e.target.value)} className="pl-10" />
+              </div>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-[color:var(--color-foreground)]">Description</label>
-            <textarea
-              value={description}
-              onChange={(e: any) => setDescription(e.target.value)}
-              className="min-h-[110px] w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm text-[color:var(--color-foreground)] outline-none transition-all focus:border-[color:var(--color-accent)] focus:ring-2 focus:ring-[color:var(--color-accent)]/15"
-              placeholder="Add notes, context, or subtasks…"
-            />
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-foreground">Priority</label>
+                <select
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-surface border border-border text-[13px] font-medium text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-foreground">Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="w-full h-10 px-3 rounded-xl bg-surface border border-border text-[13px] font-medium text-foreground outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                >
+                  <option value="todo">To Do</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="review">In Review</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+            </div>
 
-            <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
-              <Button type="button" variant="secondary" onClick={onClose} className="sm:w-auto">Cancel</Button>
-              <Button type="submit" className="sm:w-auto">Save task</Button>
+            <div className="space-y-2">
+              <label className="text-[13px] font-semibold text-foreground">Description</label>
+              <textarea
+                value={description}
+                onChange={(e: any) => setDescription(e.target.value)}
+                className="min-h-[120px] w-full rounded-xl border border-border bg-surface px-4 py-3 text-[14px] text-foreground outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/15 resize-none"
+                placeholder="Add notes, context, or subtasks…"
+              />
             </div>
           </form>
 
           {initialData?._id && (
-            <div className="flex flex-col rounded-xl border border-border bg-surface-hover h-full max-h-[400px]">
-              <div className="p-3 border-b border-border bg-[color:var(--color-surface)] rounded-t-xl">
-                <h4 className="text-xs font-semibold text-[color:var(--color-foreground)]">Activity & Comments</h4>
+            <div className="mt-8">
+              <h4 className="text-[13px] font-semibold text-foreground mb-3">Activity & Comments</h4>
+              <div className="rounded-xl border border-border bg-surface-hover p-1">
+                <TaskComments taskId={initialData._id} />
               </div>
-              <TaskComments taskId={initialData._id} />
             </div>
           )}
         </div>
-      </DialogPanel>
-    </Dialog>
+
+        {/* Footer */}
+        <div className="pt-6 mt-6 border-t border-border flex justify-end gap-3 shrink-0">
+          <Button type="button" variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button type="submit" form="task-form">{initialData?._id ? 'Save changes' : 'Create task'}</Button>
+        </div>
+      </div>
+    </Drawer>
   );
 }
