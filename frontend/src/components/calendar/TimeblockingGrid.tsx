@@ -91,27 +91,29 @@ export default function TimeblockingGrid({ weekDays, tasks, meetings }: Timebloc
 
   return (
     <div className="flex flex-1 flex-col rounded-2xl border overflow-hidden bg-[color:var(--color-surface)] shadow-[var(--shadow-xs)] border-[color:var(--color-border)]">
-      {/* Week Days Header */}
-      <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[color:var(--color-border)] sticky top-0 bg-[color:var(--color-surface)] z-20">
-        <div className="border-r border-[color:var(--color-border)]" />
-        {weekDays.map(day => (
-          <div key={day.toISOString()} className="py-3 flex flex-col items-center justify-center border-r border-[color:var(--color-border-light)]">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[color:var(--color-muted)]">
-              {format(day, 'EEE')}
-            </span>
-            <span className={clsx(
-              'mt-1 flex h-7 w-7 items-center justify-center rounded-full text-[14px] font-bold',
-              isSameDay(day, now) ? 'bg-[color:var(--color-accent)] text-white' : 'text-[color:var(--color-foreground)]'
-            )}>
-              {format(day, 'd')}
-            </span>
+      <div className="flex-1 overflow-x-auto flex flex-col" style={{ scrollbarWidth: 'thin' }}>
+        <div className="min-w-[700px] flex flex-col flex-1">
+          {/* Week Days Header */}
+          <div className="grid grid-cols-[60px_repeat(7,1fr)] border-b border-[color:var(--color-border)] sticky top-0 bg-[color:var(--color-surface)] z-20">
+            <div className="border-r border-[color:var(--color-border)]" />
+            {weekDays.map(day => (
+              <div key={day.toISOString()} className="py-3 flex flex-col items-center justify-center border-r border-[color:var(--color-border-light)]">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-[color:var(--color-muted)]">
+                  {format(day, 'EEE')}
+                </span>
+                <span className={clsx(
+                  'mt-1 flex h-7 w-7 items-center justify-center rounded-full text-[14px] font-bold',
+                  isSameDay(day, now) ? 'bg-[color:var(--color-accent)] text-white' : 'text-[color:var(--color-foreground)]'
+                )}>
+                  {format(day, 'd')}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      {/* Scrollable Time Grid */}
-      <div className="flex-1 overflow-y-auto relative" style={{ scrollbarWidth: 'thin' }}>
-        <div className="grid grid-cols-[60px_repeat(7,1fr)] relative min-h-[1440px]">
+          {/* Scrollable Time Grid */}
+          <div className="flex-1 overflow-y-auto relative" style={{ scrollbarWidth: 'thin' }}>
+            <div className="grid grid-cols-[60px_repeat(7,1fr)] relative min-h-[1440px]">
           
           {/* Time Labels Column */}
           <div className="flex flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)] relative z-10">
@@ -167,6 +169,8 @@ export default function TimeblockingGrid({ weekDays, tasks, meetings }: Timebloc
           })}
 
         </div>
+      </div>
+      </div>
       </div>
     </div>
   );
