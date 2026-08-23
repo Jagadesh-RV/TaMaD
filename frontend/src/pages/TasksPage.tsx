@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, Plus, LayoutGrid, List, CalendarDays,
@@ -152,7 +152,7 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
+const KanbanCard = memo(function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task._id,
     data: { type: 'Task', task },
@@ -222,7 +222,7 @@ function KanbanCard({ task, onClick }: { task: Task; onClick?: () => void }) {
       </Card>
     </motion.div>
   );
-}
+});
 
 function KanbanOverlay({ task }: { task: Task }) {
   return (

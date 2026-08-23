@@ -323,7 +323,19 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 focusTasks.slice(0, 3).map(task => (
-                  <div key={task._id} className="min-w-[280px] flex-1 rounded-2xl border border-border bg-surface p-5 shadow-xs snap-start hover:border-foreground-tertiary transition-colors cursor-pointer" onClick={() => navigate('/tasks')}>
+                  <div
+                    key={task._id}
+                    role="button"
+                    tabIndex={0}
+                    className="min-w-[280px] flex-1 rounded-2xl border border-border bg-surface p-5 shadow-xs snap-start hover:border-foreground-tertiary transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent"
+                    onClick={() => navigate('/tasks')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate('/tasks');
+                      }
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-3">
                       <span className={`badge badge-${task.priority === 'urgent' ? 'danger' : 'accent'}`}>{task.priority}</span>
                       {task.dueDate && <span className="text-[11px] font-medium text-foreground-tertiary">{format(parseISO(task.dueDate), 'MMM d')}</span>}

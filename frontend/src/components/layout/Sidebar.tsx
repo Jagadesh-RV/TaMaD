@@ -498,8 +498,8 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                 <p className="text-[10px] leading-none"
                   style={{ color: 'var(--color-foreground-tertiary)' }}>
                   {onlineUsers.length > 0
-                    ? `${onlineUsers.length + 1} online`
-                    : 'Online'}
+                    ? `${onlineUsers.length} online`
+                    : '1 online'}
                 </p>
               </div>
               <div className="flex items-center gap-0.5">

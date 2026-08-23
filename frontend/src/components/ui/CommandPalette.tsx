@@ -433,9 +433,12 @@ export function CommandPalette() {
             transition={{ type: 'spring', stiffness: 400, damping: 32 }}
             className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-surface/95 shadow-[var(--shadow-float)] backdrop-blur-2xl"
             onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Command Palette"
           >
             <div className="flex items-center gap-3 border-b border-border px-4 py-3.5">
-              <Search size={18} className="shrink-0 text-[color:var(--color-muted)]" />
+              <Search size={18} className="shrink-0 text-[color:var(--color-muted)]" aria-hidden="true" />
               <input
                 ref={inputRef}
                 value={query}
@@ -445,13 +448,17 @@ export function CommandPalette() {
                 placeholder="Search anything, or type a command…"
                 className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-[color:var(--color-foreground-tertiary)]"
                 style={{ color: 'var(--color-foreground)' }}
+                role="combobox"
+                aria-expanded="true"
+                aria-controls="command-palette-list"
+                aria-autocomplete="list"
               />
               <kbd className="flex items-center gap-0.5 rounded border border-border bg-background-secondary px-1.5 py-0.5 text-[10px] font-medium text-[color:var(--color-foreground-tertiary)]">
                 <Command size={10} />K
               </kbd>
             </div>
 
-            <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
+            <div ref={listRef} id="command-palette-list" role="listbox" className="max-h-[52vh] overflow-y-auto p-2" style={{ scrollbarWidth: 'thin' }}>
               {grouped.length === 0 ? (
                 <div className="flex flex-col items-center gap-2 py-10 text-center">
                   <Search size={22} className="text-[color:var(--color-muted)]" />
@@ -467,12 +474,14 @@ export function CommandPalette() {
                   return (
                     <React.Fragment key={item.id}>
                       {showHeader && (
-                        <p className="mb-1 mt-2 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]">
+                        <p className="mb-1 mt-2 px-3 text-[10px] font-bold uppercase tracking-widest text-[color:var(--color-foreground-tertiary)]" role="presentation">
                           {item.group}
                         </p>
                       )}
                       <button
                         data-palette-item
+                        role="option"
+                        aria-selected={index === selectedIndex}
                         onMouseEnter={() => setSelectedIndex(index)}
                         onClick={() => runCommand(item.run)()}
                         className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors"
