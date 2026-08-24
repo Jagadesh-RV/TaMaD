@@ -202,7 +202,7 @@ function TaskInspector({ taskId, onClose }: { taskId: string; onClose: () => voi
         ) : null}
         <div className="flex-1" />
         {dirty ? (
-          <button onClick={handleSave} className="btn-primary rounded-xl px-5 py-2.5 text-sm font-bold">
+          <button onClick={handleSave} className="btn btn-primary rounded-xl px-5 py-2.5 text-sm font-bold">
             Save changes
           </button>
         ) : (

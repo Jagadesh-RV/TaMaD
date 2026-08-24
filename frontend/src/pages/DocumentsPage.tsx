@@ -91,7 +91,7 @@ export default function DocumentsPage() {
             Create, organize, and collaborate on documents.
           </p>
         </div>
-        <Button onClick={handleCreate} disabled={creating} className="btn-primary">
+        <Button onClick={handleCreate} disabled={creating} className="btn btn-primary">
           <Plus size={16} />
           New Document
         </Button>

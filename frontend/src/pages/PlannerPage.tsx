@@ -53,7 +53,7 @@ export default function PlannerPage() {
 
         <button 
           onClick={() => activeTab === 'habits' ? setIsHabitModalOpen(true) : setIsGoalModalOpen(true)}
-          className="btn-primary flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl"
+          className="btn btn-primary flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl"
         >
           <Plus size={18} />
           <span className="font-semibold text-[13px]">New {activeTab === 'habits' ? 'Habit' : 'Goal'}</span>

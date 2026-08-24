@@ -18,7 +18,7 @@ interface EmptyStateProps {
   className?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({
+export const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(({
   icon: Icon,
   title,
   description,
@@ -26,9 +26,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   secondaryAction,
   steps,
   className = '',
-}) => {
+}, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
@@ -80,6 +81,6 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </div>
     </motion.div>
   );
-};
+});
 
 export default EmptyState;

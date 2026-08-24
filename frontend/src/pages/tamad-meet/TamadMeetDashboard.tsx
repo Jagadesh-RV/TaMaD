@@ -51,16 +51,16 @@ export default function TamadMeetDashboard() {
 
   return (
     <div className="page flex h-full flex-col p-6">
-      <header className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>TaMaD Meet Dashboard</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--color-muted)' }}>Enterprise WebRTC Communications</p>
+      <header className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold" style={{ color: 'var(--color-foreground)' }}>TaMaD Meet Dashboard</h1>
+          <p className="mt-1 truncate text-sm" style={{ color: 'var(--color-muted)' }}>Enterprise WebRTC Communications</p>
         </div>
-        <div className="flex gap-3">
-          <button onClick={() => handleOpenModal('Instant')} disabled={isCreating} className="btn btn-primary flex items-center gap-2">
+        <div className="flex w-full flex-wrap gap-3 sm:w-auto">
+          <button onClick={() => handleOpenModal('Instant')} disabled={isCreating} className="btn btn-primary flex flex-1 shrink-0 items-center justify-center gap-2 whitespace-nowrap sm:flex-none">
             <Video size={16} /> Instant Meet
           </button>
-          <button onClick={() => handleOpenModal('Scheduled')} className="btn btn-secondary flex items-center gap-2">
+          <button onClick={() => handleOpenModal('Scheduled')} className="btn btn-secondary flex flex-1 shrink-0 items-center justify-center gap-2 whitespace-nowrap sm:flex-none">
             <Plus size={16} /> Schedule
           </button>
         </div>
