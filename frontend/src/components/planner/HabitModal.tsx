@@ -116,7 +116,7 @@ export default function HabitModal({
             >
               Cancel
             </button>
-            <button type="submit" className="btn-primary px-8 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
+            <button type="submit" className="btn btn-primary px-8 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700">
               Save Habit
             </button>
           </div>
