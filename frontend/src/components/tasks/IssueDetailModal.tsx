@@ -167,14 +167,14 @@ export default function IssueDetailModal({
                 </button>
                 <div className="mx-1 h-4 w-px bg-border" />
                 <button
-                  className="btn-icon-sm btn-ghost"
+                  className="btn-icon-sm btn btn-ghost"
                   aria-label="More actions"
                 >
                   <MoreHorizontal size={16} />
                 </button>
                 <button
                   onClick={onClose}
-                  className="btn-icon-sm btn-ghost ml-1"
+                  className="btn-icon-sm btn btn-ghost ml-1"
                   aria-label="Close panel"
                 >
                   <X size={16} />
