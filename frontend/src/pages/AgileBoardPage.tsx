@@ -210,11 +210,11 @@ export default function AgileBoardPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/agile/planning')} className="btn-secondary">
+          <button onClick={() => navigate('/agile/planning')} className="btn btn-secondary">
             View Backlog
           </button>
           {activeSprint && (
-            <button onClick={() => completeSprint(activeSprint._id)} className="btn-primary">
+            <button onClick={() => completeSprint(activeSprint._id)} className="btn btn-primary">
               Complete Sprint
             </button>
           )}
