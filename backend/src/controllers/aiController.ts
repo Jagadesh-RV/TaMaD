@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
-import { parseNaturalLanguageTask, generateEmbedding } from '../utils/ai';
+import { parseNaturalLanguageTask, generateEmbedding, askAssistant } from '../utils/ai';
 import Task from '../models/Task';
 import Project from '../models/Project';
 import Note from '../models/Note';
