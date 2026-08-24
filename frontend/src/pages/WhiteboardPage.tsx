@@ -168,7 +168,7 @@ export default function WhiteboardPage() {
             <div className="w-full h-full flex items-center justify-center">
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className="btn-primary px-8 py-3.5 shadow-float rounded-xl text-[14px]"
+                className="btn btn-primary px-8 py-3.5 shadow-float rounded-xl text-[14px]"
               >
                 <Plus size={18} className="mr-2" />
                 Create Whiteboard

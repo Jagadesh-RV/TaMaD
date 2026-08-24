@@ -60,7 +60,7 @@ export default function RoadmapPage() {
 
         <button 
           onClick={() => setIsModalOpen(true)}
-          className="btn-primary flex items-center justify-center gap-2 px-4 py-2 w-auto"
+          className="btn btn-primary flex items-center justify-center gap-2 px-4 py-2 w-auto"
         >
           <Plus size={20} />
           New Project

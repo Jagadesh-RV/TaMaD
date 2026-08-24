@@ -253,7 +253,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2">
                 <button onClick={() => navigate('/verify-email')} className="btn btn-sm" style={{ background: 'var(--color-warning)', color: '#fff', borderRadius: 'var(--radius-md)' }}>Verify</button>
-                <button onClick={handleDismissEmailBanner} className="btn-icon-sm btn-ghost"><X size={14} /></button>
+                <button onClick={handleDismissEmailBanner} className="btn-icon-sm btn btn-ghost"><X size={14} /></button>
               </div>
             </div>
           </motion.div>

@@ -66,7 +66,7 @@ export default function WhiteboardModal({
             >
               Cancel
             </button>
-            <button type="submit" className="btn-primary px-8 w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+            <button type="submit" className="btn btn-primary px-8 w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
               Create Whiteboard
             </button>
           </div>

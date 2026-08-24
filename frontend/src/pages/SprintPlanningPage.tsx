@@ -184,7 +184,7 @@ export default function SprintPlanningPage() {
         </div>
         <button 
           onClick={() => setIsSprintModalOpen(true)}
-          className="btn-primary">
+          className="btn btn-primary">
           Create Sprint
         </button>
       </div>
@@ -205,7 +205,7 @@ export default function SprintPlanningPage() {
                     </h2>
                     <p className="text-[12px] font-medium text-foreground-secondary mt-1">Ends {new Date(activeSprint.endDate).toLocaleDateString()}</p>
                   </div>
-                  <button className="btn-secondary btn-sm">Complete Sprint</button>
+                  <button className="btn btn-secondary btn-sm">Complete Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === activeSprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
                   <div className="min-h-[120px]">
@@ -226,7 +226,7 @@ export default function SprintPlanningPage() {
               <DroppableContainer key={sprint._id} id={sprint._id} className="mb-6 rounded-[24px] border border-border bg-surface p-6 shadow-xs">
                 <div className="mb-6 flex items-center justify-between">
                   <h2 className="text-[16px] font-display font-bold text-foreground">{sprint.name}</h2>
-                  <button onClick={() => startSprint(sprint._id)} className="btn-primary btn-sm">Start Sprint</button>
+                  <button onClick={() => startSprint(sprint._id)} className="btn btn-primary btn-sm">Start Sprint</button>
                 </div>
                 <SortableContext items={tasks.filter(t => t.sprintId === sprint._id).map(t => t._id)} strategy={verticalListSortingStrategy}>
                   <div className="min-h-[120px]">
