@@ -314,7 +314,7 @@
 
   /* -- Buttons (Precise, purposeful) -- */
   .btn {
-    @apply relative inline-flex items-center justify-center gap-1.5 font-medium transition-all;
+    @apply relative inline-flex shrink-0 items-center justify-center gap-1.5 font-medium transition-all;
     border-radius: var(--radius-md);
     cursor: pointer;
     white-space: nowrap;
