@@ -66,7 +66,7 @@ export const verifyWorkspaceMembership = async (workspaceId: string, userId: str
   }
 };
 
-export const requireEntityWorkspaceMember = (Model: mongoose.Model<any>) => {
+export const requireEntityWorkspaceMember = (Model: mongoose.Model<mongoose.Document>) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     const entityId = req.params.id || req.params.taskId || req.params.projectId;
     if (!entityId) return next();
