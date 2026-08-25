@@ -28,7 +28,7 @@ export const getFiles = async (req: AuthRequest, res: Response) => {
 
     const files = await File.find(filter).sort(sort).populate('uploadedBy', 'name email');
     res.json(files);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -41,7 +41,7 @@ export const getFileById = async (req: AuthRequest, res: Response) => {
     const file = await File.findById(req.params.id).populate('uploadedBy', 'name email');
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -73,7 +73,7 @@ export const createFile = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(201).json(file);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -91,7 +91,7 @@ export const updateFile = async (req: AuthRequest, res: Response) => {
     const file = await File.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -108,7 +108,7 @@ export const archiveFile = async (req: AuthRequest, res: Response) => {
     );
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -125,7 +125,7 @@ export const restoreFile = async (req: AuthRequest, res: Response) => {
     );
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -149,7 +149,7 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
     }
     
     res.json({ message: 'File deleted successfully' });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -195,7 +195,7 @@ export const getFileStats = async (req: AuthRequest, res: Response) => {
       totalSize: totalSize[0]?.total || 0,
       byType: typeBreakdown,
     });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -230,7 +230,7 @@ export const generateUploadUrl = async (req: AuthRequest, res: Response) => {
     const [url] = await fileRef.getSignedUrl(options);
     
     res.json({ uploadUrl: url, storagePath: filePath });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: 'Failed to generate upload URL: ' + error.message });
   }
 };
@@ -258,7 +258,7 @@ export const generateDownloadUrl = async (req: AuthRequest, res: Response) => {
     });
     
     res.json({ downloadUrl: url });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ error: 'Failed to generate download URL: ' + error.message });
   }
 };
