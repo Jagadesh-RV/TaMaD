@@ -1,9 +1,12 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
+import { ChevronDown, ChevronUp, Trash2, Edit2, Archive, Plus, FolderKanban, Calendar, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { isPast, parseISO } from 'date-fns';
+import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
-import { ContextMenu } from '../components/ui/ContextMenu';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonGrid } from '../components/ui/Skeleton';
 import ErrorState from '../components/ui/ErrorState';
