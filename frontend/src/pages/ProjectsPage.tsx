@@ -1,17 +1,4 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
-import {
-  Plus,
-  Calendar,
-  Users,
-  FolderKanban,
-  ChevronDown,
-  ChevronUp,
-  Trash2,
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, isPast, parseISO } from 'date-fns';
-import clsx from 'clsx';
-import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
