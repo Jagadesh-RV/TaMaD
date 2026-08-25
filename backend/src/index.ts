@@ -143,7 +143,7 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
-  } catch (error) {
+  } catch (_error) {
     logger.error('Failed to start server', error);
     process.exit(1);
   }
