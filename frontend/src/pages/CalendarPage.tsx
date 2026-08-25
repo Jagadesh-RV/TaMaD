@@ -301,7 +301,7 @@ export default function CalendarPage() {
       if (newDateStr.includes(':')) {
         const newStart = parseISO(newDateStr);
         const newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
-        await updateTask(taskId, { startDate: newStart.toISOString(), dueDate: newEnd.toISOString() });
+        await updateTask(taskId, { dueDate: newEnd.toISOString() });
         toast.success(`Scheduled "${task.title}" at ${format(newStart, 'h:mm a')}`);
       } else {
         const newDate = parseISO(newDateStr);
@@ -372,11 +372,15 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {isLoading && <LoadingSpinner text="Loading calendar..." />}
+      {loading && (
+        <div className="flex flex-1 items-center justify-center min-h-[400px]">
+          <LoadingSpinner size="lg" />
+        </div>
+      )}
 
-      {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
+      {!loading && error && <ErrorState message={error} onRetry={retry} />}
 
-      {!isLoading && !error && (
+      {!loading && !error && (
       <DndContext
         sensors={sensors}
         onDragStart={(event) => {
@@ -421,7 +425,7 @@ export default function CalendarPage() {
                         today={today}
                         selected={selectedDay && isSameDay(day, selectedDay)}
                         onSelect={() => setSelectedDay(day)}
-                        isOver={overDate === dateKey}
+                        isOver={overDate && isSameDay(day, overDate)}
                       />
                     );
                   })}
