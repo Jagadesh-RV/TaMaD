@@ -3,10 +3,14 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
 
+import { IUser } from '../models/User';
+import { IWorkspace } from '../models/Workspace';
+import { ITeamMember } from '../models/TeamMember';
+
 export interface AuthRequest extends Request {
-  user?: any;
-  workspace?: any;
-  teamMember?: any;
+  user?: IUser;
+  workspace?: IWorkspace;
+  teamMember?: ITeamMember;
 }
 
 export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -22,10 +26,10 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
     
     const cacheKey = CACHE_KEYS.USER(decoded.id);
-    let user = await cache.get<any>(cacheKey);
+    let user = await cache.get<IUser>(cacheKey);
     
     if (!user) {
       const dbUser = await User.findById(decoded.id);
@@ -40,7 +44,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: 'Not authorized, token failed' });
   }
 };
