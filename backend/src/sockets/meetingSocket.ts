@@ -7,6 +7,7 @@ import MeetingParticipant from '../models/MeetingParticipant';
 const meetingPresence = new Map<string, Set<string>>(); // meetingId -> Set of userIds
 
 export const handleMeetingSockets = (io: Server, socket: Socket) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userId = (socket as any).user.id;
   const joinedMeetings = new Set<string>();
 
