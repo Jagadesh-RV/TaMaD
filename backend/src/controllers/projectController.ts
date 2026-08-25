@@ -16,6 +16,7 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
   }
 
   const cacheKey = CACHE_KEYS.PROJECTS(workspaceId as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cached = await cache.get<any>(cacheKey);
   if (cached) {
     return res.json(cached);
