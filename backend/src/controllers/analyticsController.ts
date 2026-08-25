@@ -184,6 +184,7 @@ export const exportCSV = async (req: AuthRequest, res: Response) => {
     const { workspaceId, from, to, status } = req.query;
     if (!workspaceId) return res.status(400).json({ error: 'workspaceId required' });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { workspaceId };
     if (from || to) {
       filter.createdAt = {};
