@@ -5,11 +5,13 @@ import { useTamadMeetStore } from '../../store/tamadMeetStore';
 import { Video, Plus, Calendar, Settings, Play } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MeetingModal from './MeetingModal';
+import { useCelebration } from '../../hooks/useCelebration';
 
 export default function TamadMeetDashboard() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { meetings, loading, fetchMeetings, createMeeting, joinRoom } = useTamadMeetStore();
   const navigate = useNavigate();
+  const { celebrateMilestone } = useCelebration();
   const [isCreating, setIsCreating] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'Instant' | 'Scheduled'>('Instant');
