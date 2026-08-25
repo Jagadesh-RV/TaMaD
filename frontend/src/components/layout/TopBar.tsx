@@ -213,7 +213,7 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
           onClick={() => navigate('/notifications')}
           className="relative flex items-center justify-center rounded-md transition-colors"
           style={{ width: 34, height: 34, color: 'var(--color-foreground-secondary)' }}
-          aria-label={`Notifications${unread > 0 ? ` (${unread} unread)` : ''}`}
+          aria-label={`Universal Inbox${unread > 0 ? ` (${unread} unread)` : ''}`}
         >
           <Bell size={16} />
           {unread > 0 && (
