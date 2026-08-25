@@ -66,7 +66,7 @@ export const initSocket = (server: HttpServer) => {
           workspaceId,
           users: Array.from(workspacePresence.get(workspaceId)!),
         });
-      } catch (error) {
+      } catch (_error) {
         console.error('Error joining workspace socket room:', error);
       }
     });
