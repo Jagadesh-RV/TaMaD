@@ -374,7 +374,7 @@ export default function CalendarPage() {
 
       {loading && (
         <div className="flex flex-1 items-center justify-center min-h-[400px]">
-          <LoadingSpinner size="lg" />
+          <LoadingSpinner size={32} />
         </div>
       )}
 
