@@ -32,6 +32,9 @@ export default function TamadMeetDashboard() {
       const meeting = await createMeeting({
         ...payload,
         teamId: currentWorkspace.teamId,
+        workspaceId: currentWorkspace._id,
+      });
+
       setIsModalOpen(false);
       fetchMeetings(currentWorkspace.teamId);
 
