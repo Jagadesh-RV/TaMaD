@@ -100,6 +100,7 @@ export const addMember = async (req: AuthRequest, res: Response) => {
   }
 
   const alreadyMember = workspace.members.some(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (m: any) => m.userId.toString() === user._id.toString()
   );
 
@@ -107,6 +108,7 @@ export const addMember = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'User is already a member' });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   workspace.members.push({ userId: user._id, role: role as any });
   await workspace.save();
 
@@ -134,6 +136,7 @@ export const updateMemberRole = async (req: AuthRequest, res: Response) => {
   }
 
   const memberIndex = workspace.members.findIndex(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (m: any) => m.userId.toString() === userId
   );
 
@@ -158,6 +161,7 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
   }
 
   const targetEntry = workspace.members.find(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (m: any) => m.userId.toString() === userId
   );
 
@@ -166,6 +170,7 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
   }
 
   workspace.members = workspace.members.filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (m: any) => m.userId.toString() !== userId
   );
 
