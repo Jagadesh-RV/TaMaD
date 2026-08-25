@@ -28,6 +28,7 @@ export const initSocket = (server: HttpServer) => {
   io.use(rateLimitMiddleware);
 
   io.on('connection', (socket: Socket) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userId = (socket as any).user.id;
     console.log(`User connected: ${userId}`);
 
@@ -45,6 +46,7 @@ export const initSocket = (server: HttpServer) => {
         if (!workspace) return;
         
         const isMember = workspace.members.some(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (m: any) => m.userId.toString() === userId.toString()
         );
         
