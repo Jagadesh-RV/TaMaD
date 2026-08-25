@@ -6,6 +6,7 @@ import { io } from '../index';
 
 import { dispatchN8nWebhook } from './n8nService';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const triggerN8NMeetingWorkflow = async (event: string, meetingData: any) => {
   const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
   if (n8nWebhookUrl) {

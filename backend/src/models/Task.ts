@@ -29,6 +29,7 @@ export interface ITask extends Document {
   watchers: mongoose.Types.ObjectId[];
   votes: mongoose.Types.ObjectId[];
   attachments: mongoose.Types.ObjectId[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   customFields?: Map<string, any>;
   isArchived: boolean;
   embedding?: number[];

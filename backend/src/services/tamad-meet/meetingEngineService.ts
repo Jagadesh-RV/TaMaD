@@ -4,6 +4,7 @@ import TamadMeetParticipant from '../../models/tamad-meet/TamadMeetParticipant';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createEngineMeeting = async (payload: any, hostId: mongoose.Types.ObjectId) => {
   const meeting = await TamadMeetMeeting.create({
     title: payload.title,

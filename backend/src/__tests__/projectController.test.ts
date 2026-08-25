@@ -40,6 +40,7 @@ describe('Project Controller', () => {
       const req = createMockReq({ query: {} });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await getProjects(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
@@ -51,11 +52,13 @@ describe('Project Controller', () => {
       vi.mocked(Project.find).mockReturnValue({
         populate: vi.fn().mockReturnThis(),
         sort: vi.fn().mockResolvedValue(mockProjects),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       const req = createMockReq({ query: { workspaceId: 'workspace123' } });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await getProjects(req as any, res);
 
       expect(res.json).toHaveBeenCalledWith(mockProjects);
@@ -67,6 +70,7 @@ describe('Project Controller', () => {
       const req = createMockReq({ body: { name: 'Test' }, user: createMockUser() });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await createProject(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
@@ -75,6 +79,7 @@ describe('Project Controller', () => {
 
     it('creates a project successfully', async () => {
       const mockProject = createMockProject();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(Project.create).mockResolvedValue(mockProject as any);
 
       const req = createMockReq({
@@ -83,6 +88,7 @@ describe('Project Controller', () => {
       });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await createProject(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
@@ -97,6 +103,7 @@ describe('Project Controller', () => {
       const req = createMockReq({ params: { id: 'nonexistent' }, user: createMockUser() });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await deleteProject(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(404);

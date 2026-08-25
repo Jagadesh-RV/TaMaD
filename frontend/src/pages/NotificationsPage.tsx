@@ -100,9 +100,9 @@ export default function NotificationsPage() {
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--color-muted)' }}>
-            Notification center
+            Command central
           </p>
-          <h1 className="page-title">Notifications</h1>
+          <h1 className="page-title">Universal Inbox</h1>
           <p className="page-subtitle">
             Stay on top of task updates, mentions, and team activity.
           </p>

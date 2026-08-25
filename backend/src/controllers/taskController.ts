@@ -35,6 +35,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: 'workspaceId is required' });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = { workspaceId, isArchived: false };
   if (status) query.status = status;
   if (priority) query.priority = priority;
@@ -44,6 +45,7 @@ export const getTasks = async (req: AuthRequest, res: Response) => {
   const limitNum = parseInt(limit as string, 10);
   const skip = (pageNum - 1) * limitNum;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sortOptions: any = {};
   sortOptions[sortBy as string] = parseInt(sortDir as string, 10);
 
@@ -88,6 +90,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
   if (assignees && Array.isArray(assignees)) {
     const workspace = await Workspace.findById(workspaceId);
     if (workspace) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
       validMemberIds.push(workspace.ownerId.toString());
       const invalidAssignees = assignees.filter((id: string) => !validMemberIds.includes(id));
@@ -168,6 +171,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
   if (req.body.assignees && Array.isArray(req.body.assignees)) {
     const workspace = await Workspace.findById(task.workspaceId);
     if (workspace) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const validMemberIds = workspace.members.map((m: any) => m.userId.toString());
       validMemberIds.push(workspace.ownerId.toString());
       const invalidAssignees = req.body.assignees.filter((id: string) => !validMemberIds.includes(id));
@@ -177,6 +181,7 @@ export const updateTask = async (req: AuthRequest, res: Response) => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const previousAssigneeIds = (task.assignees || []).map((id: any) => id.toString());
 
   const updatedTask = await Task.findByIdAndUpdate(

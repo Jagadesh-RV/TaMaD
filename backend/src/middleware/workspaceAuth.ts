@@ -1,7 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { AuthRequest } from './auth';
-import Workspace from '../models/Workspace';
-import { cache, CACHE_KEYS, CACHE_TTL } from '../utils/cache';
+import { cache, CACHE_KEYS } from '../utils/cache';
+import Workspace, { IWorkspace } from '../models/Workspace';
+import mongoose from 'mongoose';
 
 export const requireWorkspaceMember = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const workspaceId = req.params.id || req.query.workspaceId || req.body.workspaceId || req.params.workspaceId;
@@ -18,10 +19,10 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
 
   try {
     const cacheKey = CACHE_KEYS.WORKSPACE(workspaceId as string);
-    let workspace = await cache.get<any>(cacheKey);
+    let workspace = await cache.get<IWorkspace>(cacheKey);
 
     if (!workspace) {
-      workspace = await Workspace.findById(workspaceId).lean();
+      workspace = await Workspace.findById(workspaceId).lean() as unknown as IWorkspace;
       if (!workspace) {
         return res.status(404).json({ error: 'Workspace not found' });
       }
@@ -30,7 +31,7 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
     }
 
     const isMember = workspace.members.some(
-      (m: any) => m.userId.toString() === req.user._id.toString()
+      (m) => m.userId.toString() === req.user!._id.toString()
     );
 
     if (!isMember) {
@@ -40,7 +41,7 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
     // Pass the workspace along if needed by downstream controllers
     req.workspace = workspace;
     next();
-  } catch (error) {
+  } catch (_error) {
     console.error('Workspace auth error:', error);
     return res.status(500).json({ error: 'Server error checking workspace permissions' });
   }
@@ -49,23 +50,23 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
 export const verifyWorkspaceMembership = async (workspaceId: string, userId: string): Promise<boolean> => {
   try {
     const cacheKey = CACHE_KEYS.WORKSPACE(workspaceId);
-    let workspace = await cache.get<any>(cacheKey);
+    let workspace = await cache.get<IWorkspace>(cacheKey);
 
     if (!workspace) {
-      workspace = await Workspace.findById(workspaceId).lean();
+      workspace = await Workspace.findById(workspaceId).lean() as unknown as IWorkspace;
       if (!workspace) return false;
       await cache.set(cacheKey, workspace, 300);
     }
 
     return workspace.members.some(
-      (m: any) => m.userId.toString() === userId.toString()
+      (m) => m.userId.toString() === userId.toString()
     );
   } catch {
     return false;
   }
 };
 
-export const requireEntityWorkspaceMember = (Model: any) => {
+export const requireEntityWorkspaceMember = (Model: mongoose.Model<mongoose.Document>) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     const entityId = req.params.id || req.params.taskId || req.params.projectId;
     if (!entityId) return next();
@@ -81,7 +82,7 @@ export const requireEntityWorkspaceMember = (Model: any) => {
       }
 
       next();
-    } catch (error) {
+    } catch (_error) {
       console.error('Entity auth error:', error);
       return res.status(500).json({ error: 'Server error checking resource permissions' });
     }
@@ -95,7 +96,7 @@ export const requireWorkspaceRole = (roles: string[]) => {
     }
 
     const memberEntry = req.workspace.members.find(
-      (m: any) => m.userId.toString() === req.user!._id.toString()
+      (m) => m.userId.toString() === req.user!._id.toString()
     );
 
     if (!memberEntry || !roles.includes(memberEntry.role)) {

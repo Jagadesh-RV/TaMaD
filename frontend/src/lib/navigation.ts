@@ -60,7 +60,7 @@ export const PAGE_LABELS: Record<string, string> = {
   '/reports': 'Reports',
   '/ai': 'AI Assistant',
   '/templates': 'Templates',
-  '/notifications': 'Notifications',
+  '/notifications': 'Universal Inbox',
   '/settings': 'Settings',
   '/profile': 'Profile',
   '/agile/board': 'Active Sprint',

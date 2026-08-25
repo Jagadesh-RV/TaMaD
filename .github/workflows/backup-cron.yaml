@@ -1,0 +1,51 @@
+name: MongoDB Backup Cron
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual triggering
+
+env:
+  # The URI of your production MongoDB database
+  MONGODB_URI: ${{ secrets.MONGODB_URI }}
+  # Ensure these are configured in your repository secrets to upload to a cloud bucket (e.g. AWS S3)
+  AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_AWS_SECRET_ACCESS_KEY }}
+  AWS_REGION: ${{ secrets.BACKUP_AWS_REGION }}
+  S3_BUCKET: ${{ secrets.BACKUP_S3_BUCKET }}
+
+jobs:
+  backup:
+    name: Backup MongoDB
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setup Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mongodb-database-tools awscli
+          
+      - name: Create Backup
+        run: |
+          DATE=$(date +%Y-%m-%d-%H%M)
+          BACKUP_DIR="mongodump-$DATE"
+          mkdir -p $BACKUP_DIR
+          
+          # Dump the database to the directory
+          mongodump --uri="$MONGODB_URI" --out="$BACKUP_DIR"
+          
+          # Archive and compress
+          tar -czvf "$BACKUP_DIR.tar.gz" "$BACKUP_DIR"
+          
+          # Export for next step
+          echo "BACKUP_FILE=$BACKUP_DIR.tar.gz" >> $GITHUB_ENV
+
+      - name: Upload to S3
+        if: env.S3_BUCKET != ''
+        run: |
+          aws s3 cp $BACKUP_FILE s3://$S3_BUCKET/database-backups/$BACKUP_FILE
+          
+      - name: Cleanup
+        run: |
+          rm -rf mongodump-*

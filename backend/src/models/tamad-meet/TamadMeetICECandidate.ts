@@ -4,6 +4,7 @@ export interface ITamadMeetICECandidate extends Document {
   meetingId: mongoose.Types.ObjectId;
   senderId: mongoose.Types.ObjectId;
   receiverId: mongoose.Types.ObjectId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   candidate: any;
 }
 

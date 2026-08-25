@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createMockReq = (overrides: Record<string, any> = {}): any => {
   return {
     headers: {},
@@ -13,6 +14,7 @@ export const createMockReq = (overrides: Record<string, any> = {}): any => {
 };
 
 export const createMockRes = (): Response => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res: any = {};
   res.status = vi.fn(() => res);
   res.json = vi.fn(() => res);

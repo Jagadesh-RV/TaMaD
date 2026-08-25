@@ -79,7 +79,7 @@ export const createTeam = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(201).json({ message: 'Team created successfully', team: newTeam });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message || 'Failed to create team' });
   }
 };
@@ -92,7 +92,7 @@ export const getTeams = async (req: AuthRequest, res: Response) => {
     const teams = memberships.map(m => m.teamId).filter(Boolean);
 
     res.json({ teams });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch teams' });
   }
 };
@@ -102,7 +102,7 @@ export const getTeamById = async (req: AuthRequest, res: Response) => {
     const team = await Team.findOne({ _id: req.params.id, isDeleted: false });
     if (!team) return res.status(404).json({ error: 'Team not found' });
     res.json({ team });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch team' });
   }
 };
@@ -118,7 +118,7 @@ export const updateTeam = async (req: AuthRequest, res: Response) => {
 
     io.to(`team_${team._id}`).emit('team_updated', team);
     res.json({ team });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to update team' });
   }
 };
@@ -133,7 +133,7 @@ export const deleteTeam = async (req: AuthRequest, res: Response) => {
     if (!team) return res.status(404).json({ error: 'Team not found' });
 
     res.json({ message: 'Team deleted successfully' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to delete team' });
   }
 };
@@ -144,7 +144,7 @@ export const getMembers = async (req: AuthRequest, res: Response) => {
       .populate('userId', 'name email avatarUrl')
       .populate('roleId', 'name');
     res.json({ members });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch members' });
   }
 };
@@ -213,7 +213,7 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
     }
     
     res.status(201).json({ message: 'Invitation created', invite });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to create invitation' });
   }
 };
@@ -246,7 +246,7 @@ export const joinTeam = async (req: AuthRequest, res: Response) => {
 
     io.to(`team_${invite.teamId}`).emit('member_joined', { userId, teamId: invite.teamId });
     res.json({ message: 'Successfully joined team' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to join team' });
   }
 };
@@ -261,7 +261,7 @@ export const leaveTeam = async (req: AuthRequest, res: Response) => {
     
     io.to(`team_${req.params.id}`).emit('member_left', { userId: req.user?._id, teamId: req.params.id });
     res.json({ message: 'Successfully left team' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to leave team' });
   }
 };
@@ -279,7 +279,7 @@ export const updateMemberRole = async (req: AuthRequest, res: Response) => {
     
     io.to(`team_${req.params.id}`).emit('member_updated', { userId: req.params.memberId, teamId: req.params.id, role: member.roleId });
     res.json({ member });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to update member' });
   }
 };
@@ -294,7 +294,7 @@ export const removeMember = async (req: AuthRequest, res: Response) => {
     
     io.to(`team_${req.params.id}`).emit('member_left', { userId: req.params.memberId, teamId: req.params.id });
     res.json({ message: 'Member removed successfully' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to remove member' });
   }
 };

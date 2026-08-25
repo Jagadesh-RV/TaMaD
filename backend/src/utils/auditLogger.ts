@@ -8,6 +8,7 @@ export const createAuditLog = async (
   action: string,
   entityType: 'Task' | 'Project' | 'Workspace',
   entityId: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: Record<string, any>
 ) => {
   const log = await AuditLog.create({

@@ -6,6 +6,7 @@ export interface IAuditLog extends Document {
   action: string;
   entityType: 'Task' | 'Project' | 'Workspace';
   entityId: mongoose.Types.ObjectId;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: Record<string, any>;
   createdAt: Date;
 }

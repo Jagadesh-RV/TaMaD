@@ -17,6 +17,7 @@ import { useTaskStore } from '../../store/taskStore';
 import { useTeamStore } from '../../store/teamStore';
 import { useInteractionStore } from '../../store/interactionStore';
 import { Input } from './Input';
+import { useCelebration } from '../../hooks/useCelebration';
 
 const STATUSES = [
   { id: 'todo', label: 'To Do' },
@@ -69,9 +70,15 @@ function TaskInspector({ taskId, onClose }: { taskId: string; onClose: () => voi
 
   const markDirty = (fn: () => void) => () => { fn(); setDirty(true); };
 
+  const { celebrateMilestone } = useCelebration();
+
   const handleSave = async () => {
+    const wasNotDone = task.status !== 'done';
     await updateTask(task._id, { title: title.trim() || task.title, description, status, priority, dueDate: dueDate || undefined });
     setDirty(false);
+    if (wasNotDone && status === 'done') {
+      celebrateMilestone('Task Complete!', 'Great job finishing this task!');
+    }
   };
 
   const handleDelete = async () => {
