@@ -9,6 +9,7 @@ export const getCategories = async (req: AuthRequest, res: Response) => {
   if (!workspaceId) return res.status(400).json({ error: 'workspaceId required' });
 
   const cacheKey = CACHE_KEYS.CATEGORIES(workspaceId as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cached = await cache.get<any>(cacheKey);
   if (cached) return res.json(cached);
 
