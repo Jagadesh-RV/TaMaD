@@ -25,6 +25,7 @@ interface TamadMeetState {
   currentParticipant: TamadMeetParticipant | null;
   participants: Record<string, TamadMeetParticipant>;
   loading: boolean;
+  token: string | null;
   
   fetchMeetings: (teamId: string) => Promise<void>;
   createMeeting: (payload: any) => Promise<any>;
@@ -39,6 +40,7 @@ export const useTamadMeetStore = create<TamadMeetState>((set, get) => ({
   currentParticipant: null,
   participants: {},
   loading: false,
+  token: null,
 
   fetchMeetings: async (teamId) => {
     set({ loading: true });
@@ -66,7 +68,7 @@ export const useTamadMeetStore = create<TamadMeetState>((set, get) => ({
   joinRoom: async (roomId) => {
     try {
       const { data } = await api.post(`/tamad-meet/room/${roomId}/join`);
-      set({ currentRoom: data.room, currentParticipant: data.participant });
+      set({ currentRoom: data.room, currentParticipant: data.participant, token: data.token });
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to join room');
       throw err;
