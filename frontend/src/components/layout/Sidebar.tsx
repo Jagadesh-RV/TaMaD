@@ -507,7 +507,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
                   onClick={() => navigate('/notifications')}
                   className="relative rounded-md p-1.5 transition-colors"
                   style={{ color: 'var(--color-foreground-tertiary)' }}
-                  aria-label="Notifications"
+                  aria-label="Universal Inbox"
                 >
                   <Bell size={13} />
                   {unread > 0 && (

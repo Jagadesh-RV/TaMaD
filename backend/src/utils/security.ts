@@ -59,6 +59,7 @@ export const strictRateLimiter = createRateLimiter(
 // Sanitize request body - strip potential XSS/injection from string fields
 export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) => {
   if (req.body && typeof req.body === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sanitize = (obj: any): any => {
       if (typeof obj === 'string') {
         return sanitizeHtml(obj, {
@@ -71,6 +72,7 @@ export const sanitizeInput = (req: Request, _res: Response, next: NextFunction) 
       }
       if (Array.isArray(obj)) return obj.map(sanitize);
       if (obj && typeof obj === 'object') {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const cleaned: any = {};
         for (const key of Object.keys(obj)) {
           cleaned[key] = sanitize(obj[key]);

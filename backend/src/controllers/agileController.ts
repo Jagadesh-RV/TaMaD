@@ -8,6 +8,7 @@ import { getIO } from '../sockets/socketManager';
 // Epics
 export const getEpics = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (workspaceId) query.workspaceId = workspaceId;
   if (projectId) query.projectId = projectId;
@@ -39,6 +40,7 @@ export const deleteEpic = async (req: AuthRequest, res: Response) => {
 // Sprints
 export const getSprints = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (workspaceId) query.workspaceId = workspaceId;
   if (projectId) query.projectId = projectId;
@@ -55,7 +57,7 @@ export const createSprint = async (req: AuthRequest, res: Response) => {
     });
     getIO().to(`workspace_${workspaceId}`).emit('sprint_created', sprint);
     res.status(201).json(sprint);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to create sprint', details: error.message });
   }
 };
@@ -65,7 +67,7 @@ export const updateSprint = async (req: AuthRequest, res: Response) => {
     const sprint = await Sprint.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to update sprint' });
   }
 };
@@ -75,7 +77,7 @@ export const deleteSprint = async (req: AuthRequest, res: Response) => {
     const sprint = await Sprint.findByIdAndDelete(req.params.id);
     if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_deleted', sprint._id);
     res.json({ message: 'Sprint deleted' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to delete sprint' });
   }
 };
@@ -93,7 +95,7 @@ export const startSprint = async (req: AuthRequest, res: Response) => {
     await sprint.save();
     getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to start sprint' });
   }
 };
@@ -120,7 +122,7 @@ export const completeSprint = async (req: AuthRequest, res: Response) => {
 
     getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to complete sprint' });
   }
 };

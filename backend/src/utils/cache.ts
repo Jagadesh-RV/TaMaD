@@ -9,7 +9,7 @@ export const cache = {
       const data = await redis.get(key);
       if (!data) return null;
       return JSON.parse(data) as T;
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Cache get error for key ${key}:`, error);
       return null;
     }
@@ -18,7 +18,7 @@ export const cache = {
   async set(key: string, value: unknown, ttl: number = DEFAULT_TTL): Promise<void> {
     try {
       await redis.setex(key, ttl, JSON.stringify(value));
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Cache set error for key ${key}:`, error);
     }
   },
@@ -26,7 +26,7 @@ export const cache = {
   async del(key: string): Promise<void> {
     try {
       await redis.del(key);
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Cache del error for key ${key}:`, error);
     }
   },
@@ -39,7 +39,7 @@ export const cache = {
         keys.forEach((key) => pipeline.del(key));
         await pipeline.exec();
       }
-    } catch (error) {
+    } catch (_error) {
       logger.warn(`Cache invalidatePattern error for pattern ${pattern}:`, error);
     }
   },

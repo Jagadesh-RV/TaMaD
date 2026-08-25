@@ -53,7 +53,7 @@ export const getSummary = async (req: AuthRequest, res: Response) => {
       completionRate: total > 0 ? Math.round((done / total) * 100) : 0,
       streak,
     });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -103,7 +103,7 @@ export const getTrend = async (req: AuthRequest, res: Response) => {
     }
 
     res.json({ trend });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -123,7 +123,7 @@ export const getPriorityBreakdown = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ priority: result.map(r => ({ priority: r._id, count: r.count })) });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -146,7 +146,7 @@ export const getHeatmap = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ heatmap: result.map(r => ({ date: r._id, count: r.count })) });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -171,7 +171,7 @@ export const getTagDistribution = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ tags: result });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -184,6 +184,7 @@ export const exportCSV = async (req: AuthRequest, res: Response) => {
     const { workspaceId, from, to, status } = req.query;
     if (!workspaceId) return res.status(400).json({ error: 'workspaceId required' });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { workspaceId };
     if (from || to) {
       filter.createdAt = {};
@@ -211,7 +212,7 @@ export const exportCSV = async (req: AuthRequest, res: Response) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="tamad-report-${new Date().toISOString().split('T')[0]}.csv"`);
     res.send(csv);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -252,7 +253,7 @@ export const getWeeklyReport = async (req: AuthRequest, res: Response) => {
       byPriority: byPriority.map(p => ({ priority: p._id, count: p.count })),
       dailyActivity: dailyActivity.map(d => ({ date: d._id, count: d.count })),
     });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };

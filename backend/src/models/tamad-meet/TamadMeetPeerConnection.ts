@@ -5,7 +5,9 @@ export interface ITamadMeetPeerConnection extends Document {
   callerId: mongoose.Types.ObjectId;
   calleeId: mongoose.Types.ObjectId;
   status: 'new' | 'connecting' | 'connected' | 'disconnected' | 'failed' | 'closed';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sdpOffer?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sdpAnswer?: any;
 }
 

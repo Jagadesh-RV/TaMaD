@@ -239,6 +239,7 @@ function TaskCard({ task, isSelected, onToggleSelect, onClick }: TaskCardProps) 
         )}
       </AnimatePresence>
     </div>
+    </ContextMenu>
   );
 }
 

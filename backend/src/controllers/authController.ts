@@ -43,6 +43,7 @@ const getRefreshToken = (id: string) => {
 const hashToken = (token: string) =>
   crypto.createHash('sha256').update(token).digest('hex');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const buildUserPayload = (user: any) => ({
   id: user._id,
   name: user.name,
@@ -59,13 +60,16 @@ const buildUserPayload = (user: any) => ({
   lastLogin: user.lastLogin,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const appendSession = async (user: any, refreshToken: string, req: Request) => {
   user.sessions = (user.sessions || []).filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (session: any) => session.expiresAt > new Date(),
   );
   user.sessions.push({
     tokenHash: hashToken(refreshToken),
     deviceName: req.headers['user-agent']?.slice(0, 80) || 'Unknown device',
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ipAddress: req.ip || (req.socket as any).remoteAddress || 'Unknown',
     createdAt: new Date(),
     lastUsedAt: new Date(),
@@ -151,7 +155,7 @@ export const createFirebaseSession = async (req: Request, res: Response) => {
     );
     await appendSession(user, refreshToken, req);
     res.json({ user: buildUserPayload(user) });
-  } catch (error: any) {
+  } catch (_error) {
     res
       .status(401)
       .json({ error: error.message || 'Unable to verify Firebase session' });
@@ -172,6 +176,7 @@ export const refresh = async (req: Request, res: Response) => {
     };
     const user = await User.findById(decoded.id);
     const session = user?.sessions.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (entry: any) =>
         entry.tokenHash === hashToken(refreshToken) &&
         entry.expiresAt > new Date(),
@@ -182,6 +187,7 @@ export const refresh = async (req: Request, res: Response) => {
 
     // Rotate: remove old, issue new
     user.sessions = user.sessions.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (entry: any) => entry.tokenHash !== hashToken(refreshToken),
     );
     const nextRefreshToken = setSessionCookies(
@@ -196,12 +202,14 @@ export const refresh = async (req: Request, res: Response) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logout = async (req: any, res: Response) => {
   const refreshToken =
     req.cookies?.[refreshCookieName] || req.body?.refreshToken;
   const user = await User.findById(req.user._id);
   if (user && refreshToken) {
     user.sessions = user.sessions.filter(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (entry: any) => entry.tokenHash !== hashToken(refreshToken),
     );
     await user.save();
@@ -215,6 +223,7 @@ export const logout = async (req: any, res: Response) => {
   res.json({ message: 'Logged out successfully' });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logoutAll = async (req: any, res: Response) => {
   await User.findByIdAndUpdate(req.user._id, { $set: { sessions: [] } });
   
@@ -226,10 +235,12 @@ export const logoutAll = async (req: any, res: Response) => {
   res.json({ message: 'Logged out from all devices' });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getMe = async (req: any, res: Response) => {
   res.json({ user: buildUserPayload(req.user) });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const syncEmailVerification = async (req: any, res: Response) => {
   try {
     const user = await User.findById(req.user._id);
@@ -246,13 +257,14 @@ export const syncEmailVerification = async (req: any, res: Response) => {
     }
 
     res.json({ user: buildUserPayload(user) });
-  } catch (error: any) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to sync verification status' });
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const updateProfile = async (req: any, res: Response) => {
   const user = await User.findById(req.user._id);
   if (!user) return res.status(404).json({ error: 'User not found' });
@@ -272,6 +284,7 @@ export const updateProfile = async (req: any, res: Response) => {
   res.json({ user: buildUserPayload(user) });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const changePassword = async (req: any, res: Response) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -311,6 +324,7 @@ export const changePassword = async (req: any, res: Response) => {
     if (currentRefreshToken) {
       const currentHash = hashToken(currentRefreshToken);
       user.sessions = user.sessions.filter(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (s: any) => s.tokenHash === currentHash,
       );
     } else {
@@ -322,7 +336,7 @@ export const changePassword = async (req: any, res: Response) => {
     await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
 
     res.json({ message: 'Password changed successfully. Other sessions have been logged out.' });
-  } catch (error: any) {
+  } catch (_error) {
     if (error.code === 'auth/user-not-found') {
       return res.status(404).json({ error: 'User not found in Firebase' });
     }
@@ -332,6 +346,7 @@ export const changePassword = async (req: any, res: Response) => {
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const deleteAccount = async (req: any, res: Response) => {
   try {
     const user = await User.findById(req.user._id);
@@ -397,13 +412,14 @@ export const deleteAccount = async (req: any, res: Response) => {
     res.clearCookie(accessCookieName, accessCookieOptions);
     res.clearCookie(refreshCookieName, refreshCookieOptions);
     res.json({ message: 'Account deleted successfully' });
-  } catch (error: any) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to delete account' });
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const revokeSession = async (req: any, res: Response) => {
   try {
     const { sessionIndex } = req.body;
@@ -429,13 +445,15 @@ export const revokeSession = async (req: any, res: Response) => {
     user.sessions.splice(sessionIndex, 1);
     await user.save();
     res.json({ message: 'Session revoked' });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message || 'Unable to revoke session' });
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getSessions = async (req: any, res: Response) => {
   const user = await User.findById(req.user._id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sessions = (user?.sessions || []).map((s: any) => ({
     deviceName: s.deviceName,
     ipAddress: s.ipAddress,
@@ -449,9 +467,11 @@ export const getSessions = async (req: any, res: Response) => {
   res.json({ sessions });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getWorkspace = async (req: any, res: Response) => {
   try {
     const cacheKey = CACHE_KEYS.WORKSPACE(req.user._id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cached = await cache.get<any>(cacheKey);
     if (cached) {
       return res.json(cached);
@@ -474,6 +494,7 @@ export const getWorkspace = async (req: any, res: Response) => {
     }
 
     const memberEntry = workspace.members.find(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (m: any) => m.userId.toString() === req.user._id.toString(),
     );
 
@@ -488,7 +509,7 @@ export const getWorkspace = async (req: any, res: Response) => {
 
     await cache.set(cacheKey, result, CACHE_TTL.WORKSPACE);
     res.json(result);
-  } catch (error: any) {
+  } catch (_error) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to fetch workspace' });

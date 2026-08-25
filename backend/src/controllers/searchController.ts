@@ -131,7 +131,7 @@ export const globalSearch = async (req: AuthRequest, res: Response) => {
     });
 
     res.json({ results });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };

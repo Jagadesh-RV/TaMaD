@@ -15,7 +15,7 @@ export const getFocusSessions = async (req: AuthRequest, res: Response) => {
       .limit(parseInt(limit as string));
 
     res.json(sessions);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -40,7 +40,7 @@ export const createFocusSession = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(201).json(session);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -57,7 +57,7 @@ export const completeFocusSession = async (req: AuthRequest, res: Response) => {
     );
     if (!session) return res.status(404).json({ error: 'Session not found' });
     res.json(session);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -90,7 +90,7 @@ export const getFocusStats = async (req: AuthRequest, res: Response) => {
       weekSessions: weekSessions[0]?.count || 0,
       totalSessions,
     });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };

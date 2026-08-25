@@ -62,36 +62,36 @@ service firebase.storage {
     // Workspace files
     match /workspaces/{workspaceId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isOwnedUpload() && isValidFile();
-      allow delete: if canMutate();
+      allow write: if false; // Enforced via Backend Signed URLs
+      allow delete: if false; // Enforced via Backend API
     }
 
     // Task attachments
     match /workspaces/{workspaceId}/tasks/{taskId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isOwnedUpload() && isValidFile();
-      allow delete: if canMutate();
+      allow write: if false;
+      allow delete: if false;
     }
 
     // Project files
     match /workspaces/{workspaceId}/projects/{projectId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isOwnedUpload() && isValidFile();
-      allow delete: if canMutate();
+      allow write: if false;
+      allow delete: if false;
     }
 
     // Notes attachments
     match /workspaces/{workspaceId}/notes/{noteId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isOwnedUpload() && isValidFile();
-      allow delete: if canMutate();
+      allow write: if false;
+      allow delete: if false;
     }
 
     // Whiteboard images
     match /workspaces/{workspaceId}/whiteboards/{whiteboardId}/{allPaths=**} {
       allow read: if isAuthenticated();
-      allow write: if isOwnedUpload() && isImage() && request.resource.size < 10 * 1024 * 1024; // 10MB
-      allow delete: if canMutate();
+      allow write: if false;
+      allow delete: if false;
     }
 
     // Default deny everything else

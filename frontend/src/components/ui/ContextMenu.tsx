@@ -6,7 +6,7 @@ import clsx from 'clsx';
 export type ContextMenuItem = {
   label: string;
   icon?: React.ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
   danger?: boolean;
   divider?: boolean;
 };

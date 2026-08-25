@@ -15,7 +15,7 @@ interface FileItem {
 }
 
 interface FileUploadProps {
-  path: string;
+  workspaceId: string;
   accept?: string;
   multiple?: boolean;
   maxSize?: number;
@@ -37,7 +37,7 @@ const ACCEPT_MAP: Record<string, string[]> = {
 };
 
 export default function FileUpload({
-  path,
+  workspaceId,
   accept = 'all',
   multiple = false,
   maxSize = 50 * 1024 * 1024,
@@ -68,10 +68,9 @@ export default function FileUpload({
       if (validationError) {
         continue;
       }
-      const timestamp = Date.now();
       items.push({
         file,
-        path: `${path}/${timestamp}_${file.name}`,
+        path: file.name,
         status: 'pending',
       });
     }
@@ -79,7 +78,7 @@ export default function FileUpload({
     if (items.length > 0) {
       setFiles(prev => [...prev, ...items].slice(0, maxFiles));
     }
-  }, [files.length, maxFiles, multiple, path]);
+  }, [files.length, maxFiles, multiple]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -98,9 +97,9 @@ export default function FileUpload({
     for (const item of pending) {
       setFiles(prev => prev.map(f => f.path === item.path ? { ...f, status: 'uploading' } : f));
       try {
-        const url = await uploadFile(item.file, item.path);
-        urls.push(url);
-        setFiles(prev => prev.map(f => f.path === item.path ? { ...f, status: 'done', url } : f));
+        const { downloadUrl } = await uploadFile(item.file, workspaceId);
+        urls.push(downloadUrl);
+        setFiles(prev => prev.map(f => f.path === item.path ? { ...f, status: 'done', url: downloadUrl } : f));
       } catch {
         setFiles(prev => prev.map(f => f.path === item.path ? { ...f, status: 'error' } : f));
       }

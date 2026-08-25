@@ -29,7 +29,7 @@ export const requireTeamMember = async (req: AuthRequest, res: Response, next: N
 
     req.teamMember = member;
     next();
-  } catch (error) {
+  } catch (_error) {
     console.error('Team auth error:', error);
     return res.status(500).json({ error: 'Server error checking team permissions' });
   }

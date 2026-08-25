@@ -12,10 +12,12 @@ function createReq(headers: Record<string, string> = {}, cookies: Record<string,
   return {
     headers,
     cookies,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
 
 function createRes() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const res: any = {};
   res.status = vi.fn(() => res);
   res.json = vi.fn(() => res);

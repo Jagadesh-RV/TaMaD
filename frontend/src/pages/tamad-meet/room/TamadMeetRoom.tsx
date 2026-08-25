@@ -1,100 +1,70 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../store/authStore';
 import { useTamadMeetStore } from '../../../store/tamadMeetStore';
-import { useWebRTC } from '../../../hooks/useWebRTC';
-import { Video, Mic, VideoOff, MicOff, PhoneOff, MonitorUp } from 'lucide-react';
+import {
+  LiveKitRoom,
+  VideoConference,
+  RoomAudioRenderer,
+} from '@livekit/components-react';
+import '@livekit/components-styles';
 
 export default function TamadMeetRoom() {
   const { roomId } = useParams();
   const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
-  const { currentRoom, currentParticipant, joinRoom, leaveRoom } = useTamadMeetStore();
-  const { 
-    localStream, 
-    remoteStreams, 
-    startLocalStream, 
-    stopLocalStream,
-    toggleAudio,
-    toggleVideo,
-    toggleScreenShare,
-    isAudioEnabled,
-    isVideoEnabled,
-    isScreenSharing
-  } = useWebRTC(roomId, currentParticipant?._id);
+  const { currentRoom, token, joinRoom, leaveRoom } = useTamadMeetStore();
 
   useEffect(() => {
     if (roomId) {
       joinRoom(roomId).catch(() => navigate('/team/tamad-meet'));
     }
     return () => leaveRoom();
-  }, [roomId]);
+  }, [roomId, joinRoom, leaveRoom, navigate]);
 
-  useEffect(() => {
-    if (currentRoom && currentParticipant) {
-      startLocalStream();
-    }
-    return () => stopLocalStream();
-  }, [currentRoom, currentParticipant]);
+  if (!currentRoom || !token) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[color:var(--color-background)]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="skeleton h-16 w-16 rounded-full" />
+          <p className="text-[color:var(--color-foreground)] font-bold">Joining room...</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!currentRoom) return <div className="p-8">Joining room...</div>;
+  // Normally, LIVEKIT_URL should be an environment variable.
+  // We mock a placeholder server URL if one isn't defined.
+  const serverUrl = import.meta.env.VITE_LIVEKIT_URL || 'wss://tamad-meet-placeholder.livekit.cloud';
 
   return (
-    <div className="flex h-screen bg-black text-white flex-col">
-      <header className="p-4 border-b border-gray-800 flex justify-between items-center">
-        <h1 className="font-bold">TaMaD Meet: Room {roomId}</h1>
+    <div className="flex h-screen flex-col bg-[color:var(--color-background)] text-[color:var(--color-foreground)]" data-theme="dark">
+      <header className="p-4 border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)] flex justify-between items-center z-10 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color:var(--color-accent-ghost)] text-[color:var(--color-accent)] font-bold text-lg">
+            TM
+          </div>
+          <div>
+            <h1 className="font-bold text-lg leading-none">TaMaD Meet: Room {roomId}</h1>
+            <p className="text-xs text-[color:var(--color-muted)] mt-1">{user?.name} (You)</p>
+          </div>
+        </div>
       </header>
       
-      <main className="flex-1 overflow-auto p-4 flex gap-4 flex-wrap justify-center items-center">
-        {/* Local Video */}
-        {localStream && (
-          <div className="relative w-[320px] h-[240px] bg-gray-900 rounded-xl overflow-hidden border border-gray-700">
-            <video 
-              autoPlay 
-              muted 
-              playsInline 
-              className="w-full h-full object-cover"
-              ref={el => { if (el) el.srcObject = localStream }} 
-            />
-            <div className="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs">{user?.name} (You)</div>
-          </div>
-        )}
-
-        {/* Remote Videos */}
-        {Object.entries(remoteStreams).map(([id, stream]) => (
-          <div key={id} className="relative w-[320px] h-[240px] bg-gray-900 rounded-xl overflow-hidden border border-gray-700">
-            <video 
-              autoPlay 
-              playsInline 
-              className="w-full h-full object-cover"
-              ref={el => { if (el) el.srcObject = stream }} 
-            />
-            <div className="absolute bottom-2 left-2 bg-black/60 px-2 py-1 rounded text-xs">Participant</div>
-          </div>
-        ))}
+      <main className="flex-1 relative overflow-hidden bg-[color:var(--color-background)]">
+        <LiveKitRoom
+          video={true}
+          audio={true}
+          token={token}
+          serverUrl={serverUrl}
+          data-lk-theme="default"
+          className="h-full w-full"
+          onDisconnected={() => navigate('/team/tamad-meet')}
+        >
+          <VideoConference />
+          <RoomAudioRenderer />
+        </LiveKitRoom>
       </main>
-
-      <footer className="p-4 border-t border-gray-800 flex justify-center gap-4">
-        <button 
-          onClick={toggleAudio}
-          className={`p-3 rounded-full hover:bg-gray-700 ${isAudioEnabled ? 'bg-gray-800' : 'bg-red-600 hover:bg-red-700'}`}
-        >
-          {isAudioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
-        </button>
-        <button 
-          onClick={toggleVideo}
-          className={`p-3 rounded-full hover:bg-gray-700 ${isVideoEnabled ? 'bg-gray-800' : 'bg-red-600 hover:bg-red-700'}`}
-        >
-          {isVideoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
-        </button>
-        <button 
-          onClick={toggleScreenShare}
-          className={`p-3 rounded-full hover:bg-gray-700 ${isScreenSharing ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800'}`}
-        >
-          <MonitorUp size={20} />
-        </button>
-        <button onClick={() => navigate('/team/tamad-meet')} className="p-3 rounded-full bg-red-600 hover:bg-red-700"><PhoneOff size={20} /></button>
-      </footer>
     </div>
   );
 }

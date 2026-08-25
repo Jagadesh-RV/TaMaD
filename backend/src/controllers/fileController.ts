@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import File from '../models/File';
+import { getFirebaseStorage } from '../config/firebase';
 
 // @desc    Get all files for workspace
 // @route   GET /api/files
@@ -13,6 +14,7 @@ export const getFiles = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Workspace ID is required' });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { workspaceId, isArchived: false };
     if (folder) filter.folder = folder;
     if (search) {
@@ -22,12 +24,13 @@ export const getFiles = async (req: AuthRequest, res: Response) => {
       ];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sort: any = {};
     sort[sortBy as string] = sortDir === 'asc' ? 1 : -1;
 
     const files = await File.find(filter).sort(sort).populate('uploadedBy', 'name email');
     res.json(files);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -40,7 +43,7 @@ export const getFileById = async (req: AuthRequest, res: Response) => {
     const file = await File.findById(req.params.id).populate('uploadedBy', 'name email');
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -72,7 +75,7 @@ export const createFile = async (req: AuthRequest, res: Response) => {
     });
 
     res.status(201).json(file);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -83,6 +86,7 @@ export const createFile = async (req: AuthRequest, res: Response) => {
 export const updateFile = async (req: AuthRequest, res: Response) => {
   try {
     const { originalName, folder } = req.body;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const update: any = {};
     if (originalName) update.originalName = originalName;
     if (folder) update.folder = folder;
@@ -90,7 +94,7 @@ export const updateFile = async (req: AuthRequest, res: Response) => {
     const file = await File.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -107,7 +111,7 @@ export const archiveFile = async (req: AuthRequest, res: Response) => {
     );
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -124,20 +128,32 @@ export const restoreFile = async (req: AuthRequest, res: Response) => {
     );
     if (!file) return res.status(404).json({ error: 'File not found' });
     res.json(file);
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// @desc    Delete file metadata
+// @desc    Delete file metadata and physical file
 // @route   DELETE /api/files/:id
 // @access  Private
 export const deleteFile = async (req: AuthRequest, res: Response) => {
   try {
     const file = await File.findByIdAndDelete(req.params.id);
     if (!file) return res.status(404).json({ error: 'File not found' });
-    res.json({ message: 'File metadata deleted' });
-  } catch (error: any) {
+    
+    // Delete physical file from Firebase Storage
+    if (file.storagePath) {
+      try {
+        const bucket = getFirebaseStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app');
+        await bucket.file(file.storagePath).delete();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        console.error('Failed to delete physical file from Firebase Storage:', err);
+      }
+    }
+    
+    res.json({ message: 'File deleted successfully' });
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -183,12 +199,11 @@ export const getFileStats = async (req: AuthRequest, res: Response) => {
       totalSize: totalSize[0]?.total || 0,
       byType: typeBreakdown,
     });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-import { getFirebaseStorage } from '../config/firebase';
 
 // @desc    Generate a signed URL for uploading a file
 // @route   POST /api/files/upload-url
@@ -206,6 +221,7 @@ export const generateUploadUrl = async (req: AuthRequest, res: Response) => {
     const filePath = `workspaces/${workspaceId}/${Date.now()}_${fileName}`;
     const fileRef = bucket.file(filePath);
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options: any = {
       version: 'v4',
       action: 'write',
@@ -219,7 +235,7 @@ export const generateUploadUrl = async (req: AuthRequest, res: Response) => {
     const [url] = await fileRef.getSignedUrl(options);
     
     res.json({ uploadUrl: url, storagePath: filePath });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to generate upload URL: ' + error.message });
   }
 };
@@ -247,7 +263,7 @@ export const generateDownloadUrl = async (req: AuthRequest, res: Response) => {
     });
     
     res.json({ downloadUrl: url });
-  } catch (error: any) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to generate download URL: ' + error.message });
   }
 };

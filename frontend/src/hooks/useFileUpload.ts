@@ -1,11 +1,6 @@
 import { useState, useCallback } from 'react';
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
-import { storage, auth } from '../services/firebase';
+import axios from 'axios';
+import api from '../utils/api';
 
 interface UploadProgress {
   [key: string]: number;
@@ -15,8 +10,8 @@ interface UseFileUploadReturn {
   uploading: boolean;
   progress: UploadProgress;
   error: string | null;
-  uploadFile: (file: File, path: string) => Promise<string>;
-  deleteFile: (path: string) => Promise<void>;
+  uploadFile: (file: File, workspaceId: string) => Promise<{ downloadUrl: string, storagePath: string }>;
+  deleteFile: (fileId: string) => Promise<void>;
   resetError: () => void;
 }
 
@@ -25,36 +20,45 @@ export const useFileUpload = (): UseFileUploadReturn => {
   const [progress, setProgress] = useState<UploadProgress>({});
   const [error, setError] = useState<string | null>(null);
 
-  const uploadFile = useCallback(async (file: File, path: string): Promise<string> => {
+  const uploadFile = useCallback(async (file: File, workspaceId: string): Promise<{ downloadUrl: string, storagePath: string }> => {
     setUploading(true);
     setError(null);
 
     try {
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file, {
-        customMetadata: { uid: auth.currentUser?.uid || '' },
+      // 1. Get Signed URL from Backend
+      const { data } = await api.post('/files/upload-url', {
+        fileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+        workspaceId,
       });
 
-      return new Promise((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+      const { uploadUrl, storagePath } = data;
+
+      // 2. Upload directly to Firebase Storage using Signed URL
+      await axios.put(uploadUrl, file, {
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const pct = Math.round((progressEvent.loaded / progressEvent.total) * 100);
             setProgress(prev => ({ ...prev, [file.name]: pct }));
-          },
-          (err) => {
-            setError(err.message);
-            setUploading(false);
-            reject(err);
-          },
-          async () => {
-            const url = await getDownloadURL(uploadTask.snapshot.ref);
-            setProgress(prev => ({ ...prev, [file.name]: 100 }));
-            setUploading(false);
-            resolve(url);
           }
-        );
+        },
       });
+
+      setProgress(prev => ({ ...prev, [file.name]: 100 }));
+      setUploading(false);
+
+      // Return both for the caller to store in DB
+      // The public download URL can be inferred if the bucket is public, 
+      // but for RBAC we usually need a download token. 
+      // For now, we will construct the standard public URL that Firebase Storage uses.
+      // E.g. https://firebasestorage.googleapis.com/v0/b/[bucket]/o/[path]?alt=media
+      const bucketUrl = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app';
+      const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketUrl}/o/${encodeURIComponent(storagePath)}?alt=media`;
+
+      return { downloadUrl, storagePath };
     } catch (err: any) {
       setError(err.message || 'Upload failed');
       setUploading(false);
@@ -62,10 +66,9 @@ export const useFileUpload = (): UseFileUploadReturn => {
     }
   }, []);
 
-  const deleteFile = useCallback(async (path: string): Promise<void> => {
+  const deleteFile = useCallback(async (fileId: string): Promise<void> => {
     try {
-      const storageRef = ref(storage, path);
-      await deleteObject(storageRef);
+      await api.delete(`/files/${fileId}`);
     } catch (err: any) {
       setError(err.message || 'Delete failed');
       throw err;

@@ -58,6 +58,7 @@ describe('Task Controller', () => {
       const req = createMockReq({ query: {} });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await getTasks(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
@@ -71,12 +72,14 @@ describe('Task Controller', () => {
         sort: vi.fn().mockReturnThis(),
         skip: vi.fn().mockReturnThis(),
         limit: vi.fn().mockResolvedValue(mockTasks),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       vi.mocked(Task.countDocuments).mockResolvedValue(1);
 
       const req = createMockReq({ query: { workspaceId: 'workspace123' } });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await getTasks(req as any, res);
 
       expect(res.json).toHaveBeenCalledWith({
@@ -96,6 +99,7 @@ describe('Task Controller', () => {
       const req = createMockReq({ body: { title: 'Test' }, user: createMockUser() });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await createTask(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
@@ -104,11 +108,14 @@ describe('Task Controller', () => {
 
     it('creates a task successfully', async () => {
       const mockTask = createMockTask();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(Task.findOne).mockReturnValue({ sort: vi.fn().mockResolvedValue(null) } as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(Task.create).mockResolvedValue(mockTask as any);
       vi.mocked(Task.findById).mockReturnValue({
         populate: vi.fn().mockReturnThis(),
         exec: vi.fn().mockResolvedValue(mockTask),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       const req = createMockReq({
@@ -122,6 +129,7 @@ describe('Task Controller', () => {
       });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await createTask(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
@@ -136,6 +144,7 @@ describe('Task Controller', () => {
       const req = createMockReq({ params: { id: 'nonexistent' }, user: createMockUser() });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await deleteTask(req as any, res);
 
       expect(res.status).toHaveBeenCalledWith(404);
@@ -144,11 +153,13 @@ describe('Task Controller', () => {
 
     it('deletes a task successfully', async () => {
       const mockTask = { ...createMockTask(), deleteOne: vi.fn().mockResolvedValue(undefined) };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(Task.findById).mockResolvedValue(mockTask as any);
 
       const req = createMockReq({ params: { id: 'task123' }, user: createMockUser() });
       const res = createMockRes();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await deleteTask(req as any, res);
 
       expect(res.json).toHaveBeenCalledWith({ message: 'Task removed' });

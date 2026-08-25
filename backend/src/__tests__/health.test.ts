@@ -14,7 +14,9 @@ describe('Health Controller', () => {
   it('returns 200 with status OK when DB is connected', () => {
     const json = vi.fn();
     const status = vi.fn(() => ({ json }));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const req = {} as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const res = { status, json } as any;
 
     health(req, res);
