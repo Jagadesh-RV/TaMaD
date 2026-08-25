@@ -20,7 +20,7 @@ export const parseTask = async (req: AuthRequest, res: Response) => {
 
     const taskData = await parseNaturalLanguageTask(text);
     res.json(taskData);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'AI parsing failed', details: error.message });
   }
 };
@@ -71,7 +71,7 @@ Goals: ${goals.map(g => `${g.title} - ${g.progress}% complete`).join(', ') || 'N
         goalsCount: goals.length,
       }
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Chat feature failed', details: error.message });
   }
 };
@@ -107,7 +107,7 @@ export const generateWeeklySummary = async (req: AuthRequest, res: Response) => 
     };
 
     res.json(summary);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to generate summary', details: error.message });
   }
 };
