@@ -7,6 +7,7 @@ import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
 import ProjectModal from '../components/projects/ProjectModal';
 import ConfirmDialog from '../components/ui/ConfirmDialog';
+import { ContextMenu } from '../components/ui/ContextMenu';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { SkeletonGrid } from '../components/ui/Skeleton';
 import ErrorState from '../components/ui/ErrorState';
