@@ -15,7 +15,7 @@ export const ensureIndexes = async () => {
     }
     
     logger.info('Database indexes ensured');
-  } catch (error) {
+  } catch (_error) {
     logger.error('Error ensuring indexes:', error);
   }
 };
@@ -32,7 +32,7 @@ export const getQueryStats = async () => {
       mem: stats.mem,
       connections: stats.connections,
     };
-  } catch (error) {
+  } catch (_error) {
     logger.error('Error getting query stats:', error);
     return null;
   }
@@ -47,7 +47,7 @@ export const explainQuery = async (
     if (!col) return null;
     const result = await (col as any).explain(query);
     return result;
-  } catch (error) {
+  } catch (_error) {
     logger.error('Error explaining query:', error);
     return null;
   }
