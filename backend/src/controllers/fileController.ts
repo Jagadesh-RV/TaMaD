@@ -14,6 +14,7 @@ export const getFiles = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ error: 'Workspace ID is required' });
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: any = { workspaceId, isArchived: false };
     if (folder) filter.folder = folder;
     if (search) {
@@ -23,6 +24,7 @@ export const getFiles = async (req: AuthRequest, res: Response) => {
       ];
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sort: any = {};
     sort[sortBy as string] = sortDir === 'asc' ? 1 : -1;
 
@@ -84,6 +86,7 @@ export const createFile = async (req: AuthRequest, res: Response) => {
 export const updateFile = async (req: AuthRequest, res: Response) => {
   try {
     const { originalName, folder } = req.body;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const update: any = {};
     if (originalName) update.originalName = originalName;
     if (folder) update.folder = folder;
@@ -143,6 +146,7 @@ export const deleteFile = async (req: AuthRequest, res: Response) => {
       try {
         const bucket = getFirebaseStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app');
         await bucket.file(file.storagePath).delete();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error('Failed to delete physical file from Firebase Storage:', err);
       }
@@ -217,6 +221,7 @@ export const generateUploadUrl = async (req: AuthRequest, res: Response) => {
     const filePath = `workspaces/${workspaceId}/${Date.now()}_${fileName}`;
     const fileRef = bucket.file(filePath);
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const options: any = {
       version: 'v4',
       action: 'write',
