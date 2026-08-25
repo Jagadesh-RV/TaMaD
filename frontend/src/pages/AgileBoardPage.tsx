@@ -15,6 +15,8 @@ import { SkeletonKanban } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
+import { KanbanBoard } from '../components/tasks/KanbanBoard';
+import { useCelebration } from '../hooks/useCelebration';
 import { ContextMenu } from '../components/ui/ContextMenu';
 
 const PRIORITY_COLORS: Record<string, { dot: string; label: string }> = {
@@ -125,6 +127,7 @@ function SortableKanbanItem({ task, onClick }: { task: any; onClick: () => void 
 
 export default function AgileBoardPage() {
   const navigate = useNavigate();
+  const { celebrateMilestone } = useCelebration();
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { tasks, loading: tasksLoading, fetchTasks, updateTask } = useTaskStore();
   const { sprints, loading: sprintsLoading, fetchSprints, completeSprint } = useAgileStore();
@@ -214,7 +217,10 @@ export default function AgileBoardPage() {
             View Backlog
           </button>
           {activeSprint && (
-            <button onClick={() => completeSprint(activeSprint._id)} className="btn btn-primary">
+            <button onClick={() => {
+              completeSprint(activeSprint._id);
+              celebrateMilestone('Sprint Complete!', 'Amazing work completing this sprint!');
+            }} className="btn btn-primary">
               Complete Sprint
             </button>
           )}
