@@ -41,7 +41,7 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
     // Pass the workspace along if needed by downstream controllers
     req.workspace = workspace;
     next();
-  } catch (error) {
+  } catch (_error) {
     console.error('Workspace auth error:', error);
     return res.status(500).json({ error: 'Server error checking workspace permissions' });
   }
@@ -82,7 +82,7 @@ export const requireEntityWorkspaceMember = (Model: mongoose.Model<mongoose.Docu
       }
 
       next();
-    } catch (error) {
+    } catch (_error) {
       console.error('Entity auth error:', error);
       return res.status(500).json({ error: 'Server error checking resource permissions' });
     }
