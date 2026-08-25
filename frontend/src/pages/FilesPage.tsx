@@ -80,15 +80,15 @@ export default function FilesPage() {
 
     for (const file of Array.from(fileList)) {
       try {
-        const timestamp = Date.now();
-        const storagePath = `workspaces/${workspaceId}/files/${timestamp}_${file.name}`;
-        const url = await uploadFile(file, storagePath);
+        const { downloadUrl, storagePath } = await uploadFile(file, workspaceId);
+        const generatedFileName = storagePath.split('/').pop() || file.name;
+        
         await createFileMetadata({
           originalName: file.name,
-          fileName: `${timestamp}_${file.name}`,
+          fileName: generatedFileName,
           mimeType: file.type,
           size: file.size,
-          url,
+          url: downloadUrl,
           storagePath,
           workspaceId,
         });
@@ -111,15 +111,15 @@ export default function FilesPage() {
     const fileList = e.dataTransfer.files;
     for (const file of Array.from(fileList)) {
       try {
-        const timestamp = Date.now();
-        const storagePath = `workspaces/${workspaceId}/files/${timestamp}_${file.name}`;
-        const url = await uploadFile(file, storagePath);
+        const { downloadUrl, storagePath } = await uploadFile(file, workspaceId);
+        const generatedFileName = storagePath.split('/').pop() || file.name;
+
         await createFileMetadata({
           originalName: file.name,
-          fileName: `${timestamp}_${file.name}`,
+          fileName: generatedFileName,
           mimeType: file.type,
           size: file.size,
-          url,
+          url: downloadUrl,
           storagePath,
           workspaceId,
         });
@@ -309,7 +309,7 @@ export default function FilesPage() {
                 </button>
               </div>
               <FileUpload
-                path={`workspaces/${workspaceId}/files`}
+                workspaceId={workspaceId}
                 accept="all"
                 multiple
                 maxSize={50 * 1024 * 1024}
