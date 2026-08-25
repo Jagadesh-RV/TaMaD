@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IWhiteboard extends Document {
   title: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   elements: any[]; // Array of drawing elements (lines, shapes, text)
   workspaceId: mongoose.Types.ObjectId;
   createdBy: mongoose.Types.ObjectId;
