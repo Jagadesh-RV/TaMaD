@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import File from '../models/File';
+import { getFirebaseStorage } from '../config/firebase';
 
 // @desc    Get all files for workspace
 // @route   GET /api/files
@@ -129,14 +130,25 @@ export const restoreFile = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// @desc    Delete file metadata
+// @desc    Delete file metadata and physical file
 // @route   DELETE /api/files/:id
 // @access  Private
 export const deleteFile = async (req: AuthRequest, res: Response) => {
   try {
     const file = await File.findByIdAndDelete(req.params.id);
     if (!file) return res.status(404).json({ error: 'File not found' });
-    res.json({ message: 'File metadata deleted' });
+    
+    // Delete physical file from Firebase Storage
+    if (file.storagePath) {
+      try {
+        const bucket = getFirebaseStorage().bucket(process.env.FIREBASE_STORAGE_BUCKET || 'tamad-ce3c7.firebasestorage.app');
+        await bucket.file(file.storagePath).delete();
+      } catch (err: any) {
+        console.error('Failed to delete physical file from Firebase Storage:', err);
+      }
+    }
+    
+    res.json({ message: 'File deleted successfully' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -188,7 +200,6 @@ export const getFileStats = async (req: AuthRequest, res: Response) => {
   }
 };
 
-import { getFirebaseStorage } from '../config/firebase';
 
 // @desc    Generate a signed URL for uploading a file
 // @route   POST /api/files/upload-url
