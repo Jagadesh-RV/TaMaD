@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { ChevronDown, ChevronUp, Trash2, Edit2, Archive, Plus, FolderKanban, Calendar, Users } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { isPast, parseISO } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import { isPast, parseISO, format } from 'date-fns';
+import clsx from 'clsx';
 import { useProjectStore } from '../store/projectStore';
 import { useTaskStore } from '../store/taskStore';
 import { useAuthStore } from '../store/authStore';
