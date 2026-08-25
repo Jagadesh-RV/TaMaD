@@ -24,12 +24,14 @@ export const resolveSocketToken = (socket: Socket): string | undefined => {
   return token as string | undefined;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const authenticateSocket = (socket: Socket): any => {
   const token = resolveSocketToken(socket);
   if (!token) {
     throw new Error('Authentication error');
   }
   const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (socket as any).user = decoded;
   return decoded;
 };
