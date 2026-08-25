@@ -7,6 +7,7 @@ import { getIO } from '../sockets/socketManager';
 export const getNotifications = async (req: AuthRequest, res: Response) => {
   const { page = '1', limit = '50', unreadOnly } = req.query;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = { userId: req.user._id };
   if (unreadOnly === 'true') query.read = false;
 
