@@ -60,7 +60,7 @@ export const createMeeting = async (req: AuthRequest, res: Response) => {
     io.to(`team_${teamId}`).emit('meeting_created', meeting);
 
     res.status(201).json({ message: 'Meeting scheduled successfully', meeting });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: error.message || 'Failed to schedule meeting' });
   }
 };
@@ -81,7 +81,7 @@ export const getMeetings = async (req: AuthRequest, res: Response) => {
 
     const meetings = await Meeting.find(query).sort({ startTime: -1 });
     res.json({ meetings });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch meetings' });
   }
 };
@@ -91,7 +91,7 @@ export const getMeetingById = async (req: AuthRequest, res: Response) => {
     const meeting = await Meeting.findById(req.params.id);
     if (!meeting) return res.status(404).json({ error: 'Meeting not found' });
     res.json({ meeting });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch meeting' });
   }
 };
@@ -138,7 +138,7 @@ export const joinMeeting = async (req: AuthRequest, res: Response) => {
     );
 
     res.json({ token, serverUrl: getLiveKitServerUrl(), roomName: meeting.roomName, meeting });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to join meeting' });
   }
 };
@@ -173,7 +173,7 @@ export const endMeeting = async (req: AuthRequest, res: Response) => {
     generateMockAISummary(meeting._id as mongoose.Types.ObjectId);
 
     res.json({ message: 'Meeting ended' });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to end meeting' });
   }
 };
@@ -188,7 +188,7 @@ export const updateMeeting = async (req: AuthRequest, res: Response) => {
     if (!meeting) return res.status(404).json({ error: 'Meeting not found or unauthorized' });
     io.to(`team_${meeting.teamId}`).emit('meeting_updated', meeting);
     res.json({ meeting });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to update meeting' });
   }
 };
@@ -201,7 +201,7 @@ export const deleteMeeting = async (req: AuthRequest, res: Response) => {
     await MeetingParticipant.deleteMany({ meetingId: meeting._id });
     io.to(`team_${meeting.teamId}`).emit('meeting_deleted', { meetingId: meeting._id });
     res.json({ message: 'Meeting deleted successfully' });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to delete meeting' });
   }
 };
@@ -216,7 +216,7 @@ export const cancelMeeting = async (req: AuthRequest, res: Response) => {
     if (!meeting) return res.status(404).json({ error: 'Meeting not found or unauthorized' });
     io.to(`team_${meeting.teamId}`).emit('meeting_updated', meeting);
     res.json({ meeting });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to cancel meeting' });
   }
 };
@@ -250,7 +250,7 @@ export const duplicateMeeting = async (req: AuthRequest, res: Response) => {
 
     io.to(`team_${duplicated.teamId}`).emit('meeting_created', duplicated);
     res.status(201).json({ meeting: duplicated });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to duplicate meeting' });
   }
 };
@@ -274,7 +274,7 @@ export const inviteMember = async (req: AuthRequest, res: Response) => {
     });
     
     res.json({ message: 'User invited successfully', participant });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to invite member' });
   }
 };
@@ -289,7 +289,7 @@ export const respondToInvitation = async (req: AuthRequest, res: Response) => {
     );
     if (!participant) return res.status(404).json({ error: 'Invitation not found' });
     res.json({ participant });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to respond to invitation' });
   }
 };
