@@ -108,6 +108,7 @@ app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   const requestId = _req.headers['x-request-id'];
   const statusCode =
