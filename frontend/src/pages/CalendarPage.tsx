@@ -389,7 +389,7 @@ export default function CalendarPage() {
         }}
         onDragOver={(event) => {
           const overId = event.over?.id as string;
-          setOverDate(overId || null);
+          setOverDate(overId ? parseISO(overId) : null);
         }}
         onDragEnd={handleDragEnd}
         onDragCancel={() => { setActiveTask(null); setOverDate(null); }}
