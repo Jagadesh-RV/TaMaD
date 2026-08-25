@@ -174,9 +174,9 @@ const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export default function CalendarPage() {
   const { workspace } = useAuthStore();
   const { projects } = useProjectStore();
-  const { tasks, isLoading, error, fetchTasks, updateTask } = useTaskStore();
+  const { tasks, loading, error, fetchTasks, updateTask } = useTaskStore();
   const { meetings, fetchMeetings } = useMeetingStore();
-  const { members, fetchMembers } = useTeamStore();
+  const { members, getMembers } = useTeamStore();
 
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -189,9 +189,9 @@ export default function CalendarPage() {
     if (workspace?._id) {
       fetchTasks(workspace._id);
       fetchMeetings(workspace._id);
-      fetchMembers(workspace._id);
+      getMembers(workspace._id);
     }
-  }, [workspace, fetchTasks, fetchMeetings, fetchMembers]);
+  }, [workspace, fetchTasks, fetchMeetings, getMembers]);
 
   useEffect(() => {
     retry();
@@ -299,15 +299,11 @@ export default function CalendarPage() {
 
     try {
       if (newDateStr.includes(':')) {
-        // Timeblock drop (e.g. "2023-10-05T10:00")
         const newStart = parseISO(newDateStr);
-        // Default duration 1 hour
-        const newEnd = addDays(newStart, 0);
-        newEnd.setHours(newEnd.getHours() + 1);
+        const newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
         await updateTask(taskId, { startDate: newStart.toISOString(), dueDate: newEnd.toISOString() });
         toast.success(`Scheduled "${task.title}" at ${format(newStart, 'h:mm a')}`);
       } else {
-        // Month drop
         const newDate = parseISO(newDateStr);
         const oldDate = task.dueDate ? parseISO(task.dueDate) : null;
         if (oldDate && isSameDay(oldDate, newDate)) return;
@@ -322,7 +318,6 @@ export default function CalendarPage() {
 
   return (
     <div className="page flex flex-col h-[calc(100vh-80px)] relative z-10">
-      {/* Header */}
       <div className="mb-6 flex shrink-0 flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h1 className="page-title mb-0">Calendar</h1>
@@ -332,7 +327,6 @@ export default function CalendarPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* View Toggles */}
           <div className="inline-flex rounded-xl p-1" style={{ background: 'var(--color-surface-active)', border: '1px solid var(--color-border)' }}>
             <button
               onClick={() => setViewMode('month')}
@@ -382,7 +376,6 @@ export default function CalendarPage() {
 
       {!isLoading && error && <ErrorState message={error} onRetry={retry} />}
 
-      {/* Main Layout */}
       {!isLoading && !error && (
       <DndContext
         sensors={sensors}
@@ -398,11 +391,9 @@ export default function CalendarPage() {
         onDragCancel={() => { setActiveTask(null); setOverDate(null); }}
       >
         <div className="flex flex-1 min-h-0 gap-5">
-          {/* Calendar Grid */}
           <div className="flex-1 flex flex-col min-w-0">
             {viewMode === 'month' ? (
               <div className="flex flex-1 flex-col rounded-2xl border overflow-hidden" style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', boxShadow: 'var(--shadow-xs)' }}>
-                {/* Day Headers */}
                 <div className="grid grid-cols-7" style={{ borderBottom: '1px solid var(--color-border)' }}>
                   {DAY_NAMES.map(d => (
                     <div key={d} className="py-3 text-center text-[11px] font-bold uppercase tracking-widest" style={{ color: 'var(--color-muted)' }}>
@@ -411,7 +402,6 @@ export default function CalendarPage() {
                   ))}
                 </div>
 
-                {/* Day Cells */}
                 <div className="flex-1 grid grid-cols-7" style={{ gridTemplateRows: `repeat(${totalWeeks}, 1fr)` }}>
                   {days.map((day, i) => {
                     const dateKey = format(day, 'yyyy-MM-dd');
@@ -419,7 +409,6 @@ export default function CalendarPage() {
                     const dayMeetings = meetingsByDate[dateKey] || [];
                     const inMonth = isSameMonth(day, currentDate);
                     const today = isToday(day);
-                    const selected = selectedDay && isSameDay(day, selectedDay);
 
                     return (
                       <DroppableDayCell
@@ -430,7 +419,7 @@ export default function CalendarPage() {
                         dayMeetings={dayMeetings}
                         inMonth={inMonth}
                         today={today}
-                        selected={selected}
+                        selected={selectedDay && isSameDay(day, selectedDay)}
                         onSelect={() => setSelectedDay(day)}
                         isOver={overDate === dateKey}
                       />
