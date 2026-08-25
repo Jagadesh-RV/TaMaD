@@ -15,7 +15,7 @@ import { SkeletonKanban } from '../components/ui/Skeleton';
 import EmptyState from '../components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { KanbanBoard } from '../components/tasks/KanbanBoard';
+
 import { useCelebration } from '../hooks/useCelebration';
 import { ContextMenu } from '../components/ui/ContextMenu';
 
