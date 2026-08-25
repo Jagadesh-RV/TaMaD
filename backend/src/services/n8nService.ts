@@ -5,6 +5,7 @@ import crypto from 'crypto';
 // In a real production system, this would be stored in the database under Workspace Settings.
 // For now, we will provide a generic method to dispatch events to a user-provided webhook.
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const dispatchN8nWebhook = async (webhookUrl: string, event: string, payload: any) => {
   if (!webhookUrl) return;
 
