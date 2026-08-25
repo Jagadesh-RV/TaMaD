@@ -8,6 +8,7 @@ import { getIO } from '../sockets/socketManager';
 // Epics
 export const getEpics = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (workspaceId) query.workspaceId = workspaceId;
   if (projectId) query.projectId = projectId;
@@ -39,6 +40,7 @@ export const deleteEpic = async (req: AuthRequest, res: Response) => {
 // Sprints
 export const getSprints = async (req: AuthRequest, res: Response) => {
   const { workspaceId, projectId } = req.query;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (workspaceId) query.workspaceId = workspaceId;
   if (projectId) query.projectId = projectId;
