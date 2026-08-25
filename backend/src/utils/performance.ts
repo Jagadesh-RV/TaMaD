@@ -45,6 +45,7 @@ export const explainQuery = async (
   try {
     const col = mongoose.connection.db?.collection(collection);
     if (!col) return null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await (col as any).explain(query);
     return result;
   } catch (_error) {
