@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useTeamStore } from '../../store/teamStore';
 import { useWorkspaceStore } from '../../store/workspaceStore';
-import { UserPlus, Users, ShieldCheck, Activity, Zap, Flame, Calendar as CalendarIcon, Clock, HeartPulse } from 'lucide-react';
+import { UserPlus, Users, ShieldCheck, Activity, Zap, Flame, Calendar as CalendarIcon, Clock, HeartPulse, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const AVATAR_GRADIENTS = [
