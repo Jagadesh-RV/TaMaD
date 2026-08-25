@@ -172,8 +172,38 @@ function DroppableDayCell({
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function CalendarPage() {
+  const { workspace } = useAuthStore();
+  const { projects } = useProjectStore();
+  const { tasks, isLoading, error, fetchTasks, updateTask } = useTaskStore();
+  const { meetings, fetchMeetings } = useMeetingStore();
+  const { members, fetchMembers } = useTeamStore();
+
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [projectFilter, setProjectFilter] = useState<string[]>([]);
+  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const [activeTask, setActiveTask] = useState<any>(null);
+  const [overDate, setOverDate] = useState<Date | null>(null);
+
+  const retry = useCallback(() => {
+    if (workspace?._id) {
+      fetchTasks(workspace._id);
+      fetchMeetings(workspace._id);
+      fetchMembers(workspace._id);
+    }
+  }, [workspace, fetchTasks, fetchMeetings, fetchMembers]);
+
+  useEffect(() => {
+    retry();
+  }, [retry]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
