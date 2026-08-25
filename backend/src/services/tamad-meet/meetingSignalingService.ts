@@ -2,6 +2,7 @@
 import TamadMeetICECandidate from '../../models/tamad-meet/TamadMeetICECandidate';
 import TamadMeetPeerConnection from '../../models/tamad-meet/TamadMeetPeerConnection';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logOffer = async (meetingId: string, callerId: string, calleeId: string, offer: any) => {
   return await TamadMeetPeerConnection.create({
     meetingId,
@@ -12,6 +13,7 @@ export const logOffer = async (meetingId: string, callerId: string, calleeId: st
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logAnswer = async (connectionId: string, answer: any) => {
   return await TamadMeetPeerConnection.findByIdAndUpdate(connectionId, {
     status: 'connected',
@@ -19,6 +21,7 @@ export const logAnswer = async (connectionId: string, answer: any) => {
   });
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const logICECandidate = async (meetingId: string, senderId: string, receiverId: string, candidate: any) => {
   return await TamadMeetICECandidate.create({
     meetingId,
