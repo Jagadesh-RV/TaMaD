@@ -68,6 +68,7 @@ export const createMeeting = async (req: AuthRequest, res: Response) => {
 export const getMeetings = async (req: AuthRequest, res: Response) => {
   const { teamId } = req.query;
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {};
     const isValidTeamId = teamId && teamId !== 'undefined';
     
