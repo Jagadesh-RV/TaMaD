@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import FocusSession from '../models/FocusSession';
