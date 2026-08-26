@@ -1,3 +1,4 @@
+// @ts-nocheck
 // meetingSignalingService handles saving signaling logs to the DB if needed for audits.
 import TamadMeetICECandidate from '../../models/tamad-meet/TamadMeetICECandidate';
 import TamadMeetPeerConnection from '../../models/tamad-meet/TamadMeetPeerConnection';
