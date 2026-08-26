@@ -16,7 +16,8 @@ export const connectDB = async () => {
       await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 });
       logger.info(`MongoDB connected successfully at ${redactConnectionString(mongoUri)}`);
       return;
-    } catch (_error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       logger.error(`MongoDB connection attempt ${attempt}/${MAX_RETRIES} failed:`, error);
       if (attempt === MAX_RETRIES) {
         throw new Error(`MongoDB connection failed after ${MAX_RETRIES} attempts`);

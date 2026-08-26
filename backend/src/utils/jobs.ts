@@ -14,7 +14,8 @@ const cleanupExpiredSessions = async () => {
     if (result.modifiedCount > 0) {
       logger.info(`Cleaned up expired sessions from ${result.modifiedCount} users`);
     }
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error cleaning up expired sessions:', error);
   }
 };
@@ -32,7 +33,8 @@ const cleanupOldNotifications = async () => {
     if (result.deletedCount > 0) {
       logger.info(`Deleted ${result.deletedCount} old notifications`);
     }
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error cleaning up old notifications:', error);
   }
 };
@@ -48,7 +50,8 @@ const checkOverdueTasks = async () => {
     if (overdueTasks.length > 0) {
       logger.info(`Found ${overdueTasks.length} overdue tasks`);
     }
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error checking overdue tasks:', error);
   }
 };

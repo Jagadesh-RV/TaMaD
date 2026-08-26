@@ -41,7 +41,8 @@ export const requireWorkspaceMember = async (req: AuthRequest, res: Response, ne
     // Pass the workspace along if needed by downstream controllers
     req.workspace = workspace;
     next();
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error('Workspace auth error:', error);
     return res.status(500).json({ error: 'Server error checking workspace permissions' });
   }
@@ -82,7 +83,8 @@ export const requireEntityWorkspaceMember = (Model: mongoose.Model<mongoose.Docu
       }
 
       next();
-    } catch (_error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.error('Entity auth error:', error);
       return res.status(500).json({ error: 'Server error checking resource permissions' });
     }

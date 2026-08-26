@@ -144,7 +144,8 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Failed to start server', error);
     process.exit(1);
   }
