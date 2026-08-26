@@ -11,6 +11,7 @@ import { useNotifStore } from '../../store/notifStore';
 import { useTheme } from '../../hooks/useTheme';
 import { useRealtime } from '../../providers/RealtimeProvider';
 import { useWorkspaceStore } from '../../store/workspaceStore';
+import { useInteractionStore } from '../../store/interactionStore';
 import { pageLabelFor } from '../../lib/navigation';
 
 interface TopBarProps {
@@ -90,6 +91,7 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
   const unread = useNotifStore(s => s.unread);
   const { theme, toggleTheme, isDark } = useTheme();
   const { isConnected } = useRealtime();
+  const openQuickCreate = useInteractionStore(s => s.openQuickCreate);
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -200,7 +202,7 @@ export default function TopBar({ onMenuToggle, onCommandPaletteOpen }: TopBarPro
 
         {/* Quick Create */}
         <button
-          onClick={() => {}} // TODO: Connect to QuickCreate modal
+          onClick={() => openQuickCreate()}
           className="relative flex items-center justify-center rounded-full bg-[color:var(--color-foreground)] text-[color:var(--color-background)] hover:opacity-90 transition-opacity mx-1"
           style={{ width: 28, height: 28 }}
           aria-label="Quick Create"

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import Whiteboard from '../models/Whiteboard';

@@ -131,7 +131,8 @@ export const globalSearch = async (req: AuthRequest, res: Response) => {
     });
 
     res.json({ results });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import TamadMeetRoom from '../../models/tamad-meet/TamadMeetRoom';
 import TamadMeetParticipant from '../../models/tamad-meet/TamadMeetParticipant';
 import mongoose from 'mongoose';

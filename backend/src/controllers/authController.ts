@@ -155,7 +155,8 @@ export const createFirebaseSession = async (req: Request, res: Response) => {
     );
     await appendSession(user, refreshToken, req);
     res.json({ user: buildUserPayload(user) });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res
       .status(401)
       .json({ error: error.message || 'Unable to verify Firebase session' });
@@ -257,7 +258,8 @@ export const syncEmailVerification = async (req: any, res: Response) => {
     }
 
     res.json({ user: buildUserPayload(user) });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to sync verification status' });
@@ -336,7 +338,8 @@ export const changePassword = async (req: any, res: Response) => {
     await cache.del(CACHE_KEYS.WORKSPACE(req.user._id));
 
     res.json({ message: 'Password changed successfully. Other sessions have been logged out.' });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     if (error.code === 'auth/user-not-found') {
       return res.status(404).json({ error: 'User not found in Firebase' });
     }
@@ -412,7 +415,8 @@ export const deleteAccount = async (req: any, res: Response) => {
     res.clearCookie(accessCookieName, accessCookieOptions);
     res.clearCookie(refreshCookieName, refreshCookieOptions);
     res.json({ message: 'Account deleted successfully' });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to delete account' });
@@ -445,7 +449,8 @@ export const revokeSession = async (req: any, res: Response) => {
     user.sessions.splice(sessionIndex, 1);
     await user.save();
     res.json({ message: 'Session revoked' });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message || 'Unable to revoke session' });
   }
 };
@@ -509,7 +514,8 @@ export const getWorkspace = async (req: any, res: Response) => {
 
     await cache.set(cacheKey, result, CACHE_TTL.WORKSPACE);
     res.json(result);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res
       .status(500)
       .json({ error: error.message || 'Unable to fetch workspace' });

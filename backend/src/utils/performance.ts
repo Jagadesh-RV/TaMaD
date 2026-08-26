@@ -15,7 +15,8 @@ export const ensureIndexes = async () => {
     }
     
     logger.info('Database indexes ensured');
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error ensuring indexes:', error);
   }
 };
@@ -32,7 +33,8 @@ export const getQueryStats = async () => {
       mem: stats.mem,
       connections: stats.connections,
     };
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error getting query stats:', error);
     return null;
   }
@@ -48,7 +50,8 @@ export const explainQuery = async (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await (col as any).explain(query);
     return result;
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Error explaining query:', error);
     return null;
   }
