@@ -110,6 +110,7 @@ export default function App() {
             <Route path="/files" element={<FilesPage />} />
             <Route path="/ai" element={<AIAssistantPage />} />
             <Route path="/templates" element={<TemplatesPage />} />
+            <Route path="/automations" element={<AutomationsPage />} />
             <Route path="/agile/board" element={<AgileBoardPage />} />
             <Route path="/agile/planning" element={<SprintPlanningPage />} />
             <Route path="/team/members" element={<MembersPage />} />
