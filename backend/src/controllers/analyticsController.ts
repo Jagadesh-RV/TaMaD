@@ -53,7 +53,8 @@ export const getSummary = async (req: AuthRequest, res: Response) => {
       completionRate: total > 0 ? Math.round((done / total) * 100) : 0,
       streak,
     });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -103,7 +104,8 @@ export const getTrend = async (req: AuthRequest, res: Response) => {
     }
 
     res.json({ trend });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -123,7 +125,8 @@ export const getPriorityBreakdown = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ priority: result.map(r => ({ priority: r._id, count: r.count })) });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -146,7 +149,8 @@ export const getHeatmap = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ heatmap: result.map(r => ({ date: r._id, count: r.count })) });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -171,7 +175,8 @@ export const getTagDistribution = async (req: AuthRequest, res: Response) => {
     ]);
 
     res.json({ tags: result });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -212,7 +217,8 @@ export const exportCSV = async (req: AuthRequest, res: Response) => {
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename="tamad-report-${new Date().toISOString().split('T')[0]}.csv"`);
     res.send(csv);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
@@ -253,7 +259,8 @@ export const getWeeklyReport = async (req: AuthRequest, res: Response) => {
       byPriority: byPriority.map(p => ({ priority: p._id, count: p.count })),
       dailyActivity: dailyActivity.map(d => ({ date: d._id, count: d.count })),
     });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };

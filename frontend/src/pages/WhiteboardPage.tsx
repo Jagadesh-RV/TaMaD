@@ -38,11 +38,11 @@ export default function WhiteboardPage() {
     <div className="page flex flex-col h-[calc(100vh-64px)] p-4 lg:p-6 bg-[color:var(--color-background)] relative z-10">
       <div className="flex-1 rounded-[24px] border border-[color:var(--color-border)] shadow-sm overflow-hidden relative bg-[color:var(--color-surface)] flex flex-col">
         
-        {/* Header Toolbar (Overlaid on Tldraw) */}
-        <div className="absolute top-6 left-6 right-6 z-20 flex flex-col sm:flex-row items-center justify-between gap-4 pointer-events-none">
+        {/* Header Toolbar (Standard block, no overlap) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 lg:px-6 bg-[color:var(--color-surface)] border-b border-[color:var(--color-border)] z-20 shrink-0">
           
           {/* Board Title & Selector */}
-          <div className="bg-[color:var(--color-surface)]/90 backdrop-blur-md px-4 py-3 rounded-2xl flex items-center gap-3 pointer-events-auto shadow-float border border-[color:var(--color-border)]">
+          <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[color:var(--color-accent-ghost)] flex items-center justify-center shrink-0" style={{ color: 'var(--color-accent)' }}>
               <div className="w-5 h-5 rounded-full border-2 border-current opacity-80" />
             </div>
@@ -68,13 +68,13 @@ export default function WhiteboardPage() {
           </div>
 
           {/* Collab / Share */}
-          <div className="flex items-center gap-3 pointer-events-auto hidden sm:flex">
+          <div className="flex items-center gap-3 hidden sm:flex">
             <div className="flex items-center -space-x-3 mr-1">
-              <div className="w-10 h-10 rounded-full border-[2.5px] border-[color:var(--color-surface)] bg-[color:var(--color-info)] text-white flex items-center justify-center text-xs font-bold z-20 shadow-sm">J</div>
-              <div className="w-10 h-10 rounded-full border-[2.5px] border-[color:var(--color-surface)] bg-[color:var(--color-warning)] text-white flex items-center justify-center text-xs font-bold z-10 shadow-sm">A</div>
-              <div className="w-10 h-10 rounded-full border-[2.5px] border-[color:var(--color-surface)] bg-[color:var(--color-surface-active)] flex items-center justify-center text-xs font-bold hover:bg-[color:var(--color-surface-hover)] transition-colors cursor-pointer" style={{ color: 'var(--color-foreground-secondary)' }}><Plus size={14}/></div>
+              <div className="w-9 h-9 rounded-full border-[2px] border-[color:var(--color-surface)] bg-[color:var(--color-info)] text-white flex items-center justify-center text-[11px] font-bold z-20 shadow-sm">J</div>
+              <div className="w-9 h-9 rounded-full border-[2px] border-[color:var(--color-surface)] bg-[color:var(--color-warning)] text-white flex items-center justify-center text-[11px] font-bold z-10 shadow-sm">A</div>
+              <div className="w-9 h-9 rounded-full border-[2px] border-[color:var(--color-surface)] bg-[color:var(--color-surface-active)] flex items-center justify-center text-[11px] font-bold hover:bg-[color:var(--color-surface-hover)] transition-colors cursor-pointer shadow-sm" style={{ color: 'var(--color-foreground-secondary)' }}><Plus size={14}/></div>
             </div>
-            <button className="bg-[color:var(--color-surface)]/90 backdrop-blur-md p-3 rounded-2xl hover:bg-[color:var(--color-accent-ghost)] transition-colors shadow-float border border-[color:var(--color-border)] group" style={{ color: 'var(--color-foreground-secondary)' }}>
+            <button className="p-2.5 rounded-xl hover:bg-[color:var(--color-surface-hover)] transition-colors group" style={{ color: 'var(--color-foreground-secondary)' }}>
               <Share2 size={18} className="group-hover:text-[color:var(--color-accent)] transition-colors" />
             </button>
           </div>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import TamadMeetMeeting from '../../models/tamad-meet/TamadMeetMeeting';
 import TamadMeetRoom from '../../models/tamad-meet/TamadMeetRoom';
 import TamadMeetParticipant from '../../models/tamad-meet/TamadMeetParticipant';

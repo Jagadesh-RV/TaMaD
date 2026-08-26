@@ -20,7 +20,8 @@ export const parseTask = async (req: AuthRequest, res: Response) => {
 
     const taskData = await parseNaturalLanguageTask(text);
     res.json(taskData);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'AI parsing failed', details: error.message });
   }
 };
@@ -71,7 +72,8 @@ Goals: ${goals.map(g => `${g.title} - ${g.progress}% complete`).join(', ') || 'N
         goalsCount: goals.length,
       }
     });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Chat feature failed', details: error.message });
   }
 };
@@ -107,7 +109,8 @@ export const generateWeeklySummary = async (req: AuthRequest, res: Response) => 
     };
 
     res.json(summary);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to generate summary', details: error.message });
   }
 };

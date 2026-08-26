@@ -30,6 +30,7 @@ import goalRoutes from './routes/goalRoutes';
 import documentRoutes from './routes/documentRoutes';
 import noteRoutes from './routes/noteRoutes';
 import whiteboardRoutes from './routes/whiteboardRoutes';
+import automationRoutes from './routes/automationRoutes';
 import healthRoutes from './routes/healthRoutes';
 import commentRoutes from './routes/commentRoutes';
 import aiRoutes from './routes/aiRoutes';
@@ -144,7 +145,8 @@ const startServer = async () => {
     httpServer.listen(PORT, () => {
       logger.info(`Server is running on port ${PORT}`);
     });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     logger.error('Failed to start server', error);
     process.exit(1);
   }

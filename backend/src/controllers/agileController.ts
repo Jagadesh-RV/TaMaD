@@ -57,7 +57,8 @@ export const createSprint = async (req: AuthRequest, res: Response) => {
     });
     getIO().to(`workspace_${workspaceId}`).emit('sprint_created', sprint);
     res.status(201).json(sprint);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to create sprint', details: error.message });
   }
 };
@@ -67,7 +68,8 @@ export const updateSprint = async (req: AuthRequest, res: Response) => {
     const sprint = await Sprint.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to update sprint' });
   }
 };
@@ -77,7 +79,8 @@ export const deleteSprint = async (req: AuthRequest, res: Response) => {
     const sprint = await Sprint.findByIdAndDelete(req.params.id);
     if (sprint) getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_deleted', sprint._id);
     res.json({ message: 'Sprint deleted' });
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to delete sprint' });
   }
 };
@@ -95,7 +98,8 @@ export const startSprint = async (req: AuthRequest, res: Response) => {
     await sprint.save();
     getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to start sprint' });
   }
 };
@@ -122,7 +126,8 @@ export const completeSprint = async (req: AuthRequest, res: Response) => {
 
     getIO().to(`workspace_${sprint.workspaceId}`).emit('sprint_updated', sprint);
     res.json(sprint);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     res.status(500).json({ error: 'Failed to complete sprint' });
   }
 };

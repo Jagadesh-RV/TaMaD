@@ -68,7 +68,8 @@ export const initSocket = (server: HttpServer) => {
           workspaceId,
           users: Array.from(workspacePresence.get(workspaceId)!),
         });
-      } catch (_error) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
         console.error('Error joining workspace socket room:', error);
       }
     });

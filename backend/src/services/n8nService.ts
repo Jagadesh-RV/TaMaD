@@ -25,7 +25,8 @@ export const dispatchN8nWebhook = async (webhookUrl: string, event: string, payl
       }
     });
     console.log(`[n8n] Successfully dispatched event ${event} to ${webhookUrl}`);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error(`[n8n] Failed to dispatch event ${event}:`, error.message);
   }
 };

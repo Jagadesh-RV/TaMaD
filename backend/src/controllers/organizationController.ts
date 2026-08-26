@@ -30,7 +30,8 @@ export const createOrganization = async (req: AuthRequest, res: Response): Promi
     await organization.save();
 
     res.status(201).json(organization);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error('Error creating organization:', error);
     res.status(500).json({ error: 'Failed to create organization' });
   }
@@ -51,7 +52,8 @@ export const getMyOrganizations = async (req: AuthRequest, res: Response): Promi
     }).populate('members.userId', 'name email avatarUrl');
 
     res.status(200).json(organizations);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error('Error fetching organizations:', error);
     res.status(500).json({ error: 'Failed to fetch organizations' });
   }
@@ -83,7 +85,8 @@ export const getOrganizationById = async (req: AuthRequest, res: Response): Prom
     }
 
     res.status(200).json(organization);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error('Error fetching organization:', error);
     res.status(500).json({ error: 'Failed to fetch organization' });
   }
@@ -121,7 +124,8 @@ export const updateOrganization = async (req: AuthRequest, res: Response): Promi
     await organization.save();
 
     res.status(200).json(organization);
-  } catch (_error) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
     console.error('Error updating organization:', error);
     res.status(500).json({ error: 'Failed to update organization' });
   }
