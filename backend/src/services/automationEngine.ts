@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import AutomationRule, { IAutomationRule, TriggerEvent, Condition } from '../models/AutomationRule';
 import Task, { ITask } from '../models/Task';
 import Notification from '../models/Notification';
-import { io } from '../sockets/socketManager';
+import { getIO } from '../sockets/socketManager';
 
 class AutomationEngine {
   
@@ -116,7 +116,7 @@ class AutomationEngine {
       });
 
       // Emit via socket
-      io.to(payload.recipientId.toString()).emit('new_notification', notif);
+      getIO().to(payload.recipientId.toString()).emit('new_notification', notif);
     }
   }
 
@@ -128,7 +128,7 @@ class AutomationEngine {
       { new: true }
     );
     if (updated) {
-      io.to(`workspace_${task.workspaceId}`).emit('task_updated', updated);
+      getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updated);
     }
   }
 
@@ -141,7 +141,7 @@ class AutomationEngine {
         { new: true }
       );
       if (updated) {
-        io.to(`workspace_${task.workspaceId}`).emit('task_updated', updated);
+        getIO().to(`workspace_${task.workspaceId}`).emit('task_updated', updated);
         
         // Notify the newly assigned user
         const notif = await Notification.create({
@@ -153,7 +153,7 @@ class AutomationEngine {
           read: false,
           link: `/tasks/${task._id}`
         });
-        io.to(payload.assigneeId).emit('new_notification', notif);
+        getIO().to(payload.assigneeId).emit('new_notification', notif);
       }
     }
   }
