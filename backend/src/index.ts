@@ -30,6 +30,7 @@ import goalRoutes from './routes/goalRoutes';
 import documentRoutes from './routes/documentRoutes';
 import noteRoutes from './routes/noteRoutes';
 import whiteboardRoutes from './routes/whiteboardRoutes';
+import automationRoutes from './routes/automationRoutes';
 import healthRoutes from './routes/healthRoutes';
 import commentRoutes from './routes/commentRoutes';
 import aiRoutes from './routes/aiRoutes';
