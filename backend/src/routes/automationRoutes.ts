@@ -1,6 +1,7 @@
 import express from 'express';
 import { getRules, createRule, updateRule, deleteRule } from '../controllers/automationController';
-import { protect, requireWorkspaceMember } from '../middleware/workspaceAuth';
+import { requireWorkspaceMember } from '../middleware/workspaceAuth';
+import { protect } from '../middleware/auth';
 
 const router = express.Router();
 
