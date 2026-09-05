@@ -49,6 +49,7 @@ const TamadMeetRoom = lazy(() => import("./pages/tamad-meet/room/TamadMeetRoom")
 const AdminLayout = lazy(() => import("./components/admin/layout/AdminLayout"));
 const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUsersPage = lazy(() => import("./pages/admin/AdminUsersPage"));
 
 function LoadingSpinner() {
   return (
@@ -132,7 +133,7 @@ export default function App() {
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
-            {/* Add more admin routes here as they are built */}
+            <Route path="users" element={<AdminUsersPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
