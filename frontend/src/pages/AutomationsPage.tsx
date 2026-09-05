@@ -8,7 +8,6 @@ import { useWorkspaceStore } from '../store/workspaceStore';
 import { useAutomationStore, AutomationRule } from '../store/automationStore';
 import RuleBuilder from '../components/automations/RuleBuilder';
 
-
 export default function AutomationsPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
   const { rules, fetchRules, toggleRuleActive, deleteRule } = useAutomationStore();

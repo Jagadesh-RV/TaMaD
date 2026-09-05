@@ -48,6 +48,7 @@ import focusSessionRoutes from './routes/focusSessionRoutes';
 import agileRoutes from './routes/agileRoutes';
 import teamRoutes from './routes/teamRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import adminRoutes from './routes/adminRoutes';
 import organizationRoutes from './routes/organizationRoutes';
 import meetingRoutes from './routes/meetingRoutes';
 import tamadMeetRoutes from './routes/tamadMeetRoutes';
@@ -98,12 +99,13 @@ app.use('/api/v1/files', fileRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/automations', automationRoutes);
-app.use('/api/v1/focus-sessions', focusSessionRoutes);
+app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/agile', agileRoutes);
 app.use('/api/v1/teams', teamRoutes);
 app.use('/api/v1/dashboards', dashboardRoutes);
 app.use('/api/v1/organizations', organizationRoutes);
 app.use('/api/v1/meetings', meetingRoutes);
+app.use('/api/v1/focus-sessions', focusSessionRoutes);
 app.use('/api/v1/tamad-meet', tamadMeetRoutes);
 
 app.use('/api', (_req, res) => {
