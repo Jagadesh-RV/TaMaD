@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../lib/api'; // Or use fetch if needed
+import api from '../utils/api';
 
 export interface AdminUser {
   id: string;
@@ -25,28 +25,23 @@ export const useAdminAuthStore = create<AdminAuthState>()(
       isAuthenticated: false,
 
       login: async (email, password) => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error || 'Failed to login');
+        try {
+          const response = await api.post('/admin/login', { email, password });
+          const data = response.data;
+          set({ admin: data.admin, token: data.token, isAuthenticated: true });
+        } catch (error: any) {
+          throw new Error(error.response?.data?.error || 'Failed to login');
         }
-
-        const data = await response.json();
-        set({ admin: data.admin, token: data.token, isAuthenticated: true });
       },
 
       logout: async () => {
         const token = get().token;
         if (token) {
-          await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/logout`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).catch(() => {});
+          try {
+            await api.post('/admin/logout', {}, {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+          } catch (e) {}
         }
         set({ admin: null, token: null, isAuthenticated: false });
       },
