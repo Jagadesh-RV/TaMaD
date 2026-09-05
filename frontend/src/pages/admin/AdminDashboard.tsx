@@ -4,6 +4,7 @@ import {
   ArrowUpRight, ArrowDownRight, Zap 
 } from 'lucide-react';
 import { useAdminAuthStore } from '../../store/adminAuthStore';
+import api from '../../utils/api';
 
 interface PlatformMetrics {
   totalUsers: number;
@@ -20,10 +21,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/metrics/overview`, {
+        const res = await api.get('/admin/metrics/overview', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        const data = await res.json();
+        const data = res.data;
         setMetrics(data);
       } catch (error) {
         console.error('Failed to fetch metrics', error);
