@@ -97,6 +97,7 @@ app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1/files', fileRoutes);
 app.use('/api/v1/search', searchRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/automations', automationRoutes);
 app.use('/api/v1/focus-sessions', focusSessionRoutes);
 app.use('/api/v1/agile', agileRoutes);
 app.use('/api/v1/teams', teamRoutes);
