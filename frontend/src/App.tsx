@@ -33,6 +33,7 @@ const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const FilesPage = lazy(() => import("./pages/FilesPage"));
 const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
 const TemplatesPage = lazy(() => import("./pages/TemplatesPage"));
+const AutomationsPage = lazy(() => import("./pages/AutomationsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AgileBoardPage = lazy(() => import("./pages/AgileBoardPage"));
 const SprintPlanningPage = lazy(() => import("./pages/SprintPlanningPage"));
