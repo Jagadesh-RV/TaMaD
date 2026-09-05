@@ -15,24 +15,21 @@ import {
   getWorkspace,
 } from '../controllers/authController';
 import { protect } from '../middleware/auth';
+import { createRateLimiter } from '../utils/security';
 
 const router = Router();
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 50,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many auth requests, please try again later.' },
-});
+const authLimiter = createRateLimiter(
+  15 * 60 * 1000,
+  50,
+  'Too many auth requests, please try again later.'
+);
 
-const strictAuthLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many attempts, please try again later.' },
-});
+const strictAuthLimiter = createRateLimiter(
+  15 * 60 * 1000,
+  10,
+  'Too many attempts, please try again later.'
+);
 
 // Public
 router.use(authLimiter);
