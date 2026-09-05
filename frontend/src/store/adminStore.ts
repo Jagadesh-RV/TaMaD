@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useAdminAuthStore } from './adminAuthStore';
+import api from '../utils/api';
 
 export interface PlatformUser {
   _id: string;
@@ -49,11 +50,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     set({ usersLoading: true });
     try {
       const token = useAdminAuthStore.getState().token;
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/users?page=${page}&limit=${limit}`, {
+      const res = await api.get(`/admin/users?page=${page}&limit=${limit}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
+      const data = res.data;
       set({ users: data.users, usersTotal: data.pagination.total });
     } catch (error) {
       console.error(error);
@@ -65,15 +65,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   toggleUserStatus: async (userId, isActive) => {
     try {
       const token = useAdminAuthStore.getState().token;
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/users/${userId}/status`, {
-        method: 'PATCH',
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ isActive })
-      });
-      if (!res.ok) throw new Error('Failed to update user status');
+      const res = await api.patch(`/admin/users/${userId}/status`, 
+        { isActive },
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
       
       // Update local state
       set(state => ({
@@ -88,11 +83,10 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     set({ auditLogsLoading: true });
     try {
       const token = useAdminAuthStore.getState().token;
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/v1/admin/audits?page=${page}&limit=${limit}`, {
+      const res = await api.get(`/admin/audits?page=${page}&limit=${limit}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!res.ok) throw new Error('Failed to fetch audits');
-      const data = await res.json();
+      const data = res.data;
       set({ auditLogs: data.logs, auditLogsTotal: data.pagination.total });
     } catch (error) {
       console.error(error);
