@@ -50,6 +50,7 @@ const AdminLayout = lazy(() => import("./components/admin/layout/AdminLayout"));
 const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminUsersPage = lazy(() => import("./pages/admin/AdminUsersPage"));
+const AdminSecurityPage = lazy(() => import("./pages/admin/AdminSecurityPage"));
 
 function LoadingSpinner() {
   return (
@@ -134,6 +135,7 @@ export default function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<AdminUsersPage />} />
+            <Route path="security" element={<AdminSecurityPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
