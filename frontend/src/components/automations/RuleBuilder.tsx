@@ -119,7 +119,7 @@ export default function RuleBuilder({ rule, onClose }: RuleBuilderProps) {
             
             <select 
               value={event} 
-              onChange={e => setEvent(e.target.value)}
+              onChange={e => setEvent(e.target.value as any)}
               className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 py-2 text-sm outline-none focus:border-[color:var(--color-accent)]"
             >
               <option value="TASK_CREATED">Task is created</option>
@@ -141,7 +141,7 @@ export default function RuleBuilder({ rule, onClose }: RuleBuilderProps) {
               </select>
               <select 
                 value={conditionOperator} 
-                onChange={e => setConditionOperator(e.target.value)}
+                onChange={e => setConditionOperator(e.target.value as any)}
                 className="flex-1 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-3 py-2 text-sm outline-none focus:border-[color:var(--color-accent)]"
               >
                 <option value="equals">is equal to</option>
@@ -167,7 +167,7 @@ export default function RuleBuilder({ rule, onClose }: RuleBuilderProps) {
             
             <select 
               value={actionType} 
-              onChange={e => setActionType(e.target.value)}
+              onChange={e => setActionType(e.target.value as any)}
               className="w-full rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)] px-4 py-2 text-sm outline-none focus:border-[color:var(--color-accent)]"
             >
               <option value="SEND_NOTIFICATION">Send an in-app notification</option>

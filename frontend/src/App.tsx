@@ -33,6 +33,7 @@ const DocumentsPage = lazy(() => import("./pages/DocumentsPage"));
 const FilesPage = lazy(() => import("./pages/FilesPage"));
 const AIAssistantPage = lazy(() => import("./pages/AIAssistantPage"));
 const TemplatesPage = lazy(() => import("./pages/TemplatesPage"));
+const AutomationsPage = lazy(() => import("./pages/AutomationsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AgileBoardPage = lazy(() => import("./pages/AgileBoardPage"));
 const SprintPlanningPage = lazy(() => import("./pages/SprintPlanningPage"));
@@ -43,6 +44,14 @@ const MeetingsDashboard = lazy(() => import("./pages/meetings/MeetingsDashboard"
 const MeetingRoom = lazy(() => import("./pages/meetings/MeetingRoom"));
 const TamadMeetDashboard = lazy(() => import("./pages/tamad-meet/TamadMeetDashboard"));
 const TamadMeetRoom = lazy(() => import("./pages/tamad-meet/room/TamadMeetRoom"));
+
+// Admin Pages
+const AdminLayout = lazy(() => import("./components/admin/layout/AdminLayout"));
+const AdminLoginPage = lazy(() => import("./pages/admin/AdminLoginPage"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminUsersPage = lazy(() => import("./pages/admin/AdminUsersPage"));
+const AdminSecurityPage = lazy(() => import("./pages/admin/AdminSecurityPage"));
+const AdminHealthPage = lazy(() => import("./pages/admin/AdminHealthPage"));
 
 function LoadingSpinner() {
   return (
@@ -120,6 +129,15 @@ export default function App() {
             <Route path="/team/tamad-meet" element={<TamadMeetDashboard />} />
             <Route path="/team/tamad-meet/room/:roomId" element={<TamadMeetRoom />} />
             <Route path="/org/:id" element={<OrganizationDashboardPage />} />
+          </Route>
+
+          {/* Super Admin Control Center */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="security" element={<AdminSecurityPage />} />
+            <Route path="health" element={<AdminHealthPage />} />
           </Route>
 
           <Route path="*" element={<NotFoundPage />} />
