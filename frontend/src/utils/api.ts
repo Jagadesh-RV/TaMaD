@@ -23,7 +23,7 @@ api.interceptors.response.use(
       await refreshRequest;
       return api(request);
     } catch {
-      const loginPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/phone-login'];
+      const loginPaths = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/phone-login', '/admin'];
       if (!loginPaths.some(p => window.location.pathname.startsWith(p))) {
         window.location.href = '/login';
       }

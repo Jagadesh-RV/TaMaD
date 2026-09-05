@@ -216,7 +216,6 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
         { label: 'AI Assistant', path: '/ai' },
         { label: 'Templates', path: '/templates' },
         { label: 'Automations', path: '/automations' },
-        { label: 'Automations', path: '/automations' },
       ],
     },
   ];
@@ -269,6 +268,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse, isMobile,
       links: [
         { label: 'AI Assistant', path: '/ai' },
         { label: 'Templates', path: '/templates' },
+        { label: 'Automations', path: '/automations' },
       ],
     },
   ];

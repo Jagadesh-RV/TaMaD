@@ -7,7 +7,6 @@ import {
 import { useWorkspaceStore } from '../store/workspaceStore';
 import { useAutomationStore, AutomationRule } from '../store/automationStore';
 import RuleBuilder from '../components/automations/RuleBuilder';
-import TopBar from '../components/layout/TopBar';
 
 export default function AutomationsPage() {
   const currentWorkspace = useWorkspaceStore(s => s.currentWorkspace);
@@ -33,7 +32,6 @@ export default function AutomationsPage() {
 
   return (
     <div className="flex h-full flex-col bg-[color:var(--color-surface)]">
-      <TopBar />
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
         <div className="mx-auto max-w-5xl">
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -139,6 +139,7 @@ export const pageIconFor = (pathname: string): LucideIcon => {
     '/team/members': Users,
     '/team/settings': Settings,
     '/team/tamad-meet': Video,
+    '/automations': Webhook,
   };
   return map[pathname] || LayoutDashboard;
 }
@@ -168,6 +169,7 @@ export const iconNameFor = (pathname: string): string => {
     '/team/members': 'members',
     '/team/settings': 'settings',
     '/team/tamad-meet': 'meet',
+    '/automations': 'automation',
   };
   if (pathname.startsWith('/team/') && pathname.includes('/meetings')) return 'meetings';
   return map[pathname] || 'dashboard';
