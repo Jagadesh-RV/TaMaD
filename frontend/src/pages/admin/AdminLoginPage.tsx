@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Loader2 } from 'lucide-react';
-import { useAdminAuthStore } from '../../../store/adminAuthStore';
+import { useAdminAuthStore } from '../../store/adminAuthStore';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
